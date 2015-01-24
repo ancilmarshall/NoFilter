@@ -11,7 +11,6 @@
 
 #import "NFPAddImageTableViewController.h"
 #import "PhotoTableViewController.h"
-#import "CameraViewController.h"
 #import "AppDelegate.h"
 
 @interface NFPAddImageTableViewController () <UIImagePickerControllerDelegate, UINavigationControllerDelegate>
