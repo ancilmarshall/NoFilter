@@ -7,11 +7,14 @@
 //
 
 #import <Foundation/Foundation.h>
+#import <MobileCoreServices/MobileCoreServices.h>
+
 #import "NFPAddImageTableViewController.h"
 #import "PhotoTableViewController.h"
 #import "CameraViewController.h"
+#import "AppDelegate.h"
 
-@interface NFPAddImageTableViewController ()
+@interface NFPAddImageTableViewController () <UIImagePickerControllerDelegate, UINavigationControllerDelegate>
 
 @end
 
@@ -70,9 +73,7 @@ static NSString* const kCellReuseIdentifier = @"addImageTableViewCell";
     }
     else if ([imageSource isEqualToString:NSLocalizedString(@"Camera", nil)])
     {
-        nextVC = [CameraViewController new];
-        //[((CameraViewController*)nextVC) takePhoto:nil];
-        [self.navigationController pushViewController:nextVC animated:YES];
+        [self takePhoto:nil];
     }
     else {
         NSAssert(NO,NSLocalizedString(@"Unexpected imageSource type",nil));
@@ -90,5 +91,54 @@ static NSString* const kCellReuseIdentifier = @"addImageTableViewCell";
     // Pass the selected object to the new view controller.
 }
 */
+
+#pragma mark - UIImagePickerControllerDelegate
+
+- (void)takePhoto:(id)sender;
+{
+    if (![UIImagePickerController isSourceTypeAvailable:UIImagePickerControllerSourceTypeCamera]) {
+        return;
+    }
+    
+    UIImagePickerController *imagePicker = [[UIImagePickerController alloc] init];
+    imagePicker.sourceType = UIImagePickerControllerSourceTypeCamera;
+    imagePicker.mediaTypes = @[ (__bridge NSString *)kUTTypeImage ];
+    imagePicker.delegate = self;
+    [self presentViewController:imagePicker animated:YES completion:nil];
+}
+
+//dismiss the view controller if the use cancels the camera picker
+//(cancel button is part of GUI)
+- (void)imagePickerControllerDidCancel:(UIImagePickerController *)picker;
+{
+    [picker dismissViewControllerAnimated:YES completion:nil];
+}
+
+//if user takes photo, unpack photo data from the NSDictionary parameter
+- (void)imagePickerController:(UIImagePickerController *)picker didFinishPickingMediaWithInfo:(NSDictionary *)info;
+{
+    NSString *mediaType = info[UIImagePickerControllerMediaType];
+    NSAssert(UTTypeConformsTo((__bridge CFStringRef)mediaType, kUTTypeImage), @"Expected an image type");
+    
+    //grab either the edited (by user within the camera app) or the original photo
+    UIImage *image = info[UIImagePickerControllerEditedImage];
+    if (image == nil) {
+        image = info[UIImagePickerControllerOriginalImage];
+    }
+    
+    //save to the device's photo library and update the UI before dismissing
+    if (image != nil) {
+        UIImageWriteToSavedPhotosAlbum(image, nil, NULL, NULL);
+        [((AppDelegate*)[[UIApplication sharedApplication] delegate])
+         setUserImage:image];
+    }
+    
+    //dismiss the controller after the image has been updated
+    [picker dismissViewControllerAnimated:YES completion:^{
+        [self dismissViewControllerAnimated:YES completion:nil];
+    }];
+}
+
+
 
 @end

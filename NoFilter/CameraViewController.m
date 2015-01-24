@@ -21,7 +21,6 @@
 - (void) viewDidLoad
 {
     [super viewDidLoad];
-    //self.navigationItem.title = NSLocalizedString(@"Camera",nil);
     [self takePhoto:nil];
 }
 
