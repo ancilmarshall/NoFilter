@@ -7,6 +7,7 @@
 //
 #import <Photos/Photos.h>
 
+#import "NFPAddImageTableViewController.h"
 #import "NFPCollectionViewController.h"
 #import "NFPThumbnailGenerator.h"
 
@@ -18,6 +19,7 @@
 @implementation NFPCollectionViewController
 
 static NSString * const reuseIdentifier = @"NFPCollectionViewCell";
+static NSString * const kAddImageSegueIdentifier = @"addImageSegue";
 
 - (void)viewDidLoad {
     [super viewDidLoad];
@@ -87,15 +89,8 @@ static NSString * const reuseIdentifier = @"NFPCollectionViewCell";
     // Dispose of any resources that can be recreated.
 }
 
-/*
-#pragma mark - Navigation
 
-// In a storyboard-based application, you will often want to do a little preparation before navigation
-- (void)prepareForSegue:(UIStoryboardSegue *)segue sender:(id)sender {
-    // Get the new view controller using [segue destinationViewController].
-    // Pass the selected object to the new view controller.
-}
-*/
+
 
 #pragma mark - <UICollectionViewDataSource>
 
@@ -176,5 +171,56 @@ static NSString * const reuseIdentifier = @"NFPCollectionViewCell";
     NSIndexPath* indexPath = [NSIndexPath indexPathForItem:index inSection:0];
     [self.collectionView reloadItemsAtIndexPaths:[NSArray arrayWithObject:indexPath]];
 }
+
+
+#pragma mark - Add Bar Button Item
+
+- (IBAction)addImageToCollectionView:(UIBarButtonItem *)sender
+{
+    NSParameterAssert(sender = self.navigationItem.rightBarButtonItem);
+    
+}
+
+
+#pragma mark - Navigation
+
+ - (void)prepareForSegue:(UIStoryboardSegue *)segue sender:(id)sender {
+     
+     if ([segue.identifier isEqualToString:kAddImageSegueIdentifier]){
+
+         // The next view controller is a embedded in a NavigationController, therefore
+         // get it by diving down one level to the first child of the NavigationController
+         id destVC = [[[segue destinationViewController] childViewControllers]
+                      firstObject] ;
+     
+         // check if Camera is available.
+         
+         if ( [destVC isKindOfClass:[NFPAddImageTableViewController class]]){
+             
+             NFPAddImageTableViewController* vc = (NFPAddImageTableViewController*)destVC;
+             NSMutableArray* sources = [NSMutableArray new];
+             [sources addObject:
+                [NSString stringWithString:NSLocalizedString(@"Photo Media Library",nil)]];
+             
+             if ([UIImagePickerController isSourceTypeAvailable:UIImagePickerControllerSourceTypeCamera])
+             {
+                 [sources addObject:
+                  [NSString stringWithString:NSLocalizedString(@"Camera",nil)]];
+             }
+
+             vc.imageSources = [NSArray arrayWithArray:sources];
+             
+         }
+         
+     }
+ }
+
+-(IBAction) cancelAddImageToCollectionView:(UIStoryboardSegue*)segue;
+{
+    UIViewController* vc = [segue sourceViewController];
+    [self.navigationController dismissViewControllerAnimated:vc completion:nil];
+}
+
+
 
 @end

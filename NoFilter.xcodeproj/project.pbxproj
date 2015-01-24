@@ -19,6 +19,10 @@
 		1DBD527E1A73A9A400AAEDAD /* NFPThumbnail.m in Sources */ = {isa = PBXBuildFile; fileRef = 1DBD527D1A73A9A400AAEDAD /* NFPThumbnail.m */; };
 		1DBD52811A73BDFD00AAEDAD /* NFPThumbnailOperation.m in Sources */ = {isa = PBXBuildFile; fileRef = 1DBD52801A73BDFD00AAEDAD /* NFPThumbnailOperation.m */; };
 		1DBD52841A73BE8500AAEDAD /* UIImage+NFExtensions.m in Sources */ = {isa = PBXBuildFile; fileRef = 1DBD52831A73BE8500AAEDAD /* UIImage+NFExtensions.m */; };
+		1DBD52871A73DF3E00AAEDAD /* NFPAddImageTableViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 1DBD52861A73DF3E00AAEDAD /* NFPAddImageTableViewController.m */; };
+		1DBD528C1A741BEF00AAEDAD /* PhotoCollectionViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 1DBD52891A741BEF00AAEDAD /* PhotoCollectionViewController.m */; };
+		1DBD528D1A741BEF00AAEDAD /* PhotoTableViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 1DBD528B1A741BEF00AAEDAD /* PhotoTableViewController.m */; };
+		1DBD52901A741DE100AAEDAD /* CameraViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 1DBD528F1A741DE100AAEDAD /* CameraViewController.m */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -54,6 +58,14 @@
 		1DBD52801A73BDFD00AAEDAD /* NFPThumbnailOperation.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = NFPThumbnailOperation.m; sourceTree = "<group>"; };
 		1DBD52821A73BE8500AAEDAD /* UIImage+NFExtensions.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "UIImage+NFExtensions.h"; sourceTree = "<group>"; };
 		1DBD52831A73BE8500AAEDAD /* UIImage+NFExtensions.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "UIImage+NFExtensions.m"; sourceTree = "<group>"; };
+		1DBD52851A73DF3E00AAEDAD /* NFPAddImageTableViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = NFPAddImageTableViewController.h; sourceTree = "<group>"; };
+		1DBD52861A73DF3E00AAEDAD /* NFPAddImageTableViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = NFPAddImageTableViewController.m; sourceTree = "<group>"; };
+		1DBD52881A741BEF00AAEDAD /* PhotoCollectionViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PhotoCollectionViewController.h; sourceTree = "<group>"; };
+		1DBD52891A741BEF00AAEDAD /* PhotoCollectionViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = PhotoCollectionViewController.m; sourceTree = "<group>"; };
+		1DBD528A1A741BEF00AAEDAD /* PhotoTableViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PhotoTableViewController.h; sourceTree = "<group>"; };
+		1DBD528B1A741BEF00AAEDAD /* PhotoTableViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = PhotoTableViewController.m; sourceTree = "<group>"; };
+		1DBD528E1A741DE100AAEDAD /* CameraViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CameraViewController.h; sourceTree = "<group>"; };
+		1DBD528F1A741DE100AAEDAD /* CameraViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CameraViewController.m; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -137,8 +149,16 @@
 		1DBD52741A738E2D00AAEDAD /* ViewControllers */ = {
 			isa = PBXGroup;
 			children = (
+				1DBD528E1A741DE100AAEDAD /* CameraViewController.h */,
+				1DBD528F1A741DE100AAEDAD /* CameraViewController.m */,
+				1DBD52881A741BEF00AAEDAD /* PhotoCollectionViewController.h */,
+				1DBD52891A741BEF00AAEDAD /* PhotoCollectionViewController.m */,
+				1DBD528A1A741BEF00AAEDAD /* PhotoTableViewController.h */,
+				1DBD528B1A741BEF00AAEDAD /* PhotoTableViewController.m */,
 				1DBD52761A738E8E00AAEDAD /* NFPCollectionViewController.h */,
 				1DBD52771A738E8E00AAEDAD /* NFPCollectionViewController.m */,
+				1DBD52851A73DF3E00AAEDAD /* NFPAddImageTableViewController.h */,
+				1DBD52861A73DF3E00AAEDAD /* NFPAddImageTableViewController.m */,
 			);
 			name = ViewControllers;
 			sourceTree = "<group>";
@@ -263,7 +283,11 @@
 				1DBD52811A73BDFD00AAEDAD /* NFPThumbnailOperation.m in Sources */,
 				1DBD527B1A73A5DC00AAEDAD /* NFPThumbnailGenerator.m in Sources */,
 				1DBD52841A73BE8500AAEDAD /* UIImage+NFExtensions.m in Sources */,
+				1DBD52871A73DF3E00AAEDAD /* NFPAddImageTableViewController.m in Sources */,
 				1D4622721A69BEA7009C514A /* main.m in Sources */,
+				1DBD52901A741DE100AAEDAD /* CameraViewController.m in Sources */,
+				1DBD528D1A741BEF00AAEDAD /* PhotoTableViewController.m in Sources */,
+				1DBD528C1A741BEF00AAEDAD /* PhotoCollectionViewController.m in Sources */,
 				1DBD52781A738E8E00AAEDAD /* NFPCollectionViewController.m in Sources */,
 				1DBD527E1A73A9A400AAEDAD /* NFPThumbnail.m in Sources */,
 			);
