@@ -71,6 +71,8 @@ static NSString* const kCellReuseIdentifier = @"addImageTableViewCell";
     else if ([imageSource isEqualToString:NSLocalizedString(@"Camera", nil)])
     {
         nextVC = [CameraViewController new];
+        //[((CameraViewController*)nextVC) takePhoto:nil];
+        [self.navigationController pushViewController:nextVC animated:YES];
     }
     else {
         NSAssert(NO,NSLocalizedString(@"Unexpected imageSource type",nil));

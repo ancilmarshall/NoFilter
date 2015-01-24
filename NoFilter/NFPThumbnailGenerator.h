@@ -19,12 +19,13 @@
     NS_DESIGNATED_INITIALIZER;
 -(UIImage*) thumbnailAtIndex:(NSUInteger)index;
 -(void) addImage:(UIImage*)image;
-
+-(NSUInteger) count;
 @end
 
 
 @protocol NFPThumbnailGeneratorProtocol <NSObject>
 
--(void) didFinishGeneratingThumbnailAtIndex:(NSUInteger)index;
+-(void) didGenerateThumbnailAtIndex:(NSUInteger)index;
+-(void) willGenerateThumbnailAtIndex:(NSUInteger)index;
 
 @end

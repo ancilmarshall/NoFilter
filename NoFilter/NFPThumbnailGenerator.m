@@ -66,6 +66,10 @@
     [thumbnail addObserver:self forKeyPath:@"hasThumbnail" options:NSKeyValueObservingOptionNew context:nil];
     
     [self.thumbnails addObject:thumbnail];
+    // Responsibility of this class to call the delegate on the main queue
+    dispatch_async(dispatch_get_main_queue(), ^{
+        [self.delegate willGenerateThumbnailAtIndex:thumbnail.index];
+    });
     
     //Initiate and start NSOperation
     NFPThumbnailOperation* operation =
@@ -86,10 +90,15 @@
     
     // Responsibility of this class to call the delegate on the main queue
     dispatch_async(dispatch_get_main_queue(), ^{
-        [self.delegate didFinishGeneratingThumbnailAtIndex:thumbnail.index];
+        [self.delegate didGenerateThumbnailAtIndex:thumbnail.index];
     });
    
-    
+}
+
+#pragma mark - Helper functions
+-(NSUInteger)count;
+{
+    return [self.thumbnails count];
 }
 
 @end

@@ -6,6 +6,7 @@
 //  Copyright (c) 2014 Ancil Marshall. All rights reserved.
 //
 
+#import "AppDelegate.h"
 #import "CameraViewController.h"
 #import <MobileCoreServices/MobileCoreServices.h>
 
@@ -20,7 +21,7 @@
 - (void) viewDidLoad
 {
     [super viewDidLoad];
-    self.navigationItem.title = NSLocalizedString(@"Camera",nil);
+    //self.navigationItem.title = NSLocalizedString(@"Camera",nil);
     [self takePhoto:nil];
 }
 
@@ -28,7 +29,6 @@
 {
     [super viewWillAppear:animated];
 }
-
 
 - (void)takePhoto:(id)sender;
 {
@@ -67,7 +67,8 @@
     //save to the device's photo library and update the UI before dismissing
     if (image != nil) {
         UIImageWriteToSavedPhotosAlbum(image, nil, NULL, NULL);
-        //self.imageView.image = image;
+        [((AppDelegate*)[[UIApplication sharedApplication] delegate])
+         setUserImage:image];
     }
     
     //dismiss the controller after the image has been updated

@@ -7,6 +7,7 @@
 //
 #import <Photos/Photos.h>
 
+#import "AppDelegate.h"
 #import "NFPAddImageTableViewController.h"
 #import "NFPCollectionViewController.h"
 #import "NFPThumbnailGenerator.h"
@@ -34,54 +35,11 @@ static NSString * const kAddImageSegueIdentifier = @"addImageSegue";
     
     // Set collection view's background color (default is bizzarly black)
     self.collectionView.backgroundColor = [UIColor whiteColor];
+    
+    // Set as observer of AppDelegate's image property
+    AppDelegate* appDel = (AppDelegate*)[UIApplication sharedApplication].delegate;
+    [appDel addObserver:self forKeyPath:@"image" options:NSKeyValueObservingOptionNew context:nil];
 
-    // Setup PhotoLibrary and check for authorization
-    [PHPhotoLibrary requestAuthorization:^(PHAuthorizationStatus status) {
-        if (status != PHAuthorizationStatusAuthorized){
-            return;
-        }
-        
-        //fetch photo asset collection from library by assetcollection type
-        PHFetchResult* albumsFetchResult =
-        [PHAssetCollection
-         fetchAssetCollectionsWithType:PHAssetCollectionTypeSmartAlbum
-         subtype:PHAssetCollectionSubtypeAny
-         options:nil];
-        
-        
-        //grab largest photo asset collection and its latest photo
-        NSUInteger largestAssetSize = 0;
-        PHFetchResult* largestAlbum;
-        
-        for (PHAssetCollection* album in albumsFetchResult)
-        {
-            PHFetchResult* assets = [PHAsset fetchAssetsInAssetCollection:album
-                                                                  options:nil];
-            NSUInteger assetSize = [assets count];
-            if (assetSize > largestAssetSize)
-            {
-                largestAssetSize = assetSize;
-                largestAlbum = assets;
-            }
-        }
-        
-        NSUInteger lastAssetIndex = [largestAlbum count] -1;
-        NSLog(@"Largest Size %tu",lastAssetIndex+1);
-        PHAsset* asset = largestAlbum[lastAssetIndex];
-        
-        // Grab Image
-        __weak NFPCollectionViewController* weak_self = self;
-        //NOTE: important to update the cell's content within the resultHandler block
-        [[PHImageManager defaultManager]
-             requestImageForAsset:asset
-             targetSize:CGSizeMake(100, 100)
-             contentMode:PHImageContentModeAspectFit
-             options:nil
-             resultHandler:^(UIImage *result, NSDictionary *info){
-                 NSLog(@"Adding image to generator");
-                 [weak_self.thumbnailgenerator addImage:result];
-             }];
-    }];
 }
 
 - (void)didReceiveMemoryWarning {
@@ -90,17 +48,14 @@ static NSString * const kAddImageSegueIdentifier = @"addImageSegue";
 }
 
 
-
-
 #pragma mark - <UICollectionViewDataSource>
 
 - (NSInteger)numberOfSectionsInCollectionView:(UICollectionView *)collectionView {
     return 1;
 }
 
-
 - (NSInteger)collectionView:(UICollectionView *)collectionView numberOfItemsInSection:(NSInteger)section {
-    return 1;
+    return [self.thumbnailgenerator count];
 }
 
 - (UICollectionViewCell *)collectionView:(UICollectionView *)collectionView cellForItemAtIndexPath:(NSIndexPath *)indexPath {
@@ -116,12 +71,31 @@ static NSString * const kAddImageSegueIdentifier = @"addImageSegue";
     }
     
     UIActivityIndicatorView *activityIndicatorView = [[UIActivityIndicatorView alloc] initWithActivityIndicatorStyle:UIActivityIndicatorViewStyleGray];
+    activityIndicatorView.translatesAutoresizingMaskIntoConstraints = NO;
     
     // Get thumbnail image based on indexPath
     UIImage* thumbnailImage = [self.thumbnailgenerator thumbnailAtIndex:indexPath.item];
     
     if (nil == thumbnailImage){
         [cell.contentView addSubview:activityIndicatorView];
+        
+        // Perform auto-layout constraints. Center activity view in cell
+        [NSLayoutConstraint constraintWithItem:cell.contentView
+                                     attribute:NSLayoutAttributeCenterX
+                                     relatedBy:NSLayoutRelationEqual
+                                        toItem:activityIndicatorView
+                                     attribute:NSLayoutAttributeCenterX
+                                    multiplier:1.0
+                                      constant:0.0].active = YES;
+        
+        [NSLayoutConstraint constraintWithItem:cell.contentView
+                                     attribute:NSLayoutAttributeCenterY
+                                     relatedBy:NSLayoutRelationEqual
+                                        toItem:activityIndicatorView
+                                     attribute:NSLayoutAttributeCenterY
+                                    multiplier:1.0
+                                      constant:0.0].active = YES;
+        
         [activityIndicatorView startAnimating];
     }
     else {
@@ -134,6 +108,34 @@ static NSString * const kAddImageSegueIdentifier = @"addImageSegue";
 }
 
 #pragma mark - <UICollectionViewDelegate>
+//cellSize is a helper function
+-(CGSize)cellSize
+{
+    return (CGSize){.width = 100, .height=100};
+}
+
+
+-(CGSize)collectionView:(UICollectionView *)collectionView
+                 layout:(UICollectionViewLayout *)collectionViewLayout
+ sizeForItemAtIndexPath:(NSIndexPath *)indexPath
+{
+    return  [self cellSize];
+}
+
+//TODO: not sure why this is not working?
+-(CGFloat)collectionView:(UICollectionView *)collectionView
+                  layout:(UICollectionViewLayout *)collectionViewLayout
+minimumInteritemSpacingForSectionAtIndex:(NSInteger)section
+{
+    return 0.0f;
+}
+
+-(CGFloat)collectionView:(UICollectionView *)collectionView
+                  layout:(UICollectionViewLayout *)collectionViewLayout
+minimumLineSpacingForSectionAtIndex:(NSInteger)section
+{
+    return  0.0f;
+}
 
 /*
 // Uncomment this method to specify if the specified item should be highlighted during tracking
@@ -164,14 +166,20 @@ static NSString * const kAddImageSegueIdentifier = @"addImageSegue";
 }
 */
 
-
-#pragma mark - <NFPThumbnailGeneratorProtocol>
--(void)didFinishGeneratingThumbnailAtIndex:(NSUInteger)index;
+#pragma mark - NFPThumbnailGeneratorProtocol
+-(void)didGenerateThumbnailAtIndex:(NSUInteger)index;
 {
     NSIndexPath* indexPath = [NSIndexPath indexPathForItem:index inSection:0];
-    [self.collectionView reloadItemsAtIndexPaths:[NSArray arrayWithObject:indexPath]];
+    [self.collectionView reloadData];
+    //TODO: problem here!
+    //[self.collectionView reloadItemsAtIndexPaths:[NSArray arrayWithObject:indexPath]];
 }
 
+-(void) willGenerateThumbnailAtIndex:(NSUInteger)index;
+{
+    NSIndexPath* indexPath = [NSIndexPath indexPathForItem:index inSection:0];
+    [self.collectionView reloadData];
+}
 
 #pragma mark - Add Bar Button Item
 
@@ -184,43 +192,53 @@ static NSString * const kAddImageSegueIdentifier = @"addImageSegue";
 
 #pragma mark - Navigation
 
- - (void)prepareForSegue:(UIStoryboardSegue *)segue sender:(id)sender {
-     
-     if ([segue.identifier isEqualToString:kAddImageSegueIdentifier]){
-
-         // The next view controller is a embedded in a NavigationController, therefore
-         // get it by diving down one level to the first child of the NavigationController
-         id destVC = [[[segue destinationViewController] childViewControllers]
-                      firstObject] ;
-     
-         // check if Camera is available.
-         
-         if ( [destVC isKindOfClass:[NFPAddImageTableViewController class]]){
-             
-             NFPAddImageTableViewController* vc = (NFPAddImageTableViewController*)destVC;
-             NSMutableArray* sources = [NSMutableArray new];
-             [sources addObject:
-                [NSString stringWithString:NSLocalizedString(@"Photo Media Library",nil)]];
-             
-             if ([UIImagePickerController isSourceTypeAvailable:UIImagePickerControllerSourceTypeCamera])
-             {
-                 [sources addObject:
-                  [NSString stringWithString:NSLocalizedString(@"Camera",nil)]];
-             }
-
-             vc.imageSources = [NSArray arrayWithArray:sources];
-             
-         }
-         
-     }
- }
-
--(IBAction) cancelAddImageToCollectionView:(UIStoryboardSegue*)segue;
-{
-    UIViewController* vc = [segue sourceViewController];
-    [self.navigationController dismissViewControllerAnimated:vc completion:nil];
+- (void)prepareForSegue:(UIStoryboardSegue *)segue sender:(id)sender {
+    
+    if ([segue.identifier isEqualToString:kAddImageSegueIdentifier]){
+        
+        // The next view controller is a embedded in a NavigationController, therefore
+        // get it by diving down one level to the first child of the NavigationController
+        id destVC = [[[segue destinationViewController] childViewControllers]
+                     firstObject] ;
+        
+        // check if Camera is available.
+        
+        if ( [destVC isKindOfClass:[NFPAddImageTableViewController class]]){
+            
+            NFPAddImageTableViewController* vc = (NFPAddImageTableViewController*)destVC;
+            NSMutableArray* sources = [NSMutableArray new];
+            [sources addObject:
+             [NSString stringWithString:NSLocalizedString(@"Photo Media Library",nil)]];
+            
+            if ([UIImagePickerController isSourceTypeAvailable:UIImagePickerControllerSourceTypeCamera])
+            {
+                [sources addObject:
+                 [NSString stringWithString:NSLocalizedString(@"Camera",nil)]];
+            }
+            
+            vc.imageSources = [NSArray arrayWithArray:sources];
+            
+        }
+    }
 }
 
+//unwind segue
+-(IBAction) cancelAddImageToCollectionView:(UIStoryboardSegue*)segue;
+{
+    if ([[segue sourceViewController]
+            isKindOfClass:[NFPAddImageTableViewController class]])
+    {
+        [self.navigationController dismissViewControllerAnimated:YES completion:nil];
+    }
+}
 
+#pragma  mark - KVO for AppDelegate's image property
+- (void) observeValueForKeyPath:(NSString *)keyPath ofObject:(id)object change:(NSDictionary *)change context:(void *)context;
+{
+    AppDelegate* appDel = (AppDelegate*)object;
+    UIImage* image = [appDel getUserImage];
+    NSLog(@"About to call the thumbnail gen");
+    [self.thumbnailgenerator addImage:image];
+}
 
 @end
