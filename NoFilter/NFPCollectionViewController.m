@@ -169,7 +169,7 @@ minimumLineSpacingForSectionAtIndex:(NSInteger)section
 #pragma mark - NFPThumbnailGeneratorProtocol
 -(void)didGenerateThumbnailAtIndex:(NSUInteger)index;
 {
-    NSIndexPath* indexPath = [NSIndexPath indexPathForItem:index inSection:0];
+//    NSIndexPath* indexPath = [NSIndexPath indexPathForItem:index inSection:0];
     [self.collectionView reloadData];
     //TODO: problem here!
     //[self.collectionView reloadItemsAtIndexPaths:[NSArray arrayWithObject:indexPath]];
@@ -177,7 +177,8 @@ minimumLineSpacingForSectionAtIndex:(NSInteger)section
 
 -(void) willGenerateThumbnailAtIndex:(NSUInteger)index;
 {
-    NSIndexPath* indexPath = [NSIndexPath indexPathForItem:index inSection:0];
+    //TODO: use the indexPath
+    //NSIndexPath* indexPath = [NSIndexPath indexPathForItem:index inSection:0];
     [self.collectionView reloadData];
 }
 
@@ -237,7 +238,6 @@ minimumLineSpacingForSectionAtIndex:(NSInteger)section
 {
     AppDelegate* appDel = (AppDelegate*)object;
     UIImage* image = [appDel getUserImage];
-    NSLog(@"About to call the thumbnail gen");
     [self.thumbnailgenerator addImage:image];
 }
 

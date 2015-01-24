@@ -127,24 +127,19 @@ minimumLineSpacingForSectionAtIndex:(NSInteger)section
     PHAsset* asset = [self.assets objectAtIndex:indexPath.item];
     
     PHImageRequestOptions* options = [PHImageRequestOptions new];
-    options.synchronous = YES; //needed to only call the result handler once, when done
-    //otherwise multiple calls can be performed
+    options.synchronous = YES;
     
     [[PHImageManager defaultManager]
-     requestImageForAsset:asset
-     targetSize: self.collectionView.bounds.size
-     contentMode:PHImageContentModeAspectFill
-     options:options
-     resultHandler:^(UIImage *result, NSDictionary *info)
-     {
-        [((AppDelegate*)[[UIApplication sharedApplication] delegate])
-            setUserImage:result];
-     }];
+         requestImageForAsset:asset
+         targetSize: self.collectionView.bounds.size
+         contentMode:PHImageContentModeAspectFill
+         options:options
+         resultHandler:^(UIImage *result, NSDictionary *info){
+            [((AppDelegate*)[[UIApplication sharedApplication] delegate])
+                setUserImage:result];
+         }];
     
-    AppDelegate* app = (AppDelegate*)[UIApplication sharedApplication].delegate;
-    UIViewController* appRootController = [[app.window.rootViewController childViewControllers] firstObject];
-    //[self.navigationController popToViewController:appRootController animated:YES];
-    [self.navigationController popToRootViewControllerAnimated:YES];
+    [self dismissViewControllerAnimated:YES completion:nil];
     
 }
 
