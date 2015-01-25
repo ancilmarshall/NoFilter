@@ -10,5 +10,4 @@
 
 @interface NFPAddImageTableViewController : UITableViewController
 @property (nonatomic,strong) NSArray* imageSources;
--(instancetype)initWithSources:(NSArray*)imageSources;
 @end

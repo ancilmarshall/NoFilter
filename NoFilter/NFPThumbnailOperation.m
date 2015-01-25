@@ -29,21 +29,27 @@
     return self;
 }
 
+// perform the time intensive tasks here
 -(void) main;
 {
+    // always check if operation is cancelled
     if (self.isCancelled)
         return;
     
     self.thumbnail.thumbnailImage =
-        [self.thumbnail.rawImage scaledImageConstrainedToSize:CGSizeMake(100.0, 100.0)];
+        [self.thumbnail.rawImage
+            scaledImageConstrainedToSize:CGSizeMake(100.0, 100.0)];
     
 }
 
 -(void) operationComplete;
 {
+    // always check if operation is cancelled
     if (self.isCancelled)
         return;
     
+    //This boolean can be used to trigger an event notification to indicate that
+    // the operation has been completed
     self.thumbnail.hasThumbnail = YES;
 }
 @end

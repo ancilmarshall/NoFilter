@@ -39,7 +39,8 @@
 {
     if (!_thumbnailGeneratorQueue){
         _thumbnailGeneratorQueue = [NSOperationQueue new];
-        _thumbnailGeneratorQueue.maxConcurrentOperationCount = 1;
+        _thumbnailGeneratorQueue.maxConcurrentOperationCount = 2;
+        _thumbnailGeneratorQueue.name = @"NFPThumbnailGeneratorQueue";
     }
     return _thumbnailGeneratorQueue;
 }
@@ -62,10 +63,13 @@
     NFPThumbnail* thumbnail = [[NFPThumbnail alloc] initWithRawImage:image
                                                    atCollectionIndex:currentIndex];
     
-    //KVO first attempt at doing this
-    [thumbnail addObserver:self forKeyPath:@"hasThumbnail" options:NSKeyValueObservingOptionNew context:nil];
+    //Add self as observer to know when the operation has completed
+    [thumbnail addObserver:self forKeyPath:@"hasThumbnail"
+                   options:NSKeyValueObservingOptionNew
+                   context:nil];
     
     [self.thumbnails addObject:thumbnail];
+    
     // Responsibility of this class to call the delegate on the main queue
     dispatch_async(dispatch_get_main_queue(), ^{
         [self.delegate willGenerateThumbnailAtIndex:thumbnail.index];

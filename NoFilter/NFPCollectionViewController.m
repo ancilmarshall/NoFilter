@@ -22,6 +22,8 @@
 static NSString * const reuseIdentifier = @"NFPCollectionViewCell";
 static NSString * const kAddImageSegueIdentifier = @"addImageSegue";
 
+#pragma mark - Initialization
+
 - (void)viewDidLoad {
     [super viewDidLoad];
     
@@ -33,36 +35,41 @@ static NSString * const kAddImageSegueIdentifier = @"addImageSegue";
     [self.collectionView registerClass:[UICollectionViewCell class]
             forCellWithReuseIdentifier:reuseIdentifier];
     
-    // Set collection view's background color (default is bizzarly black)
-    self.collectionView.backgroundColor = [UIColor whiteColor];
-    
-    // Set as observer of AppDelegate's image property
-    AppDelegate* appDel = (AppDelegate*)[UIApplication sharedApplication].delegate;
-    [appDel addObserver:self forKeyPath:@"image" options:NSKeyValueObservingOptionNew context:nil];
+    // Set self as observer of AppDelegate's image property
+    [[AppDelegate getDelegate] addObserver:self
+                                forKeyPath:@"image"
+                                   options:NSKeyValueObservingOptionNew
+                                   context:nil];
 
 }
 
+//TODO: not sure if this is needed
 - (void)didReceiveMemoryWarning {
     [super didReceiveMemoryWarning];
     // Dispose of any resources that can be recreated.
 }
 
 
-#pragma mark - <UICollectionViewDataSource>
+#pragma mark - UICollectionViewDataSource
 
 - (NSInteger)numberOfSectionsInCollectionView:(UICollectionView *)collectionView {
     return 1;
 }
 
-- (NSInteger)collectionView:(UICollectionView *)collectionView numberOfItemsInSection:(NSInteger)section {
+- (NSInteger)collectionView:(UICollectionView *)collectionView
+     numberOfItemsInSection:(NSInteger)section {
     return [self.thumbnailgenerator count];
 }
 
-- (UICollectionViewCell *)collectionView:(UICollectionView *)collectionView cellForItemAtIndexPath:(NSIndexPath *)indexPath {
-    UICollectionViewCell *cell = [collectionView dequeueReusableCellWithReuseIdentifier:reuseIdentifier forIndexPath:indexPath];
+- (UICollectionViewCell *)collectionView:(UICollectionView *)collectionView
+                  cellForItemAtIndexPath:(NSIndexPath *)indexPath
+{
     
-    //remove any content previously added to this cell (could use a view tag instead?)
-    //TODO: not always the same view cell, so need to figure out how to stop animation of activity
+    UICollectionViewCell *cell =
+        [collectionView dequeueReusableCellWithReuseIdentifier:reuseIdentifier
+                                                  forIndexPath:indexPath];
+    
+    //remove any content previously added to this cell
     for (UIView* view in [cell.contentView subviews]){
         if ([view isKindOfClass:[UIActivityIndicatorView class]]){
             [((UIActivityIndicatorView*)view) stopAnimating];
@@ -70,16 +77,21 @@ static NSString * const kAddImageSegueIdentifier = @"addImageSegue";
         [view removeFromSuperview];
     }
     
-    UIActivityIndicatorView *activityIndicatorView = [[UIActivityIndicatorView alloc] initWithActivityIndicatorStyle:UIActivityIndicatorViewStyleGray];
+    UIActivityIndicatorView *activityIndicatorView =
+        [[UIActivityIndicatorView alloc]
+         initWithActivityIndicatorStyle:UIActivityIndicatorViewStyleGray];
     activityIndicatorView.translatesAutoresizingMaskIntoConstraints = NO;
     
     // Get thumbnail image based on indexPath
-    UIImage* thumbnailImage = [self.thumbnailgenerator thumbnailAtIndex:indexPath.item];
+    UIImage* thumbnailImage = [self.thumbnailgenerator
+                               thumbnailAtIndex:indexPath.item];
     
+    // If the thumnail is nil, then the thumbnailGenerator is not yet finished
+    // with processing the raw image. Thus start the activity view animation
     if (nil == thumbnailImage){
         [cell.contentView addSubview:activityIndicatorView];
         
-        // Perform auto-layout constraints. Center activity view in cell
+        // Perform auto-layout constraints. Center activityIndicatorView in cell
         [NSLayoutConstraint constraintWithItem:cell.contentView
                                      attribute:NSLayoutAttributeCenterX
                                      relatedBy:NSLayoutRelationEqual
@@ -98,22 +110,25 @@ static NSString * const kAddImageSegueIdentifier = @"addImageSegue";
         
         [activityIndicatorView startAnimating];
     }
-    else {
-        UIImageView* thumbnailView = [[UIImageView alloc] initWithFrame:CGRectMake(0, 0, 100,100)];
+    else { // thumbnail is available
+        UIImageView* thumbnailView = [[UIImageView alloc]
+                                      initWithFrame:CGRectMake(0, 0, 100,100)];
+        thumbnailView.contentMode = UIViewContentModeScaleAspectFit;
+        thumbnailView.clipsToBounds = YES;
         thumbnailView.image = thumbnailImage;
+        cell.contentView.clipsToBounds = YES;
         [cell.contentView addSubview:thumbnailView];
     }
         
     return cell;
 }
 
-#pragma mark - <UICollectionViewDelegate>
+#pragma mark - UICollectionViewDelegate
 //cellSize is a helper function
 -(CGSize)cellSize
 {
     return (CGSize){.width = 100, .height=100};
 }
-
 
 -(CGSize)collectionView:(UICollectionView *)collectionView
                  layout:(UICollectionViewLayout *)collectionViewLayout
@@ -122,7 +137,7 @@ static NSString * const kAddImageSegueIdentifier = @"addImageSegue";
     return  [self cellSize];
 }
 
-//TODO: not sure why this is not working?
+//TODO: not sure why these two functions are not working?
 -(CGFloat)collectionView:(UICollectionView *)collectionView
                   layout:(UICollectionViewLayout *)collectionViewLayout
 minimumInteritemSpacingForSectionAtIndex:(NSInteger)section
@@ -137,59 +152,33 @@ minimumLineSpacingForSectionAtIndex:(NSInteger)section
     return  0.0f;
 }
 
-/*
-// Uncomment this method to specify if the specified item should be highlighted during tracking
-- (BOOL)collectionView:(UICollectionView *)collectionView shouldHighlightItemAtIndexPath:(NSIndexPath *)indexPath {
-	return YES;
-}
-*/
-
-/*
-// Uncomment this method to specify if the specified item should be selected
-- (BOOL)collectionView:(UICollectionView *)collectionView shouldSelectItemAtIndexPath:(NSIndexPath *)indexPath {
-    return YES;
-}
-*/
-
-/*
-// Uncomment these methods to specify if an action menu should be displayed for the specified item, and react to actions performed on the item
-- (BOOL)collectionView:(UICollectionView *)collectionView shouldShowMenuForItemAtIndexPath:(NSIndexPath *)indexPath {
-	return NO;
-}
-
-- (BOOL)collectionView:(UICollectionView *)collectionView canPerformAction:(SEL)action forItemAtIndexPath:(NSIndexPath *)indexPath withSender:(id)sender {
-	return NO;
-}
-
-- (void)collectionView:(UICollectionView *)collectionView performAction:(SEL)action forItemAtIndexPath:(NSIndexPath *)indexPath withSender:(id)sender {
-	
-}
-*/
 
 #pragma mark - NFPThumbnailGeneratorProtocol
+
 -(void)didGenerateThumbnailAtIndex:(NSUInteger)index;
 {
-//    NSIndexPath* indexPath = [NSIndexPath indexPathForItem:index inSection:0];
-    [self.collectionView reloadData];
-    //TODO: problem here!
-    //[self.collectionView reloadItemsAtIndexPaths:[NSArray arrayWithObject:indexPath]];
+    NSIndexPath* indexPath = [NSIndexPath indexPathForItem:index inSection:0];
+    [self.collectionView reloadItemsAtIndexPaths:[NSArray arrayWithObject:indexPath]];
 }
 
 -(void) willGenerateThumbnailAtIndex:(NSUInteger)index;
 {
-    //TODO: use the indexPath
+    //TODO: use the indexPath instead of reloading all cells
+    // sometime this is called, even if the image is nil (from the result
+    // handler in PhotoCollectionViewController didSelectItemAtIndexPath
     //NSIndexPath* indexPath = [NSIndexPath indexPathForItem:index inSection:0];
+    //[self.collectionView reloadItemsAtIndexPaths:[NSArray arrayWithObject:indexPath]];
     [self.collectionView reloadData];
 }
 
 #pragma mark - Add Bar Button Item
 
+// Most of the work is done in prepareForSegue:sender:
 - (IBAction)addImageToCollectionView:(UIBarButtonItem *)sender
 {
     NSParameterAssert(sender = self.navigationItem.rightBarButtonItem);
-    
-}
 
+}
 
 #pragma mark - Navigation
 
@@ -197,26 +186,31 @@ minimumLineSpacingForSectionAtIndex:(NSInteger)section
     
     if ([segue.identifier isEqualToString:kAddImageSegueIdentifier]){
         
-        // The next view controller is a embedded in a NavigationController, therefore
-        // get it by diving down one level to the first child of the NavigationController
+        // The next view controller is an embedded in a NavigationController,
+        // therefore retrieve it by diving down one level to the first child
+        // of the NavigationController
         id destVC = [[[segue destinationViewController] childViewControllers]
                      firstObject] ;
         
-        // check if Camera is available.
         
         if ( [destVC isKindOfClass:[NFPAddImageTableViewController class]]){
             
             NFPAddImageTableViewController* vc = (NFPAddImageTableViewController*)destVC;
             NSMutableArray* sources = [NSMutableArray new];
+            
+            // Add photo library since always available (device and simulator)
             [sources addObject:
              [NSString stringWithString:NSLocalizedString(@"Photo Media Library",nil)]];
             
-            if ([UIImagePickerController isSourceTypeAvailable:UIImagePickerControllerSourceTypeCamera])
+            // check if Camera is available on device, then add to sources
+            if ([UIImagePickerController
+                    isSourceTypeAvailable:UIImagePickerControllerSourceTypeCamera])
             {
                 [sources addObject:
                  [NSString stringWithString:NSLocalizedString(@"Camera",nil)]];
             }
             
+            // Set the destination view controllers imageSources property
             vc.imageSources = [NSArray arrayWithArray:sources];
             
         }
@@ -229,12 +223,17 @@ minimumLineSpacingForSectionAtIndex:(NSInteger)section
     if ([[segue sourceViewController]
             isKindOfClass:[NFPAddImageTableViewController class]])
     {
-        [self.navigationController dismissViewControllerAnimated:YES completion:nil];
+        [self.navigationController dismissViewControllerAnimated:YES
+                                                      completion:nil];
     }
 }
 
 #pragma  mark - KVO for AppDelegate's image property
-- (void) observeValueForKeyPath:(NSString *)keyPath ofObject:(id)object change:(NSDictionary *)change context:(void *)context;
+
+- (void) observeValueForKeyPath:(NSString *)keyPath
+                       ofObject:(id)object
+                         change:(NSDictionary *)change
+                        context:(void *)context;
 {
     AppDelegate* appDel = (AppDelegate*)object;
     UIImage* image = [appDel getUserImage];

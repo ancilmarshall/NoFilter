@@ -13,7 +13,8 @@
 #import "PhotoTableViewController.h"
 #import "AppDelegate.h"
 
-@interface NFPAddImageTableViewController () <UIImagePickerControllerDelegate, UINavigationControllerDelegate>
+@interface NFPAddImageTableViewController () <UIImagePickerControllerDelegate,
+    UINavigationControllerDelegate>
 
 @end
 
@@ -21,14 +22,7 @@ static NSString* const kCellReuseIdentifier = @"addImageTableViewCell";
 
 @implementation NFPAddImageTableViewController
 
-
--(instancetype)initWithSources:(NSArray*)imageSources;
-{
-    if (self = [super init]){
-        _imageSources = imageSources;
-    }
-    return self;
-}
+#pragma mark - Initialization
 
 - (void)viewDidLoad {
     [super viewDidLoad];
@@ -44,13 +38,17 @@ static NSString* const kCellReuseIdentifier = @"addImageTableViewCell";
     return 1;
 }
 
-- (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section {
+- (NSInteger)tableView:(UITableView *)tableView
+    numberOfRowsInSection:(NSInteger)section {
     return [self.imageSources count];
 }
 
 
-- (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath {
-    UITableViewCell *cell = [tableView dequeueReusableCellWithIdentifier:kCellReuseIdentifier forIndexPath:indexPath];
+- (UITableViewCell *)tableView:(UITableView *)tableView
+         cellForRowAtIndexPath:(NSIndexPath *)indexPath {
+    UITableViewCell *cell =
+        [tableView dequeueReusableCellWithIdentifier:kCellReuseIdentifier
+                                        forIndexPath:indexPath];
     
     cell.accessoryType = UITableViewCellAccessoryDisclosureIndicator;
     cell.textLabel.text = self.imageSources[indexPath.row];
@@ -58,7 +56,8 @@ static NSString* const kCellReuseIdentifier = @"addImageTableViewCell";
 }
 
 
-# pragma mark - tableView Delegate
+# pragma mark - TableView Delegate
+
 -(void) tableView:(UITableView*)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath
 {
     UIViewController* nextVC;
@@ -72,7 +71,7 @@ static NSString* const kCellReuseIdentifier = @"addImageTableViewCell";
     }
     else if ([imageSource isEqualToString:NSLocalizedString(@"Camera", nil)])
     {
-        [self takePhoto:nil];
+        [self takePhoto];
     }
     else {
         NSAssert(NO,NSLocalizedString(@"Unexpected imageSource type",nil));
@@ -81,21 +80,12 @@ static NSString* const kCellReuseIdentifier = @"addImageTableViewCell";
 }
 
 
-/*
-#pragma mark - Navigation
-
-// In a storyboard-based application, you will often want to do a little preparation before navigation
-- (void)prepareForSegue:(UIStoryboardSegue *)segue sender:(id)sender {
-    // Get the new view controller using [segue destinationViewController].
-    // Pass the selected object to the new view controller.
-}
-*/
-
 #pragma mark - UIImagePickerControllerDelegate
 
-- (void)takePhoto:(id)sender;
+- (void)takePhoto;
 {
-    if (![UIImagePickerController isSourceTypeAvailable:UIImagePickerControllerSourceTypeCamera]) {
+    if (![UIImagePickerController
+          isSourceTypeAvailable:UIImagePickerControllerSourceTypeCamera]) {
         return;
     }
     
@@ -114,10 +104,12 @@ static NSString* const kCellReuseIdentifier = @"addImageTableViewCell";
 }
 
 //if user takes photo, unpack photo data from the NSDictionary parameter
-- (void)imagePickerController:(UIImagePickerController *)picker didFinishPickingMediaWithInfo:(NSDictionary *)info;
+- (void)imagePickerController:(UIImagePickerController *)picker
+    didFinishPickingMediaWithInfo:(NSDictionary *)info;
 {
     NSString *mediaType = info[UIImagePickerControllerMediaType];
-    NSAssert(UTTypeConformsTo((__bridge CFStringRef)mediaType, kUTTypeImage), @"Expected an image type");
+    NSAssert(UTTypeConformsTo((__bridge CFStringRef)mediaType, kUTTypeImage),
+             @"Expected an image type");
     
     //grab either the edited (by user within the camera app) or the original photo
     UIImage *image = info[UIImagePickerControllerEditedImage];
@@ -128,8 +120,7 @@ static NSString* const kCellReuseIdentifier = @"addImageTableViewCell";
     //save to the device's photo library and update the UI before dismissing
     if (image != nil) {
         UIImageWriteToSavedPhotosAlbum(image, nil, NULL, NULL);
-        [((AppDelegate*)[[UIApplication sharedApplication] delegate])
-         setUserImage:image];
+        [[AppDelegate getDelegate] setUserImage:image];
     }
     
     //dismiss the controller after the image has been updated
