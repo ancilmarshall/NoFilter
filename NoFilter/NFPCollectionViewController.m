@@ -21,6 +21,7 @@
 
 static NSString * const reuseIdentifier = @"NFPCollectionViewCell";
 static NSString * const kAddImageSegueIdentifier = @"addImageSegue";
+static NSString * const kDebugSegueIdentifier = @"debugSegue";
 
 #pragma mark - Initialization
 
@@ -215,6 +216,14 @@ minimumLineSpacingForSectionAtIndex:(NSInteger)section
             
         }
     }
+    
+    else if ([segue.identifier isEqualToString:kDebugSegueIdentifier])
+    {
+        NSParameterAssert([sender isKindOfClass:[UILongPressGestureRecognizer class]]);
+    }
+    
+    
+    
 }
 
 //unwind segue
@@ -239,5 +248,18 @@ minimumLineSpacingForSectionAtIndex:(NSInteger)section
     UIImage* image = [appDel getUserImage];
     [self.thumbnailgenerator addImage:image];
 }
+
+#pragma mark - Long Press Gesture Recognizer
+-(IBAction) showDebugViewController:(UILongPressGestureRecognizer*)gesture;
+{
+    NSParameterAssert(gesture.view == self.collectionView);
+    
+    if ( gesture.state == UIGestureRecognizerStateBegan )
+    {
+        [self performSegueWithIdentifier:kDebugSegueIdentifier sender:gesture];
+    }
+
+}
+
 
 @end

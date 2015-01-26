@@ -22,6 +22,7 @@
 		1DBD52871A73DF3E00AAEDAD /* NFPAddImageTableViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 1DBD52861A73DF3E00AAEDAD /* NFPAddImageTableViewController.m */; };
 		1DBD528C1A741BEF00AAEDAD /* PhotoCollectionViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 1DBD52891A741BEF00AAEDAD /* PhotoCollectionViewController.m */; };
 		1DBD528D1A741BEF00AAEDAD /* PhotoTableViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 1DBD528B1A741BEF00AAEDAD /* PhotoTableViewController.m */; };
+		1DF2B4D91A758D0400977E57 /* NFPDebugViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 1DF2B4D81A758D0400977E57 /* NFPDebugViewController.m */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -63,6 +64,8 @@
 		1DBD52891A741BEF00AAEDAD /* PhotoCollectionViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = PhotoCollectionViewController.m; sourceTree = "<group>"; };
 		1DBD528A1A741BEF00AAEDAD /* PhotoTableViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PhotoTableViewController.h; sourceTree = "<group>"; };
 		1DBD528B1A741BEF00AAEDAD /* PhotoTableViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = PhotoTableViewController.m; sourceTree = "<group>"; };
+		1DF2B4D71A758D0400977E57 /* NFPDebugViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = NFPDebugViewController.h; sourceTree = "<group>"; };
+		1DF2B4D81A758D0400977E57 /* NFPDebugViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = NFPDebugViewController.m; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -154,6 +157,8 @@
 				1DBD52771A738E8E00AAEDAD /* NFPCollectionViewController.m */,
 				1DBD52851A73DF3E00AAEDAD /* NFPAddImageTableViewController.h */,
 				1DBD52861A73DF3E00AAEDAD /* NFPAddImageTableViewController.m */,
+				1DF2B4D71A758D0400977E57 /* NFPDebugViewController.h */,
+				1DF2B4D81A758D0400977E57 /* NFPDebugViewController.m */,
 			);
 			name = ViewControllers;
 			sourceTree = "<group>";
@@ -283,6 +288,7 @@
 				1DBD528D1A741BEF00AAEDAD /* PhotoTableViewController.m in Sources */,
 				1DBD528C1A741BEF00AAEDAD /* PhotoCollectionViewController.m in Sources */,
 				1DBD52781A738E8E00AAEDAD /* NFPCollectionViewController.m in Sources */,
+				1DF2B4D91A758D0400977E57 /* NFPDebugViewController.m in Sources */,
 				1DBD527E1A73A9A400AAEDAD /* NFPThumbnail.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
