@@ -21,6 +21,7 @@
 -(void) addImage:(UIImage*)image;
 -(NSUInteger) count;
 -(void) performRegenerationOfAllThumbnails;
+-(void) clearAllThumbnails;
 @end
 
 
@@ -28,5 +29,6 @@
 
 -(void) didGenerateThumbnailAtIndex:(NSUInteger)index;
 -(void) willGenerateThumbnailAtIndex:(NSUInteger)index;
+-(void) didClearAllThumbnails;
 
 @end

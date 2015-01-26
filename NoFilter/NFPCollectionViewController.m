@@ -41,18 +41,9 @@ static NSString * const kDebugSegueIdentifier = @"debugSegue";
                                 forKeyPath:@"image"
                                    options:NSKeyValueObservingOptionNew
                                    context:nil];
-
-    
-    UIBarButtonItem* b = [[UIBarButtonItem alloc] initWithTitle:@"Debug" style:UIBarButtonItemStylePlain target:self action:@selector(debugMe)];
-    
-    self.navigationItem.leftBarButtonItem = b;
     
 }
 
--(void)debugMe;
-{
-    [self.thumbnailgenerator performRegenerationOfAllThumbnails];
-}
 
 //TODO: not sure if this is needed
 - (void)didReceiveMemoryWarning {
@@ -182,6 +173,11 @@ minimumLineSpacingForSectionAtIndex:(NSInteger)section
     [self.collectionView reloadData];
 }
 
+-(void) didClearAllThumbnails;
+{
+    [self.collectionView reloadData];
+}
+
 #pragma mark - Add Bar Button Item
 
 // Most of the work is done in prepareForSegue:sender:
@@ -231,9 +227,6 @@ minimumLineSpacingForSectionAtIndex:(NSInteger)section
     {
         NSParameterAssert([sender isKindOfClass:[UILongPressGestureRecognizer class]]);
     }
-    
-    
-    
 }
 
 //unwind segue
@@ -245,6 +238,16 @@ minimumLineSpacingForSectionAtIndex:(NSInteger)section
         [self.navigationController dismissViewControllerAnimated:YES
                                                       completion:nil];
     }
+}
+
+-(IBAction)debugMe:(UIStoryboardSegue*)segue;
+{
+    [self.thumbnailgenerator performRegenerationOfAllThumbnails];
+}
+
+-(IBAction)clearAllThumbnails:(UIStoryboardSegue*)segue;
+{
+    [self.thumbnailgenerator clearAllThumbnails];
 }
 
 #pragma  mark - KVO for AppDelegate's image property

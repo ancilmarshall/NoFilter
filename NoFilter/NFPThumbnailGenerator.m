@@ -17,6 +17,8 @@
 
 @implementation NFPThumbnailGenerator
 
+static NSString* kKeyPath = @"hasThumbnail";
+
 #pragma mark - Initialization
 -(instancetype)initWithDelegate:(id<NFPThumbnailGeneratorProtocol>)delegate;
 {
@@ -64,9 +66,11 @@
                                                    atCollectionIndex:currentIndex];
     
     //Add self as observer to know when the operation has completed
-    [thumbnail addObserver:self forKeyPath:@"hasThumbnail"
+    [thumbnail addObserver:self forKeyPath:kKeyPath
                    options:NSKeyValueObservingOptionOld
                    context:nil];
+    thumbnail.observer = self;
+    thumbnail.keyPath = kKeyPath;
     
     [self.thumbnails addObject:thumbnail];
     [self startThumbnailGeneration:thumbnail];
@@ -117,14 +121,25 @@
 #pragma mark - Debuggin methods
 -(void) performRegenerationOfAllThumbnails;
 {
+    //first reset all images
     for (NFPThumbnail* thumbnail in self.thumbnails) {
         thumbnail.hasThumbnail = NO;
         thumbnail.thumbnailImage = nil;
     }
     
+    //then add start the generation process
     for (NFPThumbnail* thumbnail in self.thumbnails){
         [self startThumbnailGeneration:thumbnail];
     }
+}
+
+-(void)clearAllThumbnails;
+{
+    [self.thumbnails removeAllObjects];
+    dispatch_async(dispatch_get_main_queue(), ^{
+        [self.delegate didClearAllThumbnails];
+    });
+    
 }
 
 

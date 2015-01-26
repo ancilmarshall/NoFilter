@@ -141,11 +141,50 @@
                     <view key="view" contentMode="scaleToFill" id="RTY-cD-dVH">
                         <rect key="frame" x="0.0" y="0.0" width="600" height="600"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                        <subviews>
+                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="obm-PF-y40">
+                                <rect key="frame" x="152" y="179" width="256" height="34"/>
+                                <color key="backgroundColor" red="0.0" green="0.47843137250000001" blue="1" alpha="1" colorSpace="calibratedRGB"/>
+                                <fontDescription key="fontDescription" type="system" pointSize="20"/>
+                                <inset key="contentEdgeInsets" minX="10" minY="5" maxX="10" maxY="5"/>
+                                <state key="normal" title="Regenerate All Thumbnails">
+                                    <color key="titleColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
+                                </state>
+                                <connections>
+                                    <segue destination="nEm-fh-UhS" kind="unwind" unwindAction="debugMe:" id="Tj2-1z-GYG"/>
+                                </connections>
+                            </button>
+                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="aq7-eQ-vka">
+                                <rect key="frame" x="152" y="238" width="256" height="34"/>
+                                <color key="backgroundColor" red="0.0" green="0.47843137250000001" blue="1" alpha="1" colorSpace="calibratedRGB"/>
+                                <fontDescription key="fontDescription" type="system" pointSize="20"/>
+                                <inset key="contentEdgeInsets" minX="10" minY="5" maxX="10" maxY="5"/>
+                                <state key="normal" title="Clear All Thumbnails">
+                                    <color key="titleColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
+                                </state>
+                                <connections>
+                                    <segue destination="nEm-fh-UhS" kind="unwind" unwindAction="clearAllThumbnails:" id="sUG-zs-IJb"/>
+                                </connections>
+                            </button>
+                        </subviews>
                         <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
+                        <constraints>
+                            <constraint firstItem="obm-PF-y40" firstAttribute="trailing" secondItem="aq7-eQ-vka" secondAttribute="trailing" id="12U-7N-9op"/>
+                            <constraint firstItem="obm-PF-y40" firstAttribute="leading" secondItem="aq7-eQ-vka" secondAttribute="leading" id="1Da-HO-Vyv"/>
+                            <constraint firstAttribute="centerX" secondItem="obm-PF-y40" secondAttribute="centerX" constant="20.5" id="1cu-kx-rCN"/>
+                            <constraint firstItem="obm-PF-y40" firstAttribute="top" secondItem="lWp-I4-7HE" secondAttribute="bottom" constant="115" id="7Up-Fu-U7l"/>
+                            <constraint firstItem="aq7-eQ-vka" firstAttribute="top" secondItem="obm-PF-y40" secondAttribute="bottom" constant="25" id="Gx3-Le-xoZ"/>
+                            <constraint firstItem="obm-PF-y40" firstAttribute="centerX" secondItem="aq7-eQ-vka" secondAttribute="centerX" id="rIx-Ph-VEx"/>
+                        </constraints>
                     </view>
                     <navigationItem key="navigationItem" id="sRD-yD-6Ky"/>
+                    <connections>
+                        <outlet property="clearAllButton" destination="aq7-eQ-vka" id="T7x-zT-kZ3"/>
+                        <outlet property="regenerateButton" destination="obm-PF-y40" id="mYy-Kf-WCm"/>
+                    </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="yHY-Nr-qrM" userLabel="First Responder" sceneMemberID="firstResponder"/>
+                <exit id="nEm-fh-UhS" userLabel="Exit" sceneMemberID="exit"/>
             </objects>
             <point key="canvasLocation" x="2590" y="1768"/>
         </scene>
