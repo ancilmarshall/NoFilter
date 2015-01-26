@@ -42,6 +42,16 @@ static NSString * const kDebugSegueIdentifier = @"debugSegue";
                                    options:NSKeyValueObservingOptionNew
                                    context:nil];
 
+    
+    UIBarButtonItem* b = [[UIBarButtonItem alloc] initWithTitle:@"Debug" style:UIBarButtonItemStylePlain target:self action:@selector(debugMe)];
+    
+    self.navigationItem.leftBarButtonItem = b;
+    
+}
+
+-(void)debugMe;
+{
+    [self.thumbnailgenerator performRegenerationOfAllThumbnails];
 }
 
 //TODO: not sure if this is needed

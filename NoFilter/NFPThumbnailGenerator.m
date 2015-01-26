@@ -65,21 +65,11 @@
     
     //Add self as observer to know when the operation has completed
     [thumbnail addObserver:self forKeyPath:@"hasThumbnail"
-                   options:NSKeyValueObservingOptionNew
+                   options:NSKeyValueObservingOptionOld
                    context:nil];
     
     [self.thumbnails addObject:thumbnail];
-    
-    // Responsibility of this class to call the delegate on the main queue
-    dispatch_async(dispatch_get_main_queue(), ^{
-        [self.delegate willGenerateThumbnailAtIndex:thumbnail.index];
-    });
-    
-    //Initiate and start NSOperation
-    NFPThumbnailOperation* operation =
-        [[NFPThumbnailOperation alloc] initWithNFPThumbnail:thumbnail];
-    [self.thumbnailGeneratorQueue addOperation:operation];
-    
+    [self startThumbnailGeneration:thumbnail];
 }
 
 #pragma  mark - KVO Observer
@@ -92,11 +82,16 @@
     NSParameterAssert([object isKindOfClass:[NFPThumbnail class]]);
     NFPThumbnail* thumbnail = (NFPThumbnail*)object;
     
+    BOOL oldValue = [[change objectForKey:NSKeyValueChangeOldKey] boolValue];
+    BOOL newValue = thumbnail.hasThumbnail;
+    
     // Responsibility of this class to call the delegate on the main queue
-    dispatch_async(dispatch_get_main_queue(), ^{
-        [self.delegate didGenerateThumbnailAtIndex:thumbnail.index];
-    });
-   
+    // protect against debugging actions when the hasThumbnail is reset to NO
+    if (oldValue == NO && newValue == YES){
+        dispatch_async(dispatch_get_main_queue(), ^{
+            [self.delegate didGenerateThumbnailAtIndex:thumbnail.index];
+        });
+    }
 }
 
 #pragma mark - Helper functions
@@ -104,5 +99,40 @@
 {
     return [self.thumbnails count];
 }
+
+-(void)startThumbnailGeneration:(NFPThumbnail*)thumbnail;
+{
+    // Responsibility of this class to call the delegate on the main queue
+    dispatch_async(dispatch_get_main_queue(), ^{
+        [self.delegate willGenerateThumbnailAtIndex:thumbnail.index];
+    });
+    
+    //Initiate and start NSOperation
+    NFPThumbnailOperation* operation =
+    [[NFPThumbnailOperation alloc] initWithNFPThumbnail:thumbnail];
+    [self.thumbnailGeneratorQueue addOperation:operation];
+    
+}
+
+#pragma mark - Debuggin methods
+-(void) performRegenerationOfAllThumbnails;
+{
+    for (NFPThumbnail* thumbnail in self.thumbnails) {
+        thumbnail.hasThumbnail = NO;
+        thumbnail.thumbnailImage = nil;
+    }
+    
+    for (NFPThumbnail* thumbnail in self.thumbnails){
+        [self startThumbnailGeneration:thumbnail];
+    }
+}
+
+
+
+
+
+
+
+
 
 @end

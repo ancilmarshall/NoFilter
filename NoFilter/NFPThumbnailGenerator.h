@@ -20,6 +20,7 @@
 -(UIImage*) thumbnailAtIndex:(NSUInteger)index;
 -(void) addImage:(UIImage*)image;
 -(NSUInteger) count;
+-(void) performRegenerationOfAllThumbnails;
 @end
 
 
