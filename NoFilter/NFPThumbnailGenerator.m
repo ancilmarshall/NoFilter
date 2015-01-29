@@ -7,11 +7,11 @@
 //
 
 #import "NFPThumbnailGenerator.h"
-#import "NFPThumbnail.h"
+#import "NFPImageData.h"
 #import "NFPThumbnailOperation.h"
 
 @interface NFPThumbnailGenerator()
-@property (nonatomic,strong) NSMutableArray* thumbnails; // of NFPThumbnail objects
+@property (nonatomic,strong) NSMutableArray* images; // of NFPImageData objects
 @property (nonatomic,strong) NSOperationQueue* thumbnailGeneratorQueue;
 @end
 
@@ -29,12 +29,12 @@ static NSString* kKeyPath = @"hasThumbnail";
     return self;
 }
 
--(NSMutableArray*)thumbnails;
+-(NSMutableArray*)images;
 {
-    if (!_thumbnails){
-        _thumbnails = [NSMutableArray new];
+    if (!_images){
+        _images = [NSMutableArray new];
     }
-    return _thumbnails;
+    return _images;
 }
 
 -(NSOperationQueue*)thumbnailGeneratorQueue;
@@ -50,30 +50,30 @@ static NSString* kKeyPath = @"hasThumbnail";
 #pragma mark - Accessor methods
 -(UIImage*)thumbnailAtIndex:(NSUInteger)index;
 {
-    if ([self.thumbnails count] == 0){
+    if ([self.images count] == 0){
         return nil;
     }
     
-    NFPThumbnail* thumbnail = [self.thumbnails objectAtIndex:index];
-    return thumbnail.thumbnailImage;
+    NFPImageData* imageData = [self.images objectAtIndex:index];
+    return imageData.thumbnail;
 }
 
 -(void)addImage:(UIImage *)image;
 {
     
-    NSUInteger indexOfNewImage = [self.thumbnails count];
-    NFPThumbnail* thumbnail = [[NFPThumbnail alloc] initWithRawImage:image
+    NSUInteger indexOfNewImage = [self.images count];
+    NFPImageData* imageData = [[NFPImageData alloc] initWithImage:image
                                                    atCollectionIndex:indexOfNewImage];
     
     //Add self as observer to know when the operation has completed
-    [thumbnail addObserver:self forKeyPath:kKeyPath
+    [imageData addObserver:self forKeyPath:kKeyPath
                    options:NSKeyValueObservingOptionOld
                    context:nil];
-    thumbnail.observer = self;
-    thumbnail.keyPath = kKeyPath;
+    imageData.observer = self;
+    imageData.keyPath = kKeyPath;
     
-    [self.thumbnails addObject:thumbnail];
-    [self startThumbnailGeneration:thumbnail];
+    [self.images addObject:imageData];
+    [self startThumbnailGeneration:imageData];
 }
 
 #pragma  mark - KVO Observer
@@ -83,17 +83,17 @@ static NSString* kKeyPath = @"hasThumbnail";
                        change:(NSDictionary *)change
                       context:(void *)context
 {
-    NSParameterAssert([object isKindOfClass:[NFPThumbnail class]]);
-    NFPThumbnail* thumbnail = (NFPThumbnail*)object;
+    NSParameterAssert([object isKindOfClass:[NFPImageData class]]);
+    NFPImageData* imageData = (NFPImageData*)object;
     
     BOOL oldValue = [[change objectForKey:NSKeyValueChangeOldKey] boolValue];
-    BOOL newValue = thumbnail.hasThumbnail;
+    BOOL newValue = imageData.hasThumbnail;
     
     // Responsibility of this class to call the delegate on the main queue
     // protect against debugging actions when the hasThumbnail is reset to NO
     if (oldValue == NO && newValue == YES){
         dispatch_async(dispatch_get_main_queue(), ^{
-            [self.delegate didGenerateThumbnailAtIndex:thumbnail.index];
+            [self.delegate didGenerateThumbnailAtIndex:imageData.index];
         });
     }
 }
@@ -101,19 +101,19 @@ static NSString* kKeyPath = @"hasThumbnail";
 #pragma mark - Helper functions
 -(NSUInteger)count;
 {
-    return [self.thumbnails count];
+    return [self.images count];
 }
 
--(void)startThumbnailGeneration:(NFPThumbnail*)thumbnail;
+-(void)startThumbnailGeneration:(NFPImageData*)imageData;
 {
     // Responsibility of this class to call the delegate on the main queue
     dispatch_async(dispatch_get_main_queue(), ^{
-        [self.delegate willGenerateThumbnailAtIndex:thumbnail.index];
+        [self.delegate willGenerateThumbnailAtIndex:imageData.index];
     });
     
     //Initiate and start NSOperation
     NFPThumbnailOperation* operation =
-    [[NFPThumbnailOperation alloc] initWithNFPThumbnail:thumbnail];
+    [[NFPThumbnailOperation alloc] initWithNFPImageData:imageData];
     [self.thumbnailGeneratorQueue addOperation:operation];
     
 }
@@ -122,20 +122,20 @@ static NSString* kKeyPath = @"hasThumbnail";
 -(void) performRegenerationOfAllThumbnails;
 {
     //first reset all images
-    for (NFPThumbnail* thumbnail in self.thumbnails) {
-        thumbnail.hasThumbnail = NO;
-        thumbnail.thumbnailImage = nil;
+    for (NFPImageData* imageData in self.images) {
+        imageData.hasThumbnail = NO;
+        imageData.thumbnail = nil;
     }
     
     //then add start the generation process
-    for (NFPThumbnail* thumbnail in self.thumbnails){
-        [self startThumbnailGeneration:thumbnail];
+    for (NFPImageData* imageData in self.images){
+        [self startThumbnailGeneration:imageData];
     }
 }
 
 -(void)clearAllThumbnails;
 {
-    [self.thumbnails removeAllObjects];
+    [self.images removeAllObjects];
     dispatch_async(dispatch_get_main_queue(), ^{
         [self.delegate didClearAllThumbnails];
     });

@@ -9,8 +9,8 @@
 #import <Foundation/Foundation.h>
 #import <UIKit/UIKit.h>
 
-#import "NFPThumbnail.h"
+#import "NFPImageData.h"
 
 @interface NFPThumbnailOperation : NSOperation
--(instancetype)initWithNFPThumbnail:(NFPThumbnail*) thumbnail  NS_DESIGNATED_INITIALIZER;
+-(instancetype)initWithNFPImageData:(NFPImageData*)imageData  NS_DESIGNATED_INITIALIZER;
 @end

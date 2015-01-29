@@ -1,5 +1,5 @@
 //
-//  NFPImageItem.m
+//  NFPImageData.m
 //  NoFilter
 //
 //  Created by Ancil on 1/24/15.
@@ -7,18 +7,18 @@
 //
 
 #import <Foundation/Foundation.h>
-#import "NFPThumbnail.h"
+#import "NFPImageData.h"
 
-@implementation NFPThumbnail
+@implementation NFPImageData
 
--(instancetype) initWithRawImage:(UIImage*)image
+-(instancetype) initWithImage:(UIImage*)image
                atCollectionIndex:(NSUInteger)index;
 {
     self = [super init];
     if (self) {
-        _rawImage = image;
+        _image = image;
         _index = index;
-        _thumbnailImage = nil;
+        _thumbnail = nil;
         _hasThumbnail = NO;
         _observer = nil;
         _keyPath = nil;

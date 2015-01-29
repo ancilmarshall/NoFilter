@@ -6,21 +6,21 @@
 //  Copyright (c) 2015 Ancil Marshall. All rights reserved.
 //
 
-#import "NFPThumbnail.h"
+#import "NFPImageData.h"
 #import "NFPThumbnailOperation.h"
 #import "UIImage+NFExtensions.h"
 
 @interface NFPThumbnailOperation()
-@property (nonatomic,strong) NFPThumbnail* thumbnail;
+@property (nonatomic,strong) NFPImageData* imageData;
 @end
 
 @implementation NFPThumbnailOperation
 
--(instancetype)initWithNFPThumbnail:(NFPThumbnail*) thumbnail;
+-(instancetype)initWithNFPImageData:(NFPImageData*)imageData;
 {
     self = [super init];
     if (self){
-        _thumbnail = thumbnail;
+        _imageData = imageData;
         __weak NFPThumbnailOperation* weak_self = self;
         [self setCompletionBlock:^{
             [weak_self operationComplete];
@@ -36,8 +36,8 @@
     if (self.isCancelled)
         return;
     
-    self.thumbnail.thumbnailImage =
-        [self.thumbnail.rawImage
+    self.imageData.thumbnail =
+        [self.imageData.image
             scaledImageConstrainedToSize:CGSizeMake(100.0, 100.0)];
     
 }
@@ -50,6 +50,6 @@
     
     //This boolean can be used to trigger an event notification to indicate that
     // the operation has been completed
-    self.thumbnail.hasThumbnail = YES;
+    self.imageData.hasThumbnail = YES;
 }
 @end

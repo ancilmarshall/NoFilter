@@ -1,5 +1,5 @@
 //
-//  NFPImageItem.h
+//  NFPImageData.h
 //  NoFilter
 //
 //  Created by Ancil on 1/24/15.
@@ -9,14 +9,14 @@
 #import <Foundation/Foundation.h>
 #import <UIKit/UIKit.h>
 
-@interface NFPThumbnail : NSObject
-@property (nonatomic,strong) UIImage* rawImage;
-@property (nonatomic,strong) UIImage* thumbnailImage;
+@interface NFPImageData : NSObject
+@property (nonatomic,strong) UIImage* image;
+@property (nonatomic,strong) UIImage* thumbnail;
 @property (nonatomic,assign) NSUInteger index;
 @property (nonatomic,assign) BOOL hasThumbnail;
 @property (nonatomic,weak) id observer;
 @property (nonatomic,strong) NSString* keyPath;
 
--(instancetype) initWithRawImage:(UIImage*)image
+-(instancetype) initWithImage:(UIImage*)image
                atCollectionIndex:(NSUInteger)index NS_DESIGNATED_INITIALIZER;
 @end

@@ -85,12 +85,12 @@ static NSString * const kDebugSegueIdentifier = @"debugSegue";
     activityIndicatorView.translatesAutoresizingMaskIntoConstraints = NO;
     
     // Get thumbnail image based on indexPath
-    UIImage* thumbnailImage = [self.thumbnailgenerator
+    UIImage* thumbnail = [self.thumbnailgenerator
                                thumbnailAtIndex:indexPath.item];
     
     // If the thumnail is nil, then the thumbnailGenerator is not yet finished
     // with processing the raw image. Thus start the activity view animation
-    if (nil == thumbnailImage){
+    if (nil == thumbnail){
         [cell.contentView addSubview:activityIndicatorView];
         
         // Perform auto-layout constraints. Center activityIndicatorView in cell
@@ -117,7 +117,7 @@ static NSString * const kDebugSegueIdentifier = @"debugSegue";
                                       initWithFrame:CGRectMake(0, 0, 100,100)];
         thumbnailView.contentMode = UIViewContentModeScaleAspectFit;
         thumbnailView.clipsToBounds = YES;
-        thumbnailView.image = thumbnailImage;
+        thumbnailView.image = thumbnail;
         cell.contentView.clipsToBounds = YES;
         [cell.contentView addSubview:thumbnailView];
     }
@@ -238,6 +238,7 @@ minimumLineSpacingForSectionAtIndex:(NSInteger)section
     }
 }
 
+//unwind segue
 -(IBAction)debugMe:(UIStoryboardSegue*)segue;
 {
     [self.thumbnailgenerator performRegenerationOfAllThumbnails];
