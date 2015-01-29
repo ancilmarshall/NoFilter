@@ -37,7 +37,7 @@ static NSString * const kDebugSegueIdentifier = @"debugSegue";
             forCellWithReuseIdentifier:reuseIdentifier];
     
     // Set self as observer of AppDelegate's image property
-    [[AppDelegate getDelegate] addObserver:self
+    [[AppDelegate delegate] addObserver:self
                                 forKeyPath:@"image"
                                    options:NSKeyValueObservingOptionNew
                                    context:nil];
@@ -169,6 +169,12 @@ minimumLineSpacingForSectionAtIndex:(NSInteger)section
     // data source's data. (Don't use reloadAtIndexPath)
     NSIndexPath* indexPath = [NSIndexPath indexPathForItem:index inSection:0];
     [self.collectionView insertItemsAtIndexPaths:@[indexPath]];
+}
+
+-(void) willRegenerateThumbnailAtIndex:(NSUInteger)index;
+{
+    NSIndexPath* indexPath = [NSIndexPath indexPathForItem:index inSection:0];
+    [self.collectionView reloadItemsAtIndexPaths:@[indexPath]];
 }
 
 -(void) didClearAllThumbnails;

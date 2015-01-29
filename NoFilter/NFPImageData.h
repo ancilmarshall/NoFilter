@@ -20,3 +20,4 @@
 -(instancetype) initWithImage:(UIImage*)image
                atCollectionIndex:(NSUInteger)index NS_DESIGNATED_INITIALIZER;
 @end
+

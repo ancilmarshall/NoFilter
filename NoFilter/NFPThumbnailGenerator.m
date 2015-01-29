@@ -19,6 +19,11 @@
 
 static NSString* kKeyPath = @"hasThumbnail";
 
+typedef enum {
+    NFPThumbnailGenerationTypeGenerate = 0,
+    NFPThumbnailGenerationTypeRegenerate
+} NFP_THUMBNAIL_GENERATION_TYPE;
+
 #pragma mark - Initialization
 -(instancetype)initWithDelegate:(id<NFPThumbnailGeneratorProtocol>)delegate;
 {
@@ -73,7 +78,8 @@ static NSString* kKeyPath = @"hasThumbnail";
     imageData.keyPath = kKeyPath;
     
     [self.images addObject:imageData];
-    [self startThumbnailGeneration:imageData];
+    [self startThumbnailGeneration:imageData
+                    generationType:NFPThumbnailGenerationTypeGenerate];
 }
 
 #pragma  mark - KVO Observer
@@ -104,16 +110,24 @@ static NSString* kKeyPath = @"hasThumbnail";
     return [self.images count];
 }
 
--(void)startThumbnailGeneration:(NFPImageData*)imageData;
+-(void)startThumbnailGeneration:(NFPImageData*)imageData
+                 generationType:(NFP_THUMBNAIL_GENERATION_TYPE)type;
 {
     // Responsibility of this class to call the delegate on the main queue
-    dispatch_async(dispatch_get_main_queue(), ^{
-        [self.delegate willGenerateThumbnailAtIndex:imageData.index];
-    });
+    if (type == NFPThumbnailGenerationTypeGenerate) {
+        dispatch_async(dispatch_get_main_queue(), ^{
+            [self.delegate willGenerateThumbnailAtIndex:imageData.index];
+        });
+    }
+    else if (type == NFPThumbnailGenerationTypeRegenerate) {
+        dispatch_async(dispatch_get_main_queue(), ^{
+            [self.delegate willRegenerateThumbnailAtIndex:imageData.index];
+        });
+    }
     
     //Initiate and start NSOperation
     NFPThumbnailOperation* operation =
-    [[NFPThumbnailOperation alloc] initWithNFPImageData:imageData];
+        [[NFPThumbnailOperation alloc] initWithNFPImageData:imageData];
     [self.thumbnailGeneratorQueue addOperation:operation];
     
 }
@@ -129,7 +143,8 @@ static NSString* kKeyPath = @"hasThumbnail";
     
     //then add start the generation process
     for (NFPImageData* imageData in self.images){
-        [self startThumbnailGeneration:imageData];
+        [self startThumbnailGeneration:imageData
+                        generationType:NFPThumbnailGenerationTypeRegenerate];
     }
 }
 

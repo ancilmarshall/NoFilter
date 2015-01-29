@@ -135,7 +135,7 @@ minimumLineSpacingForSectionAtIndex:(NSInteger)section
          contentMode:PHImageContentModeAspectFill
          options:options
          resultHandler:^(UIImage *result, NSDictionary *info){
-            [[AppDelegate getDelegate] setUserImage:result];
+            [[AppDelegate delegate] setUserImage:result];
          }];
     
     [self dismissViewControllerAnimated:YES completion:nil];

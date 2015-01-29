@@ -120,7 +120,7 @@ static NSString* const kCellReuseIdentifier = @"addImageTableViewCell";
     //save to the device's photo library and update the UI before dismissing
     if (image != nil) {
         UIImageWriteToSavedPhotosAlbum(image, nil, NULL, NULL);
-        [[AppDelegate getDelegate] setUserImage:image];
+        [[AppDelegate delegate] setUserImage:image];
     }
     
     //dismiss the controller after the image has been updated

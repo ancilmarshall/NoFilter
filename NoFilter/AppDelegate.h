@@ -14,7 +14,7 @@
 
 - (void) setUserImage:(UIImage*)image;
 - (UIImage*) getUserImage;
-+ (AppDelegate*) getDelegate;
++ (AppDelegate*) delegate;
 
 @end
 

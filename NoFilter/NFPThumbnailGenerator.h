@@ -29,6 +29,7 @@
 
 -(void) didGenerateThumbnailAtIndex:(NSUInteger)index;
 -(void) willGenerateThumbnailAtIndex:(NSUInteger)index;
+-(void) willRegenerateThumbnailAtIndex:(NSUInteger)index;
 -(void) didClearAllThumbnails;
 
 @end

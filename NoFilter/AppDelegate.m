@@ -34,8 +34,11 @@
 }
 
 // Helper function to get the application delegate
-+ (AppDelegate*) getDelegate;
++ (AppDelegate*) delegate;
 {
-    return (AppDelegate*)[UIApplication sharedApplication].delegate;
+    id<UIApplicationDelegate> delegate = [[UIApplication sharedApplication] delegate];
+    NSAssert([delegate isKindOfClass:[AppDelegate class]], @"Expected to use our app delegate class");
+    return (AppDelegate *)delegate;
+
 }
 @end
