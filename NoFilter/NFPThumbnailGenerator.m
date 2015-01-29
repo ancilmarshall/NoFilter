@@ -61,9 +61,9 @@ static NSString* kKeyPath = @"hasThumbnail";
 -(void)addImage:(UIImage *)image;
 {
     
-    NSUInteger currentIndex = [self.thumbnails count];
+    NSUInteger indexOfNewImage = [self.thumbnails count];
     NFPThumbnail* thumbnail = [[NFPThumbnail alloc] initWithRawImage:image
-                                                   atCollectionIndex:currentIndex];
+                                                   atCollectionIndex:indexOfNewImage];
     
     //Add self as observer to know when the operation has completed
     [thumbnail addObserver:self forKeyPath:kKeyPath

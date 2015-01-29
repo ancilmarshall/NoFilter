@@ -154,7 +154,6 @@ minimumLineSpacingForSectionAtIndex:(NSInteger)section
     return  0.0f;
 }
 
-
 #pragma mark - NFPThumbnailGeneratorProtocol
 
 -(void)didGenerateThumbnailAtIndex:(NSUInteger)index;
@@ -165,12 +164,11 @@ minimumLineSpacingForSectionAtIndex:(NSInteger)section
 
 -(void) willGenerateThumbnailAtIndex:(NSUInteger)index;
 {
-    //TODO: use the indexPath instead of reloading all cells
-    // sometime this is called, even if the image is nil (from the result
-    // handler in PhotoCollectionViewController didSelectItemAtIndexPath
-    //NSIndexPath* indexPath = [NSIndexPath indexPathForItem:index inSection:0];
-    //[self.collectionView reloadItemsAtIndexPaths:[NSArray arrayWithObject:indexPath]];
-    [self.collectionView reloadData];
+    //NOTE: here need to use the insertItemsAtIndexPaths to make sure that the
+    // count of items in the collection view gets updated and matches the
+    // data source's data. (Don't use reloadAtIndexPath)
+    NSIndexPath* indexPath = [NSIndexPath indexPathForItem:index inSection:0];
+    [self.collectionView insertItemsAtIndexPaths:@[indexPath]];
 }
 
 -(void) didClearAllThumbnails;

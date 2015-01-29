@@ -7,7 +7,6 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		1D42A4301A7A3834004D45C4 /* README.md in Sources */ = {isa = PBXBuildFile; fileRef = 1D42A42F1A7A3834004D45C4 /* README.md */; };
 		1D4622721A69BEA7009C514A /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 1D4622711A69BEA7009C514A /* main.m */; };
 		1D4622751A69BEA7009C514A /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 1D4622741A69BEA7009C514A /* AppDelegate.m */; };
 		1D46227B1A69BEA7009C514A /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 1D4622791A69BEA7009C514A /* Main.storyboard */; };
@@ -36,7 +35,6 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
-		1D42A42F1A7A3834004D45C4 /* README.md */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = "<group>"; };
 		1D46226C1A69BEA7009C514A /* NoFilter.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = NoFilter.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		1D4622701A69BEA7009C514A /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		1D4622711A69BEA7009C514A /* main.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = main.m; sourceTree = "<group>"; };
@@ -89,7 +87,6 @@
 		1D4622631A69BEA7009C514A = {
 			isa = PBXGroup;
 			children = (
-				1D42A42F1A7A3834004D45C4 /* README.md */,
 				1D46226E1A69BEA7009C514A /* NoFilter */,
 				1D4622881A69BEA7009C514A /* NoFilterTests */,
 				1D46226D1A69BEA7009C514A /* Products */,
@@ -284,7 +281,6 @@
 				1DBD52841A73BE8500AAEDAD /* UIImage+NFExtensions.m in Sources */,
 				1DBD52871A73DF3E00AAEDAD /* NFPAddImageTableViewController.m in Sources */,
 				1D4622721A69BEA7009C514A /* main.m in Sources */,
-				1D42A4301A7A3834004D45C4 /* README.md in Sources */,
 				1DBD528D1A741BEF00AAEDAD /* PhotoTableViewController.m in Sources */,
 				1DBD528C1A741BEF00AAEDAD /* PhotoCollectionViewController.m in Sources */,
 				1DBD52781A738E8E00AAEDAD /* NFPCollectionViewController.m in Sources */,
