@@ -50,6 +50,6 @@
     
     //This boolean can be used to trigger an event notification to indicate that
     // the operation has been completed
-    self.imageData.hasThumbnail = YES;
+    self.imageData.hasThumbnail = @YES;
 }
 @end

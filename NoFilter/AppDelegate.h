@@ -7,11 +7,12 @@
 //
 
 #import <UIKit/UIKit.h>
+@class NFPImageManagedObjectContext;
 
 @interface AppDelegate : UIResponder <UIApplicationDelegate>
 
 @property (strong, nonatomic) UIWindow *window;
-
+@property (strong, nonatomic) NFPImageManagedObjectContext* managedObjectContext;
 - (void) setUserImage:(UIImage*)image;
 - (UIImage*) getUserImage;
 + (AppDelegate*) delegate;

@@ -13,7 +13,6 @@
 #import "NFPThumbnailGenerator.h"
 
 @interface NFPCollectionViewController () <NFPThumbnailGeneratorProtocol>
-@property (nonatomic,strong) UIImage* image;
 @property (nonatomic,strong) NFPThumbnailGenerator* thumbnailgenerator;
 @end
 

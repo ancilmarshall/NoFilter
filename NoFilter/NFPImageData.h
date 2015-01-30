@@ -2,22 +2,20 @@
 //  NFPImageData.h
 //  NoFilter
 //
-//  Created by Ancil on 1/24/15.
+//  Created by Ancil on 1/30/15.
 //  Copyright (c) 2015 Ancil Marshall. All rights reserved.
 //
 
 #import <Foundation/Foundation.h>
-#import <UIKit/UIKit.h>
+#import <CoreData/CoreData.h>
 
-@interface NFPImageData : NSObject
-@property (nonatomic,strong) UIImage* image;
-@property (nonatomic,strong) UIImage* thumbnail;
-@property (nonatomic,assign) NSUInteger index;
-@property (nonatomic,assign) BOOL hasThumbnail;
-@property (nonatomic,weak) id observer;
-@property (nonatomic,strong) NSString* keyPath;
 
--(instancetype) initWithImage:(UIImage*)image
-               atCollectionIndex:(NSUInteger)index NS_DESIGNATED_INITIALIZER;
+@interface NFPImageData : NSManagedObject
+
+@property (nonatomic, retain) id image;
+@property (nonatomic, retain) id thumbnail;
+@property (nonatomic, retain) NSNumber * hasThumbnail;
+@property (nonatomic, retain) NSNumber * index;
+@property (nonatomic, retain) NSDate * dateCreated;
+
 @end
-

@@ -7,6 +7,7 @@
 //
 
 #import "AppDelegate.h"
+#import "NFPImageManagedObjectContext.h"
 
 @interface AppDelegate ()
 
@@ -18,11 +19,21 @@
 
 @implementation AppDelegate
 
+#pragma mark - Initialization
+
 - (BOOL)application:(UIApplication *)application
     didFinishLaunchingWithOptions:(NSDictionary *)launchOptions {
+    
+    self.managedObjectContext = [NFPImageManagedObjectContext contextForStoreAtURL:nil];
+    
+    NSError *error = nil;
+    if (![self.managedObjectContext save:&error]) {
+        NSLog(@"Failed to seed random color data: %@", error);
+    }
     return YES;
 }
 
+#pragma mark - userImage Accessor methods
 - (void) setUserImage:(UIImage *)image;
 {
     self.image = image;
@@ -33,7 +44,7 @@
     return self.image;
 }
 
-// Helper function to get the application delegate
+#pragma mark - Shared AppDelegate helper function
 + (AppDelegate*) delegate;
 {
     id<UIApplicationDelegate> delegate = [[UIApplication sharedApplication] delegate];
@@ -41,4 +52,14 @@
     return (AppDelegate *)delegate;
 
 }
+
+# pragma mark - CoreData helper functions
+- (NSURL *)SQLiteStoreURL;
+{
+    NSArray *URLs = [[NSFileManager defaultManager] URLsForDirectory:NSDocumentDirectory inDomains:NSUserDomainMask];
+    NSAssert([URLs count] > 0, @"Expected to find a document URL");
+    NSURL *documentDirectory = URLs[0];
+    return [[documentDirectory URLByAppendingPathComponent:@"tasks"] URLByAppendingPathExtension:@"sqlite"];
+}
+
 @end
