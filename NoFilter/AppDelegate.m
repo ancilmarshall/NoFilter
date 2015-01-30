@@ -24,7 +24,7 @@
 - (BOOL)application:(UIApplication *)application
     didFinishLaunchingWithOptions:(NSDictionary *)launchOptions {
     
-    self.managedObjectContext = [NFPImageManagedObjectContext contextForStoreAtURL:nil];
+    self.managedObjectContext = [NFPImageManagedObjectContext contextForStoreAtURL:[self SQLiteStoreURL]];
     
     NSError *error = nil;
     if (![self.managedObjectContext save:&error]) {

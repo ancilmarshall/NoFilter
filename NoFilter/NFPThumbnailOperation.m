@@ -44,15 +44,14 @@
 
 -(void) operationComplete;
 {
-    NSLog(@"NSOpertion Completed");
     // always check if operation is cancelled
     if (self.isCancelled)
         return;
     
-    //This boolean can be used to trigger an event notification to indicate that
-    // the operation has been completed
-
-    self.imageData.hasThumbnail = @YES;
+    //perform the update on main queue to be recognized immediately by fetchRequestController
+    dispatch_async(dispatch_get_main_queue(), ^{
+        self.imageData.hasThumbnail = @YES;
+    });
     
 }
 @end

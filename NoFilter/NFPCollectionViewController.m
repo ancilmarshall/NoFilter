@@ -171,6 +171,13 @@ minimumLineSpacingForSectionAtIndex:(NSInteger)section
 {
     NSIndexPath* indexPath = [NSIndexPath indexPathForItem:index inSection:0];
     [self.collectionView reloadItemsAtIndexPaths:@[indexPath]];
+    
+}
+
+-(void)didDeleteThumbnailAtIndex:(NSUInteger)index;
+{
+    NSIndexPath* indexPath = [NSIndexPath indexPathForItem:index inSection:0];
+    [self.collectionView deleteItemsAtIndexPaths:@[indexPath]];
 }
 
 -(void) didClearAllThumbnails;

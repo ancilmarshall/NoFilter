@@ -17,19 +17,10 @@
 #import "NFPImageManagedObjectContext.h"
 #import "NFPImageData+NFPExtension.h"
 
-//@interface NFPImageData (NFPExtension)()
-//@property (nonatomic,strong) UIImage* newImage;
-//@property (nonatomic,strong) NSUInteger index;
-//@end
-
 @implementation NFPImageData (NFPExtension)
 
 + (NFPImageData*)initWithImage:(UIImage*)image atCollectionIndex:(NSUInteger)index;
 {
-
-    //Cache data
-//    self.newImage = image;
-//    self.newIndex = index;
     
     NFPImageManagedObjectContext* moc = [[AppDelegate delegate] managedObjectContext];
     NFPImageData* imageData =
@@ -45,18 +36,5 @@
     
     return imageData;
 }
-
-
-//- (void) awakeFromInsert;
-//{
-//    [super awakeFromInsert];
-//    self.image = self.newImage;
-//    self.index = self.newIndex;
-//    self.thumbnail = nil;
-//    self.hasThumbnail = NO;
-//}
-
-
-
 
 @end

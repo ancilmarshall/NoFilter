@@ -31,5 +31,6 @@
 -(void) willGenerateThumbnailAtIndex:(NSUInteger)index;
 -(void) willRegenerateThumbnailAtIndex:(NSUInteger)index;
 -(void) didClearAllThumbnails;
+-(void)didDeleteThumbnailAtIndex:(NSUInteger)index;
 
 @end

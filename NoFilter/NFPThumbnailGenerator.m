@@ -12,7 +12,6 @@
 #import "NFPImageData.h"
 #import "NFPImageData+NFPExtension.h"
 #import "NFPThumbnailOperation.h"
-#import "UIImage+NFExtensions.h"
 
 @interface NFPThumbnailGenerator()  <NSFetchedResultsControllerDelegate>
 @property (nonatomic,strong) NSOperationQueue* thumbnailGeneratorQueue;
@@ -21,8 +20,6 @@
 @end
 
 @implementation NFPThumbnailGenerator
-
-static NSString* kKeyPath = @"hasThumbnail";
 
 typedef enum {
     NFPThumbnailGenerationTypeGenerate = 0,
@@ -91,42 +88,15 @@ typedef enum {
     NFPImageData* imageData = [NFPImageData initWithImage:image
                                         atCollectionIndex:indexOfNewImage];
     
-    [imageData addObserver:self
-                forKeyPath:kKeyPath
-                   options:NSKeyValueObservingOptionOld
-                   context:nil];
-
     // Start the thumbnail generation by adding to background queue
     [self startThumbnailGeneration:imageData
                     generationType:NFPThumbnailGenerationTypeGenerate];
 }
 
-#pragma  mark - KVO Observer
-
--(void)observeValueForKeyPath:(NSString *)keyPath
-                     ofObject:(id)object
-                       change:(NSDictionary *)change
-                      context:(void *)context
-{
-    NSParameterAssert([object isKindOfClass:[NFPImageData class]]);
-    NFPImageData* imageData = (NFPImageData*)object;
-    
-    BOOL oldValue = [[change objectForKey:NSKeyValueChangeOldKey] boolValue];
-    BOOL newValue = imageData.hasThumbnail;
-    
-    // Responsibility of this class to call the delegate on the main queue
-    // protect against debugging actions when the hasThumbnail is reset to NO
-    if (oldValue == NO && newValue == YES){
-        dispatch_async(dispatch_get_main_queue(), ^{
-            [self.delegate didGenerateThumbnailAtIndex:[imageData.index intValue]];
-        });
-    }
-}
 #pragma mark - NSFetchedResultsControllerDelegate
 
 -(void) controllerWillChangeContent:(NSFetchedResultsController *)controller;
 {
-    NSLog(@"Will Change Content");
 }
 
 - (void)controller:(NSFetchedResultsController *)controller
@@ -136,17 +106,18 @@ typedef enum {
                               newIndexPath:(NSIndexPath *)newIndexPath;
 {
     if (type ==  NSFetchedResultsChangeInsert){
-        NSLog(@"Insert Recognized");
         dispatch_async(dispatch_get_main_queue(), ^{
             [self.delegate willGenerateThumbnailAtIndex:newIndexPath.row];
         });
         //[self.batchUpdatesInsertArray addObject:newIndexPath];
     }
     else if (type == NSFetchedResultsChangeDelete){
+        dispatch_async(dispatch_get_main_queue(), ^{
+            [self.delegate didDeleteThumbnailAtIndex:indexPath.row];
+        });
         //[self.batchUpdatesDeleteArray addObject:indexPath];
     }
     else if (type == NSFetchedResultsChangeUpdate){
-        NSLog(@"Change Recognized");
         dispatch_async(dispatch_get_main_queue(), ^{
             [self.delegate didGenerateThumbnailAtIndex:indexPath.row];
         });
@@ -158,16 +129,15 @@ typedef enum {
     
 }
 
-
-
 -(void) controllerDidChangeContent:(NSFetchedResultsController *)controller;
 {
-    NSLog(@"Did Change Content");
+    NSError* error = nil;
+    NFPImageManagedObjectContext* moc = [[AppDelegate delegate] managedObjectContext];
+    [moc save:&error];
 }
 
-
-
 #pragma mark - Helper functions
+
 -(NSUInteger)count;
 {
     return [[self.fetchedResultsController sections][0] numberOfObjects] ;
@@ -176,21 +146,6 @@ typedef enum {
 -(void)startThumbnailGeneration:(NFPImageData*)imageData
                  generationType:(NFP_THUMBNAIL_GENERATION_TYPE)type;
 {
-    // Responsibility of this class to call the delegate on the main queue
-    
-    // Let delegate know that I am about to start the generation of the thumbnail
-    // Delegate will most likely reload/insert/update/delete it's collection or table view data
-    
-//    if (type == NFPThumbnailGenerationTypeGenerate) {
-//        dispatch_async(dispatch_get_main_queue(), ^{
-//            [self.delegate willGenerateThumbnailAtIndex:[imageData.index intValue]];
-//        });
-//    }
-//    else if (type == NFPThumbnailGenerationTypeRegenerate) {
-//        dispatch_async(dispatch_get_main_queue(), ^{
-//            [self.delegate willRegenerateThumbnailAtIndex:[imageData.index intValue]];
-//        });
-//    }
     
     //Initiate and start NSOperation
     NFPThumbnailOperation* operation =
@@ -215,21 +170,28 @@ typedef enum {
         imageData.hasThumbnail = @NO;
         imageData.thumbnail = nil;
     }
-//
-//    //then add start the generation process
-//    for (NFPImageData* imageData in self.images){
-//        [self startThumbnailGeneration:imageData
-//                        generationType:NFPThumbnailGenerationTypeRegenerate];
-//    }
+
+    //then add start the generation process
+    for (NFPImageData* imageData in images){
+        [self startThumbnailGeneration:imageData
+                        generationType:NFPThumbnailGenerationTypeRegenerate];
+    }
 }
 
 -(void)clearAllThumbnails;
 {
-//    [self.images removeAllObjects];
-//    dispatch_async(dispatch_get_main_queue(), ^{
-//        [self.delegate didClearAllThumbnails];
-//    });
-//    
+    
+    NSError *error = nil;
+    if (![self.fetchedResultsController performFetch:&error]) {
+        NSLog(@"Failed to perform initial fetch: %@", error);
+    }
+    
+    NSArray* images = self.fetchedResultsController.fetchedObjects;
+    NFPImageManagedObjectContext *moc = [[AppDelegate delegate] managedObjectContext];
+    for (NFPImageData* imageData in images) {
+        [moc deleteObject:imageData];
+    }
+
 }
 
 
