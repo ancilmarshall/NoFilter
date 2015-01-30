@@ -12,6 +12,7 @@
 #import "NFPImageData.h"
 #import "NFPImageData+NFPExtension.h"
 #import "NFPThumbnailOperation.h"
+#import "UIImage+NFExtensions.h"
 
 @interface NFPThumbnailGenerator()  <NSFetchedResultsControllerDelegate>
 @property (nonatomic,strong) NSOperationQueue* thumbnailGeneratorQueue;
@@ -89,11 +90,12 @@ typedef enum {
     NSUInteger indexOfNewImage = [self count];
     NFPImageData* imageData = [NFPImageData initWithImage:image
                                         atCollectionIndex:indexOfNewImage];
-    //Add self as observer to know when the operation has completed
-//    [imageData addObserver:self forKeyPath:kKeyPath
-//                   options:NSKeyValueObservingOptionOld
-//                   context:nil];
     
+    [imageData addObserver:self
+                forKeyPath:kKeyPath
+                   options:NSKeyValueObservingOptionOld
+                   context:nil];
+
     // Start the thumbnail generation by adding to background queue
     [self startThumbnailGeneration:imageData
                     generationType:NFPThumbnailGenerationTypeGenerate];
@@ -101,30 +103,30 @@ typedef enum {
 
 #pragma  mark - KVO Observer
 
-//-(void)observeValueForKeyPath:(NSString *)keyPath
-//                     ofObject:(id)object
-//                       change:(NSDictionary *)change
-//                      context:(void *)context
-//{
-//    NSParameterAssert([object isKindOfClass:[NFPImageData class]]);
-//    NFPImageData* imageData = (NFPImageData*)object;
-//    
-//    BOOL oldValue = [[change objectForKey:NSKeyValueChangeOldKey] boolValue];
-//    BOOL newValue = imageData.hasThumbnail;
-//    
-//    // Responsibility of this class to call the delegate on the main queue
-//    // protect against debugging actions when the hasThumbnail is reset to NO
-//    if (oldValue == NO && newValue == YES){
-//        dispatch_async(dispatch_get_main_queue(), ^{
-//            [self.delegate didGenerateThumbnailAtIndex:[imageData.index intValue]];
-//        });
-//    }
-//}
+-(void)observeValueForKeyPath:(NSString *)keyPath
+                     ofObject:(id)object
+                       change:(NSDictionary *)change
+                      context:(void *)context
+{
+    NSParameterAssert([object isKindOfClass:[NFPImageData class]]);
+    NFPImageData* imageData = (NFPImageData*)object;
+    
+    BOOL oldValue = [[change objectForKey:NSKeyValueChangeOldKey] boolValue];
+    BOOL newValue = imageData.hasThumbnail;
+    
+    // Responsibility of this class to call the delegate on the main queue
+    // protect against debugging actions when the hasThumbnail is reset to NO
+    if (oldValue == NO && newValue == YES){
+        dispatch_async(dispatch_get_main_queue(), ^{
+            [self.delegate didGenerateThumbnailAtIndex:[imageData.index intValue]];
+        });
+    }
+}
 #pragma mark - NSFetchedResultsControllerDelegate
 
 -(void) controllerWillChangeContent:(NSFetchedResultsController *)controller;
 {
-    
+    NSLog(@"Will Change Content");
 }
 
 - (void)controller:(NSFetchedResultsController *)controller
@@ -133,29 +135,25 @@ typedef enum {
                              forChangeType:(NSFetchedResultsChangeType)type
                               newIndexPath:(NSIndexPath *)newIndexPath;
 {
-    
-    switch (type) {
-        case NSFetchedResultsChangeInsert:
+    if (type ==  NSFetchedResultsChangeInsert){
+        NSLog(@"Insert Recognized");
+        dispatch_async(dispatch_get_main_queue(), ^{
             [self.delegate willGenerateThumbnailAtIndex:newIndexPath.row];
-            //TODO row or item?
-            //TODO: dispatch_async?
-            
-//            [self.batchUpdatesInsertArray addObject:newIndexPath];
-            break;
-            
-        case NSFetchedResultsChangeDelete:
-//            [self.batchUpdatesDeleteArray addObject:indexPath];
-            break;
-            
-        case NSFetchedResultsChangeUpdate:
+        });
+        //[self.batchUpdatesInsertArray addObject:newIndexPath];
+    }
+    else if (type == NSFetchedResultsChangeDelete){
+        //[self.batchUpdatesDeleteArray addObject:indexPath];
+    }
+    else if (type == NSFetchedResultsChangeUpdate){
+        NSLog(@"Change Recognized");
+        dispatch_async(dispatch_get_main_queue(), ^{
             [self.delegate didGenerateThumbnailAtIndex:indexPath.row];
-            
-//            [self.batchUpdatesUpdateArray addObject:indexPath];
-            break;
-            
-        default:
-            NSLog(@"Shouldn't be here ... probably a problem");
-            break;
+        });
+        //[self.batchUpdatesUpdateArray addObject:indexPath];
+    }
+    else{
+        NSLog(@"Shouldn't be here ... probably a problem");
     }
     
 }
@@ -164,7 +162,7 @@ typedef enum {
 
 -(void) controllerDidChangeContent:(NSFetchedResultsController *)controller;
 {
-    
+    NSLog(@"Did Change Content");
 }
 
 
@@ -198,7 +196,7 @@ typedef enum {
     NFPThumbnailOperation* operation =
         [[NFPThumbnailOperation alloc] initWithNFPImageData:imageData];
     [self.thumbnailGeneratorQueue addOperation:operation];
-    
+ 
 }
 
 #pragma mark - Debugging methods

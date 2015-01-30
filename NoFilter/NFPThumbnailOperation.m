@@ -31,7 +31,7 @@
 
 // perform the time intensive tasks here
 -(void) main;
-{
+{    
     // always check if operation is cancelled
     if (self.isCancelled)
         return;
@@ -44,12 +44,15 @@
 
 -(void) operationComplete;
 {
+    NSLog(@"NSOpertion Completed");
     // always check if operation is cancelled
     if (self.isCancelled)
         return;
     
     //This boolean can be used to trigger an event notification to indicate that
     // the operation has been completed
+
     self.imageData.hasThumbnail = @YES;
+    
 }
 @end

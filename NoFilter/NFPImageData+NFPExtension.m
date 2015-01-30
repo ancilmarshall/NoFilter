@@ -6,6 +6,13 @@
 //  Copyright (c) 2015 Ancil Marshall. All rights reserved.
 //
 
+
+/*                              NOTE
+ Adding this category is a neat trick to add methods to the managed core data
+ model object and keep these methods available when this model attributes, etc
+ are changed and re-compiled
+ */
+
 #import "AppDelegate.h"
 #import "NFPImageManagedObjectContext.h"
 #import "NFPImageData+NFPExtension.h"
