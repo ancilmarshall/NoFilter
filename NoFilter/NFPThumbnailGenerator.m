@@ -12,11 +12,13 @@
 #import "NFPImageData.h"
 #import "NFPImageData+NFPExtension.h"
 #import "NFPThumbnailOperation.h"
+#import "BatchUpdateManager.h"
 
 @interface NFPThumbnailGenerator()  <NSFetchedResultsControllerDelegate>
 @property (nonatomic,strong) NSOperationQueue* thumbnailGeneratorQueue;
 @property (nonatomic,strong) NSFetchedResultsController* fetchedResultsController;
 @property (nonatomic,strong) NSFetchRequest* fetchRequest;
+@property (nonatomic,strong) BatchUpdateManager* batchUpdateManager;
 @end
 
 @implementation NFPThumbnailGenerator
@@ -63,6 +65,14 @@
     return _thumbnailGeneratorQueue;
 }
 
+-(BatchUpdateManager*)batchUpdateManager;
+{
+    if (!_batchUpdateManager){
+        _batchUpdateManager = [BatchUpdateManager new];
+    }
+    return _batchUpdateManager;
+}
+
 #pragma mark - Accessor methods
 -(UIImage*)thumbnailAtIndex:(NSUInteger)index;
 {
@@ -102,15 +112,15 @@
 
     switch (type) {
         case NSFetchedResultsChangeInsert:
-            [self.delegate willGenerateThumbnailAtIndex:newIndexPath.row];
+            [self.batchUpdateManager.insertArray addObject:newIndexPath];
             break;
             
         case NSFetchedResultsChangeDelete:
-            [self.delegate didDeleteThumbnailAtIndex:indexPath.row];
+            [self.batchUpdateManager.deleteArray addObject:indexPath];
             break;
             
         case NSFetchedResultsChangeUpdate:
-            [self.delegate didGenerateThumbnailAtIndex:indexPath.row];
+            [self.batchUpdateManager.updateArray addObject:indexPath];
             break;
             
         default:
@@ -121,7 +131,14 @@
 
 -(void) controllerDidChangeContent:(NSFetchedResultsController *)controller;
 {
+    [self.delegate performBatchUpdatesForManager:self.batchUpdateManager];
+    self.batchUpdateManager = nil;
     
+    NSError* error = nil;
+    NFPImageManagedObjectContext* moc = [[AppDelegate delegate] managedObjectContext];
+    if (![moc save:&error]){
+        NSLog(@"Error saving core data object %@",[error localizedDescription]);
+    }
 }
 
 #pragma mark - Helper functions

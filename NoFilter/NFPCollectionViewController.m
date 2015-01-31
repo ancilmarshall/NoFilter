@@ -11,6 +11,7 @@
 #import "NFPAddImageTableViewController.h"
 #import "NFPCollectionViewController.h"
 #import "NFPThumbnailGenerator.h"
+#import "BatchUpdateManager.h"
 
 @interface NFPCollectionViewController () <NFPThumbnailGeneratorProtocol>
 @property (nonatomic,strong) NFPThumbnailGenerator* thumbnailgenerator;
@@ -152,38 +153,22 @@ minimumLineSpacingForSectionAtIndex:(NSInteger)section
 
 #pragma mark - NFPThumbnailGeneratorProtocol
 
--(void)didGenerateThumbnailAtIndex:(NSUInteger)index;
+-(void) performBatchUpdatesForManager:(BatchUpdateManager*)manager;
 {
-    NSIndexPath* indexPath = [NSIndexPath indexPathForItem:index inSection:0];
-    [self.collectionView reloadItemsAtIndexPaths:[NSArray arrayWithObject:indexPath]];
-}
-
--(void) willGenerateThumbnailAtIndex:(NSUInteger)index;
-{
-    //NOTE: here need to use the insertItemsAtIndexPaths to make sure that the
-    // count of items in the collection view gets updated and matches the
-    // data source's data. (Don't use reloadAtIndexPath)
-    NSIndexPath* indexPath = [NSIndexPath indexPathForItem:index inSection:0];
-    [self.collectionView insertItemsAtIndexPaths:@[indexPath]];
-}
-
--(void) willRegenerateThumbnailAtIndex:(NSUInteger)index;
-{
-    NSIndexPath* indexPath = [NSIndexPath indexPathForItem:index inSection:0];
-    [self.collectionView reloadItemsAtIndexPaths:@[indexPath]];
+    [self.collectionView performBatchUpdates:^{
+        for (NSIndexPath* path in manager.insertArray){
+            [self.collectionView insertItemsAtIndexPaths:@[path]];
+        }
+        for (NSIndexPath* path in manager.deleteArray){
+            [self.collectionView deleteItemsAtIndexPaths:@[path]];
+        }
+        for (NSIndexPath* path in manager.updateArray){
+            [self.collectionView reloadItemsAtIndexPaths:@[path]];
+        }
+    } completion:nil];
     
 }
 
--(void)didDeleteThumbnailAtIndex:(NSUInteger)index;
-{
-    NSIndexPath* indexPath = [NSIndexPath indexPathForItem:index inSection:0];
-    [self.collectionView deleteItemsAtIndexPaths:@[indexPath]];
-}
-
--(void) didClearAllThumbnails;
-{
-    [self.collectionView reloadData];
-}
 
 #pragma mark - Add Bar Button Item
 

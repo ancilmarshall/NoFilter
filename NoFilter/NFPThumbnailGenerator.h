@@ -8,7 +8,7 @@
 
 #import <Foundation/Foundation.h>
 #import <UIKit/UIKit.h>
-
+@class BatchUpdateManager;
 @protocol NFPThumbnailGeneratorProtocol;
 
 @interface NFPThumbnailGenerator : NSObject
@@ -27,10 +27,6 @@
 
 @protocol NFPThumbnailGeneratorProtocol <NSObject>
 
--(void) didGenerateThumbnailAtIndex:(NSUInteger)index;
--(void) willGenerateThumbnailAtIndex:(NSUInteger)index;
--(void) willRegenerateThumbnailAtIndex:(NSUInteger)index;
--(void) didClearAllThumbnails;
--(void)didDeleteThumbnailAtIndex:(NSUInteger)index;
+-(void) performBatchUpdatesForManager:(BatchUpdateManager*)manager;
 
 @end
