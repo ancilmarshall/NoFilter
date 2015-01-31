@@ -21,11 +21,6 @@
 
 @implementation NFPThumbnailGenerator
 
-typedef enum {
-    NFPThumbnailGenerationTypeGenerate = 0,
-    NFPThumbnailGenerationTypeRegenerate
-} NFP_THUMBNAIL_GENERATION_TYPE;
-
 #pragma mark - Initialization
 -(instancetype)initWithDelegate:(id<NFPThumbnailGeneratorProtocol>)delegate;
 {
@@ -89,8 +84,7 @@ typedef enum {
                                         atCollectionIndex:indexOfNewImage];
     
     // Start the thumbnail generation by adding to background queue
-    [self startThumbnailGeneration:imageData
-                    generationType:NFPThumbnailGenerationTypeGenerate];
+    [self startThumbnailGeneration:imageData];
 }
 
 #pragma mark - NSFetchedResultsControllerDelegate
@@ -127,6 +121,7 @@ typedef enum {
 
 -(void) controllerDidChangeContent:(NSFetchedResultsController *)controller;
 {
+    
 }
 
 #pragma mark - Helper functions
@@ -136,10 +131,8 @@ typedef enum {
     return [[self.fetchedResultsController sections][0] numberOfObjects] ;
 }
 
--(void)startThumbnailGeneration:(NFPImageData*)imageData
-                 generationType:(NFP_THUMBNAIL_GENERATION_TYPE)type;
+-(void)startThumbnailGeneration:(NFPImageData*)imageData;
 {
-    
     //Initiate and start NSOperation
     NFPThumbnailOperation* operation =
         [[NFPThumbnailOperation alloc] initWithNFPImageData:imageData];
@@ -166,8 +159,7 @@ typedef enum {
 
     //then add start the generation process
     for (NFPImageData* imageData in images){
-        [self startThumbnailGeneration:imageData
-                        generationType:NFPThumbnailGenerationTypeRegenerate];
+        [self startThumbnailGeneration:imageData];
     }
 }
 
