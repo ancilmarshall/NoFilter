@@ -55,14 +55,8 @@
     //queue ( NSMainQueueConcurrencyType )
     dispatch_async(dispatch_get_main_queue(), ^{
         self.imageData.hasThumbnail = @YES;
-        
-        NSError* error = nil;
-        NFPImageManagedObjectContext* moc = [[AppDelegate delegate] managedObjectContext];
-        if (![moc save:&error]){
-            NSLog(@"Error saving core data object %@",[error localizedDescription]);
-        }
-
     });
+    
     
 }
 @end

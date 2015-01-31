@@ -131,13 +131,18 @@
 
 -(void) controllerDidChangeContent:(NSFetchedResultsController *)controller;
 {
-    [self.delegate performBatchUpdatesForManager:self.batchUpdateManager];
-    self.batchUpdateManager = nil;
-    
-    NSError* error = nil;
-    NFPImageManagedObjectContext* moc = [[AppDelegate delegate] managedObjectContext];
-    if (![moc save:&error]){
-        NSLog(@"Error saving core data object %@",[error localizedDescription]);
+    if (self.batchUpdateManager != nil){
+        [self.delegate performBatchUpdatesForManager:self.batchUpdateManager];
+        
+        if ([self allThumbnailsSet]){
+            NSError* error = nil;
+            NFPImageManagedObjectContext* moc = [[AppDelegate delegate] managedObjectContext];
+            if (![moc save:&error]){
+                NSLog(@"Error saving CoreData context, msg: %@",[error localizedDescription]);
+            }
+        }
+
+        self.batchUpdateManager = nil;
     }
 }
 
@@ -157,24 +162,39 @@
  
 }
 
+-(NSArray*)allImages;
+{
+    NSError *error = nil;
+    if (![self.fetchedResultsController performFetch:&error]) {
+        NSLog(@"Failed to perform fetch: %@", error);
+    }
+    
+    return self.fetchedResultsController.fetchedObjects;
+}
+
+-(BOOL)allThumbnailsSet;
+{
+    BOOL result = YES;
+    for (NFPImageData* imageData in [self allImages]){
+        if ( imageData.thumbnail == nil ){
+            result = NO;
+            break;
+        }
+    }
+    return result;
+}
+
 #pragma mark - Debugging methods
 -(void) performRegenerationOfAllThumbnails;
 {
-    
-    NSError *error = nil;
-    if (![self.fetchedResultsController performFetch:&error]) {
-        NSLog(@"Failed to perform initial fetch: %@", error);
-    }
-    
-    NSArray* images = self.fetchedResultsController.fetchedObjects;
-    
+    NSArray* images = [self allImages];
     //first reset all images
     for (NFPImageData* imageData in images) {
         imageData.hasThumbnail = @NO;
         imageData.thumbnail = nil;
     }
 
-    //then add start the generation process
+    //then start the thumbnail generation process
     for (NFPImageData* imageData in images){
         [self startThumbnailGeneration:imageData];
     }
@@ -182,19 +202,12 @@
 
 -(void)clearAllThumbnails;
 {
-    
-    NSError *error = nil;
-    if (![self.fetchedResultsController performFetch:&error]) {
-        NSLog(@"Failed to perform initial fetch: %@", error);
-    }
-    
-    NSArray* images = self.fetchedResultsController.fetchedObjects;
     NFPImageManagedObjectContext *moc = [[AppDelegate delegate] managedObjectContext];
-    for (NFPImageData* imageData in images) {
+    for (NFPImageData* imageData in [self allImages]) {
         [moc deleteObject:imageData];
     }
-
 }
+
 
 
 
