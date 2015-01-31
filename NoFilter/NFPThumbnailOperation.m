@@ -6,8 +6,10 @@
 //  Copyright (c) 2015 Ancil Marshall. All rights reserved.
 //
 
+#import "AppDelegate.h"
 #import "NFPImageData.h"
 #import "NFPThumbnailOperation.h"
+#import "NFPImageManagedObjectContext.h"
 #import "UIImage+NFExtensions.h"
 
 @interface NFPThumbnailOperation()
@@ -47,10 +49,19 @@
     // always check if operation is cancelled
     if (self.isCancelled)
         return;
-    
-    //perform the update on main queue to be recognized immediately by fetchRequestController
+        
+    //NOTE: perform the update on main queue to be recognized immediately by
+    //fetchRequestController since its ManagedObjectContext is on the main
+    //queue ( NSMainQueueConcurrencyType )
     dispatch_async(dispatch_get_main_queue(), ^{
         self.imageData.hasThumbnail = @YES;
+        
+        NSError* error = nil;
+        NFPImageManagedObjectContext* moc = [[AppDelegate delegate] managedObjectContext];
+        if (![moc save:&error]){
+            NSLog(@"Error saving core data object %@",[error localizedDescription]);
+        }
+
     });
     
 }

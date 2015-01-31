@@ -105,35 +105,28 @@ typedef enum {
                              forChangeType:(NSFetchedResultsChangeType)type
                               newIndexPath:(NSIndexPath *)newIndexPath;
 {
-    if (type ==  NSFetchedResultsChangeInsert){
-        dispatch_async(dispatch_get_main_queue(), ^{
+
+    switch (type) {
+        case NSFetchedResultsChangeInsert:
             [self.delegate willGenerateThumbnailAtIndex:newIndexPath.row];
-        });
-        //[self.batchUpdatesInsertArray addObject:newIndexPath];
-    }
-    else if (type == NSFetchedResultsChangeDelete){
-        dispatch_async(dispatch_get_main_queue(), ^{
+            break;
+            
+        case NSFetchedResultsChangeDelete:
             [self.delegate didDeleteThumbnailAtIndex:indexPath.row];
-        });
-        //[self.batchUpdatesDeleteArray addObject:indexPath];
-    }
-    else if (type == NSFetchedResultsChangeUpdate){
-        dispatch_async(dispatch_get_main_queue(), ^{
+            break;
+            
+        case NSFetchedResultsChangeUpdate:
             [self.delegate didGenerateThumbnailAtIndex:indexPath.row];
-        });
-        //[self.batchUpdatesUpdateArray addObject:indexPath];
+            break;
+            
+        default:
+            NSLog(@"Shouldn't be here ... probably a problem");
+            break;
     }
-    else{
-        NSLog(@"Shouldn't be here ... probably a problem");
-    }
-    
 }
 
 -(void) controllerDidChangeContent:(NSFetchedResultsController *)controller;
 {
-    NSError* error = nil;
-    NFPImageManagedObjectContext* moc = [[AppDelegate delegate] managedObjectContext];
-    [moc save:&error];
 }
 
 #pragma mark - Helper functions
