@@ -19,7 +19,7 @@
 
 @implementation NFPImageData (NFPExtension)
 
-+ (NFPImageData*)initWithImage:(UIImage*)image atCollectionIndex:(NSUInteger)index;
++ (NFPImageData*)addImage:(UIImage*)image;
 {
     
     NFPImageManagedObjectContext* moc = [[AppDelegate delegate] managedObjectContext];
@@ -29,7 +29,6 @@
          inManagedObjectContext:moc];
     
     imageData.image = image;
-    imageData.index = @(index);
     imageData.thumbnail = nil;
     imageData.hasThumbnail = @(NO);
     imageData.dateCreated = [NSDate date];

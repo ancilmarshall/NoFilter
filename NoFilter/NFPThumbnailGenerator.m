@@ -89,9 +89,7 @@
 -(void)addImage:(UIImage *)image;
 {
     
-    NSUInteger indexOfNewImage = [self count];
-    NFPImageData* imageData = [NFPImageData initWithImage:image
-                                        atCollectionIndex:indexOfNewImage];
+    NFPImageData* imageData = [NFPImageData addImage:image];
     
     // Start the thumbnail generation by adding to background queue
     [self startThumbnailGeneration:imageData];
@@ -164,11 +162,6 @@
 
 -(NSArray*)allImages;
 {
-    NSError *error = nil;
-    if (![self.fetchedResultsController performFetch:&error]) {
-        NSLog(@"Failed to perform fetch: %@", error);
-    }
-    
     return self.fetchedResultsController.fetchedObjects;
 }
 

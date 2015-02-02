@@ -10,7 +10,6 @@
 		1D42A4331A7AAA79004D45C4 /* NFPImageData+NFPExtension.m in Sources */ = {isa = PBXBuildFile; fileRef = 1D42A4321A7AAA79004D45C4 /* NFPImageData+NFPExtension.m */; };
 		1D42A4361A7B6599004D45C4 /* Model.xcdatamodeld in Sources */ = {isa = PBXBuildFile; fileRef = 1D42A4341A7B6599004D45C4 /* Model.xcdatamodeld */; };
 		1D42A43C1A7B6821004D45C4 /* NFPImageManagedObjectContext.m in Sources */ = {isa = PBXBuildFile; fileRef = 1D42A43B1A7B6821004D45C4 /* NFPImageManagedObjectContext.m */; };
-		1D42A4451A7B7572004D45C4 /* NFPImageData.m in Sources */ = {isa = PBXBuildFile; fileRef = 1D42A4441A7B7572004D45C4 /* NFPImageData.m */; };
 		1D4622721A69BEA7009C514A /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 1D4622711A69BEA7009C514A /* main.m */; };
 		1D4622751A69BEA7009C514A /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 1D4622741A69BEA7009C514A /* AppDelegate.m */; };
 		1D46227B1A69BEA7009C514A /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 1D4622791A69BEA7009C514A /* Main.storyboard */; };
@@ -25,6 +24,7 @@
 		1DBD528C1A741BEF00AAEDAD /* PhotoCollectionViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 1DBD52891A741BEF00AAEDAD /* PhotoCollectionViewController.m */; };
 		1DBD528D1A741BEF00AAEDAD /* PhotoTableViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 1DBD528B1A741BEF00AAEDAD /* PhotoTableViewController.m */; };
 		1DC56B9D1A7D259400A1DB38 /* BatchUpdateManager.m in Sources */ = {isa = PBXBuildFile; fileRef = 1DC56B9C1A7D259400A1DB38 /* BatchUpdateManager.m */; };
+		1DD9728A1A7F856800B7752A /* NFPImageData.m in Sources */ = {isa = PBXBuildFile; fileRef = 1DD972891A7F856800B7752A /* NFPImageData.m */; };
 		1DF2B4D91A758D0400977E57 /* NFPDebugViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 1DF2B4D81A758D0400977E57 /* NFPDebugViewController.m */; };
 /* End PBXBuildFile section */
 
@@ -44,8 +44,6 @@
 		1D42A4351A7B6599004D45C4 /* Model.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = Model.xcdatamodel; sourceTree = "<group>"; };
 		1D42A43A1A7B6821004D45C4 /* NFPImageManagedObjectContext.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = NFPImageManagedObjectContext.h; sourceTree = "<group>"; };
 		1D42A43B1A7B6821004D45C4 /* NFPImageManagedObjectContext.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = NFPImageManagedObjectContext.m; sourceTree = "<group>"; };
-		1D42A4431A7B7572004D45C4 /* NFPImageData.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = NFPImageData.h; sourceTree = "<group>"; };
-		1D42A4441A7B7572004D45C4 /* NFPImageData.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = NFPImageData.m; sourceTree = "<group>"; };
 		1D46226C1A69BEA7009C514A /* NoFilter.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = NoFilter.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		1D4622701A69BEA7009C514A /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		1D4622711A69BEA7009C514A /* main.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = main.m; sourceTree = "<group>"; };
@@ -73,6 +71,8 @@
 		1DBD528B1A741BEF00AAEDAD /* PhotoTableViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = PhotoTableViewController.m; sourceTree = "<group>"; };
 		1DC56B9B1A7D259400A1DB38 /* BatchUpdateManager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BatchUpdateManager.h; sourceTree = "<group>"; };
 		1DC56B9C1A7D259400A1DB38 /* BatchUpdateManager.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BatchUpdateManager.m; sourceTree = "<group>"; };
+		1DD972881A7F856800B7752A /* NFPImageData.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = NFPImageData.h; sourceTree = "<group>"; };
+		1DD972891A7F856800B7752A /* NFPImageData.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = NFPImageData.m; sourceTree = "<group>"; };
 		1DF2B4D71A758D0400977E57 /* NFPDebugViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = NFPDebugViewController.h; sourceTree = "<group>"; };
 		1DF2B4D81A758D0400977E57 /* NFPDebugViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = NFPDebugViewController.m; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -184,8 +184,8 @@
 				1DBD52821A73BE8500AAEDAD /* UIImage+NFExtensions.h */,
 				1DBD52831A73BE8500AAEDAD /* UIImage+NFExtensions.m */,
 				1D42A4341A7B6599004D45C4 /* Model.xcdatamodeld */,
-				1D42A4431A7B7572004D45C4 /* NFPImageData.h */,
-				1D42A4441A7B7572004D45C4 /* NFPImageData.m */,
+				1DD972881A7F856800B7752A /* NFPImageData.h */,
+				1DD972891A7F856800B7752A /* NFPImageData.m */,
 				1D42A43A1A7B6821004D45C4 /* NFPImageManagedObjectContext.h */,
 				1D42A43B1A7B6821004D45C4 /* NFPImageManagedObjectContext.m */,
 			);
@@ -310,11 +310,11 @@
 				1DBD528D1A741BEF00AAEDAD /* PhotoTableViewController.m in Sources */,
 				1D42A4331A7AAA79004D45C4 /* NFPImageData+NFPExtension.m in Sources */,
 				1DC56B9D1A7D259400A1DB38 /* BatchUpdateManager.m in Sources */,
+				1DD9728A1A7F856800B7752A /* NFPImageData.m in Sources */,
 				1DBD528C1A741BEF00AAEDAD /* PhotoCollectionViewController.m in Sources */,
 				1DBD52781A738E8E00AAEDAD /* NFPCollectionViewController.m in Sources */,
 				1DF2B4D91A758D0400977E57 /* NFPDebugViewController.m in Sources */,
 				1D42A43C1A7B6821004D45C4 /* NFPImageManagedObjectContext.m in Sources */,
-				1D42A4451A7B7572004D45C4 /* NFPImageData.m in Sources */,
 				1D42A4361A7B6599004D45C4 /* Model.xcdatamodeld in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

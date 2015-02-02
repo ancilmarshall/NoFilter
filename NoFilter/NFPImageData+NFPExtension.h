@@ -9,5 +9,5 @@
 #import "NFPImageData.h"
 
 @interface NFPImageData (NFPExtension)
-+ (NFPImageData*) initWithImage:(UIImage*)image atCollectionIndex:(NSUInteger)index;
++ (NFPImageData*) addImage:(UIImage*)image;
 @end

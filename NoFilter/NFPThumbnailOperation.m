@@ -41,7 +41,6 @@
     self.imageData.thumbnail =
         [self.imageData.image
             scaledImageConstrainedToSize:CGSizeMake(100.0, 100.0)];
-    
 }
 
 -(void) operationComplete;
