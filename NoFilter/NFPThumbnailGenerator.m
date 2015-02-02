@@ -158,26 +158,15 @@
     NFPThumbnailOperation* operation =
         [[NFPThumbnailOperation alloc] initWithNFPImageData:imageData];
     [self.thumbnailGeneratorQueue addOperation:operation];
- 
-}
-
--(NSArray*)allImages;
-{
-    return self.fetchedResultsController.fetchedObjects;
 }
 
 #pragma mark - Debugging methods
 -(void) performRegenerationOfAllThumbnails;
 {
-    NSArray* images = [self allImages];
-    //first reset all images
-    for (NFPImageData* imageData in images) {
+    //reset all images and start the background operation to regenerate thumbnail
+    for (NFPImageData* imageData in self.fetchedResultsController.fetchedObjects) {
         imageData.hasThumbnail = NO;
         imageData.thumbnail = nil;
-    }
-
-    //then start the thumbnail generation process
-    for (NFPImageData* imageData in images){
         [self startThumbnailGeneration:imageData];
     }
 }
@@ -185,7 +174,7 @@
 -(void)clearAllThumbnails;
 {
     NFPImageManagedObjectContext *moc = [[AppDelegate delegate] managedObjectContext];
-    for (NFPImageData* imageData in [self allImages]) {
+    for (NFPImageData* imageData in self.fetchedResultsController.fetchedObjects) {
         [moc deleteObject:imageData];
     }
 }
