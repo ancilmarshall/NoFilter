@@ -2,9 +2,9 @@
 <model userDefinedModelVersionIdentifier="" type="com.apple.IDECoreDataModeler.DataModel" documentVersion="1.0" lastSavedToolsVersion="6254" systemVersion="14C109" minimumToolsVersion="Xcode 4.3" macOSVersion="Automatic" iOSVersion="Automatic">
     <entity name="NFPImageData" representedClassName="NFPImageData" syncable="YES">
         <attribute name="dateCreated" attributeType="Date" syncable="YES"/>
-        <attribute name="hasThumbnail" attributeType="Boolean" syncable="YES"/>
-        <attribute name="image" attributeType="Transformable" syncable="YES"/>
-        <attribute name="thumbnail" attributeType="Transformable" syncable="YES"/>
+        <attribute name="hasThumbnailNumber" attributeType="Boolean" syncable="YES"/>
+        <attribute name="imageData" attributeType="Binary" storedInTruthFile="YES" syncable="YES"/>
+        <attribute name="thumbnailData" attributeType="Binary" storedInTruthFile="YES" syncable="YES"/>
     </entity>
     <elements>
         <element name="NFPImageData" positionX="-63" positionY="-18" width="128" height="103"/>

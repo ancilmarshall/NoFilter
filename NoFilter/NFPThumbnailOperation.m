@@ -10,6 +10,7 @@
 #import "NFPImageData.h"
 #import "NFPThumbnailOperation.h"
 #import "NFPImageManagedObjectContext.h"
+#import "NFPImageData+NFPExtension.h"
 #import "UIImage+NFExtensions.h"
 
 @interface NFPThumbnailOperation()
@@ -53,7 +54,7 @@
     //fetchRequestController since its ManagedObjectContext is on the main
     //queue ( NSMainQueueConcurrencyType )
     dispatch_async(dispatch_get_main_queue(), ^{
-        self.imageData.hasThumbnail = @YES;
+        self.imageData.hasThumbnail = YES;
     });
     
     

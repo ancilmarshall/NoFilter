@@ -24,7 +24,7 @@
 		1DBD528C1A741BEF00AAEDAD /* PhotoCollectionViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 1DBD52891A741BEF00AAEDAD /* PhotoCollectionViewController.m */; };
 		1DBD528D1A741BEF00AAEDAD /* PhotoTableViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 1DBD528B1A741BEF00AAEDAD /* PhotoTableViewController.m */; };
 		1DC56B9D1A7D259400A1DB38 /* BatchUpdateManager.m in Sources */ = {isa = PBXBuildFile; fileRef = 1DC56B9C1A7D259400A1DB38 /* BatchUpdateManager.m */; };
-		1DD9728A1A7F856800B7752A /* NFPImageData.m in Sources */ = {isa = PBXBuildFile; fileRef = 1DD972891A7F856800B7752A /* NFPImageData.m */; };
+		1DD9728D1A7FE5C800B7752A /* NFPImageData.m in Sources */ = {isa = PBXBuildFile; fileRef = 1DD9728C1A7FE5C800B7752A /* NFPImageData.m */; };
 		1DF2B4D91A758D0400977E57 /* NFPDebugViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 1DF2B4D81A758D0400977E57 /* NFPDebugViewController.m */; };
 /* End PBXBuildFile section */
 
@@ -71,8 +71,8 @@
 		1DBD528B1A741BEF00AAEDAD /* PhotoTableViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = PhotoTableViewController.m; sourceTree = "<group>"; };
 		1DC56B9B1A7D259400A1DB38 /* BatchUpdateManager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BatchUpdateManager.h; sourceTree = "<group>"; };
 		1DC56B9C1A7D259400A1DB38 /* BatchUpdateManager.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BatchUpdateManager.m; sourceTree = "<group>"; };
-		1DD972881A7F856800B7752A /* NFPImageData.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = NFPImageData.h; sourceTree = "<group>"; };
-		1DD972891A7F856800B7752A /* NFPImageData.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = NFPImageData.m; sourceTree = "<group>"; };
+		1DD9728B1A7FE5C800B7752A /* NFPImageData.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = NFPImageData.h; sourceTree = "<group>"; };
+		1DD9728C1A7FE5C800B7752A /* NFPImageData.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = NFPImageData.m; sourceTree = "<group>"; };
 		1DF2B4D71A758D0400977E57 /* NFPDebugViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = NFPDebugViewController.h; sourceTree = "<group>"; };
 		1DF2B4D81A758D0400977E57 /* NFPDebugViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = NFPDebugViewController.m; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -175,6 +175,8 @@
 		1DBD52751A738E3800AAEDAD /* Model */ = {
 			isa = PBXGroup;
 			children = (
+				1DD9728B1A7FE5C800B7752A /* NFPImageData.h */,
+				1DD9728C1A7FE5C800B7752A /* NFPImageData.m */,
 				1D42A4311A7AAA79004D45C4 /* NFPImageData+NFPExtension.h */,
 				1D42A4321A7AAA79004D45C4 /* NFPImageData+NFPExtension.m */,
 				1DBD527F1A73BDFD00AAEDAD /* NFPThumbnailOperation.h */,
@@ -184,8 +186,6 @@
 				1DBD52821A73BE8500AAEDAD /* UIImage+NFExtensions.h */,
 				1DBD52831A73BE8500AAEDAD /* UIImage+NFExtensions.m */,
 				1D42A4341A7B6599004D45C4 /* Model.xcdatamodeld */,
-				1DD972881A7F856800B7752A /* NFPImageData.h */,
-				1DD972891A7F856800B7752A /* NFPImageData.m */,
 				1D42A43A1A7B6821004D45C4 /* NFPImageManagedObjectContext.h */,
 				1D42A43B1A7B6821004D45C4 /* NFPImageManagedObjectContext.m */,
 			);
@@ -310,7 +310,7 @@
 				1DBD528D1A741BEF00AAEDAD /* PhotoTableViewController.m in Sources */,
 				1D42A4331A7AAA79004D45C4 /* NFPImageData+NFPExtension.m in Sources */,
 				1DC56B9D1A7D259400A1DB38 /* BatchUpdateManager.m in Sources */,
-				1DD9728A1A7F856800B7752A /* NFPImageData.m in Sources */,
+				1DD9728D1A7FE5C800B7752A /* NFPImageData.m in Sources */,
 				1DBD528C1A741BEF00AAEDAD /* PhotoCollectionViewController.m in Sources */,
 				1DBD52781A738E8E00AAEDAD /* NFPCollectionViewController.m in Sources */,
 				1DF2B4D91A758D0400977E57 /* NFPDebugViewController.m in Sources */,

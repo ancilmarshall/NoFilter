@@ -12,8 +12,8 @@
 @implementation NFPImageData
 
 @dynamic dateCreated;
-@dynamic hasThumbnail;
-@dynamic image;
-@dynamic thumbnail;
+@dynamic hasThumbnailNumber;
+@dynamic imageData;
+@dynamic thumbnailData;
 
 @end

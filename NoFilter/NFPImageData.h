@@ -13,8 +13,8 @@
 @interface NFPImageData : NSManagedObject
 
 @property (nonatomic, retain) NSDate * dateCreated;
-@property (nonatomic, retain) NSNumber * hasThumbnail;
-@property (nonatomic, retain) id image;
-@property (nonatomic, retain) id thumbnail;
+@property (nonatomic, retain) NSNumber * hasThumbnailNumber;
+@property (nonatomic, retain) NSData * imageData;
+@property (nonatomic, retain) NSData * thumbnailData;
 
 @end

@@ -76,14 +76,17 @@
 #pragma mark - Accessor methods
 -(UIImage*)thumbnailAtIndex:(NSUInteger)index;
 {
-    if ([self  count] == 0){
-        return nil;
-    }
-    
     NFPImageData* imageData = [self.fetchedResultsController
-       objectAtIndexPath:[NSIndexPath indexPathForItem:index
-                                             inSection:0]];
+       objectAtIndexPath:[NSIndexPath indexPathForItem:index inSection:0]];
+                          
     return imageData.thumbnail;
+}
+
+-(BOOL)hasThumbnailAtIndex:(NSUInteger)index;
+{
+    NFPImageData* imageData = [self.fetchedResultsController
+        objectAtIndexPath:[NSIndexPath indexPathForItem:index inSection:0]];
+    return imageData.hasThumbnail;
 }
 
 -(void)addImage:(UIImage *)image;
@@ -132,12 +135,10 @@
     if (self.batchUpdateManager != nil){
         [self.delegate performBatchUpdatesForManager:self.batchUpdateManager];
         
-        if ([self allThumbnailsSet]){
-            NSError* error = nil;
-            NFPImageManagedObjectContext* moc = [[AppDelegate delegate] managedObjectContext];
-            if (![moc save:&error]){
-                NSLog(@"Error saving CoreData context, msg: %@",[error localizedDescription]);
-            }
+        NSError* error = nil;
+        NFPImageManagedObjectContext* moc = [[AppDelegate delegate] managedObjectContext];
+        if (![moc save:&error]){
+            NSLog(@"Error saving CoreData context, msg: %@",[error localizedDescription]);
         }
 
         self.batchUpdateManager = nil;
@@ -165,25 +166,13 @@
     return self.fetchedResultsController.fetchedObjects;
 }
 
--(BOOL)allThumbnailsSet;
-{
-    BOOL result = YES;
-    for (NFPImageData* imageData in [self allImages]){
-        if ( imageData.thumbnail == nil ){
-            result = NO;
-            break;
-        }
-    }
-    return result;
-}
-
 #pragma mark - Debugging methods
 -(void) performRegenerationOfAllThumbnails;
 {
     NSArray* images = [self allImages];
     //first reset all images
     for (NFPImageData* imageData in images) {
-        imageData.hasThumbnail = @NO;
+        imageData.hasThumbnail = NO;
         imageData.thumbnail = nil;
     }
 

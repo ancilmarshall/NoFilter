@@ -29,11 +29,49 @@
          inManagedObjectContext:moc];
     
     imageData.image = image;
-    imageData.thumbnail = nil;
-    imageData.hasThumbnail = @(NO);
+    imageData.thumbnail =  nil;
+    imageData.hasThumbnail = NO;
     imageData.dateCreated = [NSDate date];
     
     return imageData;
 }
+
+#pragma mark - Simplified accessors
+
+-(BOOL)hasThumbnail;
+{
+    return [self.hasThumbnailNumber boolValue];
+}
+
+-(void)setHasThumbnail:(BOOL)value;
+{
+    self.hasThumbnailNumber = @(value);
+}
+
+-(UIImage*)image;
+{
+    return [UIImage imageWithData:self.imageData];
+}
+
+-(void)setImage:(UIImage*)image;
+{
+    self.imageData = UIImageJPEGRepresentation(image, 1.0);
+}
+
+-(UIImage*)thumbnail;
+{
+    return [UIImage imageWithData:self.thumbnailData];
+}
+
+-(void)setThumbnail:(UIImage*)image;
+{
+    //Create an empty NSData to avoid the error when saving a nil property
+    // to the persistent store
+    if (image==nil)
+      self.thumbnailData = [NSData new];
+    else
+        self.thumbnailData = UIImageJPEGRepresentation(image, 1.0);
+}
+
 
 @end
