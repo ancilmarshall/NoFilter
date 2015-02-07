@@ -8,7 +8,7 @@
 
 #import <Photos/Photos.h>
 
-#import "AppDelegate.h"
+#import "NFPThumbnailGenerator.h"
 #import "PhotoCollectionViewController.h"
 
 @interface PhotoCollectionViewController () <PHPhotoLibraryChangeObserver>
@@ -135,7 +135,7 @@ minimumLineSpacingForSectionAtIndex:(NSInteger)section
          contentMode:PHImageContentModeAspectFill
          options:options
          resultHandler:^(UIImage *result, NSDictionary *info){
-            [[AppDelegate delegate] setUserImage:result];
+            [[NFPThumbnailGenerator sharedInstance] addImage:result];
          }];
     
     [self dismissViewControllerAnimated:YES completion:nil];

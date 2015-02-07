@@ -15,15 +15,18 @@
 
 @interface NFPThumbnailOperation()
 @property (nonatomic,strong) NFPImageData* imageData;
+@property (nonatomic,strong) NSManagedObjectContext* moc;
 @end
 
 @implementation NFPThumbnailOperation
 
--(instancetype)initWithNFPImageData:(NFPImageData*)imageData;
+-(instancetype)initWithNFPImageData:(NFPImageData*)imageData
+                            context:(NSManagedObjectContext*)context;
 {
     self = [super init];
     if (self){
         _imageData = imageData;
+        _moc = context;
         __weak NFPThumbnailOperation* weak_self = self;
         [self setCompletionBlock:^{
             [weak_self operationComplete];
@@ -49,14 +52,17 @@
     // always check if operation is cancelled
     if (self.isCancelled)
         return;
-        
-    //NOTE: perform the update on main queue to be recognized immediately by
-    //fetchRequestController since its ManagedObjectContext is on the main
-    //queue ( NSMainQueueConcurrencyType )
-    dispatch_async(dispatch_get_main_queue(), ^{
-        self.imageData.hasThumbnail = YES;
-    });
     
+    [self.moc performBlock:^{
+        
+        self.imageData.hasThumbnail = YES;
+        NSError* error = nil;
+        if (![self.moc save:&error]){
+            NSLog(@"Error saving thumbnail to NFPImageData: %@",
+                  [error localizedDescription]);
+        }
+        
+    }];
     
 }
 @end

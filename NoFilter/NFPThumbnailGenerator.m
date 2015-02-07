@@ -15,32 +15,45 @@
 #import "BatchUpdateManager.h"
 
 @interface NFPThumbnailGenerator()  <NSFetchedResultsControllerDelegate>
+
+-(instancetype)initSingleton NS_DESIGNATED_INITIALIZER;
+
 @property (nonatomic,strong) NSOperationQueue* thumbnailGeneratorQueue;
 @property (nonatomic,strong) NSFetchedResultsController* fetchedResultsController;
-@property (nonatomic,strong) NSFetchRequest* fetchRequest;
 @property (nonatomic,strong) BatchUpdateManager* batchUpdateManager;
+@property (nonatomic,strong) NFPImageManagedObjectContext* managedObjectContext;
 @end
 
 @implementation NFPThumbnailGenerator
 
 #pragma mark - Initialization
--(instancetype)initWithDelegate:(id<NFPThumbnailGeneratorProtocol>)delegate;
+
++(instancetype) sharedInstance;
+{
+    static NFPThumbnailGenerator* instance = nil;
+    static dispatch_once_t onceToken;
+    dispatch_once(&onceToken, ^{
+        instance = [[NFPThumbnailGenerator alloc] initSingleton];
+    });
+    return instance;
+}
+
+-(instancetype)initSingleton;
 {
     self = [super init];
     if (self){
-        _delegate = delegate;
         
-        self.fetchRequest = [[NSFetchRequest alloc]
+        NSFetchRequest* fetchRequest = [[NSFetchRequest alloc]
                              initWithEntityName:NSStringFromClass([NFPImageData class])];
-        self.fetchRequest.sortDescriptors =
+        fetchRequest.sortDescriptors =
             @[ [NSSortDescriptor
                 sortDescriptorWithKey:NSStringFromSelector(@selector(dateCreated))
                             ascending:YES] ];
         
-        NFPImageManagedObjectContext *moc = [[AppDelegate delegate] managedObjectContext];
+        self.managedObjectContext = [[AppDelegate delegate] managedObjectContext];
         self.fetchedResultsController = [[NSFetchedResultsController alloc]
-                                         initWithFetchRequest:self.fetchRequest
-                                         managedObjectContext:moc
+                                         initWithFetchRequest:fetchRequest
+                                         managedObjectContext:self.managedObjectContext
                                          sectionNameKeyPath:nil
                                          cacheName:nil];
         
@@ -136,9 +149,9 @@
         [self.delegate performBatchUpdatesForManager:self.batchUpdateManager];
         
         NSError* error = nil;
-        NFPImageManagedObjectContext* moc = [[AppDelegate delegate] managedObjectContext];
-        if (![moc save:&error]){
-            NSLog(@"Error saving CoreData context, msg: %@",[error localizedDescription]);
+        if (![self.managedObjectContext save:&error]){
+            NSLog(@"Error saving CoreData context, msg: %@",
+                  [error localizedDescription]);
         }
 
         self.batchUpdateManager = nil;
@@ -154,9 +167,14 @@
 
 -(void)startThumbnailGeneration:(NFPImageData*)imageData;
 {
+    //Create a child context
+    NSManagedObjectContext* childContext = [[NSManagedObjectContext alloc] initWithConcurrencyType:NSPrivateQueueConcurrencyType];
+    childContext.parentContext = self.managedObjectContext;
+    
     //Initiate and start NSOperation
     NFPThumbnailOperation* operation =
-        [[NFPThumbnailOperation alloc] initWithNFPImageData:imageData];
+        [[NFPThumbnailOperation alloc] initWithNFPImageData:imageData
+                                                    context:childContext];
     [self.thumbnailGeneratorQueue addOperation:operation];
 }
 
@@ -173,9 +191,8 @@
 
 -(void)clearAllThumbnails;
 {
-    NFPImageManagedObjectContext *moc = [[AppDelegate delegate] managedObjectContext];
     for (NFPImageData* imageData in self.fetchedResultsController.fetchedObjects) {
-        [moc deleteObject:imageData];
+        [self.managedObjectContext deleteObject:imageData];
     }
 }
 

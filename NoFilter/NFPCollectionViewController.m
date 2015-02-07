@@ -30,7 +30,8 @@ static NSString * const kDebugSegueIdentifier = @"debugSegue";
     
     self.navigationItem.title = NSLocalizedString(@"No Filter", nil);
     
-    self.thumbnailgenerator = [[NFPThumbnailGenerator alloc] initWithDelegate:self];
+    self.thumbnailgenerator = [NFPThumbnailGenerator sharedInstance];
+    self.thumbnailgenerator.delegate = self;
     
     // Register cell classes
     [self.collectionView registerClass:[UICollectionViewCell class]

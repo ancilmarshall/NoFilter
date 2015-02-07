@@ -12,5 +12,6 @@
 #import "NFPImageData.h"
 
 @interface NFPThumbnailOperation : NSOperation
--(instancetype)initWithNFPImageData:(NFPImageData*)imageData  NS_DESIGNATED_INITIALIZER;
+-(instancetype)initWithNFPImageData:(NFPImageData*)imageData
+                            context:(NSManagedObjectContext*)context NS_DESIGNATED_INITIALIZER;
 @end

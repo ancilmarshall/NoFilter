@@ -11,7 +11,7 @@
 
 #import "NFPAddImageTableViewController.h"
 #import "PhotoTableViewController.h"
-#import "AppDelegate.h"
+#import "NFPThumbnailGenerator.h"
 
 @interface NFPAddImageTableViewController () <UIImagePickerControllerDelegate,
     UINavigationControllerDelegate>
@@ -120,7 +120,7 @@ static NSString* const kCellReuseIdentifier = @"addImageTableViewCell";
     //save to the device's photo library and update the UI before dismissing
     if (image != nil) {
         UIImageWriteToSavedPhotosAlbum(image, nil, NULL, NULL);
-        [[AppDelegate delegate] setUserImage:image];
+        [[NFPThumbnailGenerator sharedInstance] addImage:image];
     }
     
     //dismiss the controller after the image has been updated

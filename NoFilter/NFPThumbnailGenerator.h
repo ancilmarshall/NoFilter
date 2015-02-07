@@ -15,8 +15,7 @@
 
 @property (nonatomic,weak) id<NFPThumbnailGeneratorProtocol> delegate;
 
--(instancetype) initWithDelegate:(id<NFPThumbnailGeneratorProtocol>)delegate
-    NS_DESIGNATED_INITIALIZER;
++(instancetype) sharedInstance;
 -(UIImage*) thumbnailAtIndex:(NSUInteger)index;
 -(BOOL)hasThumbnailAtIndex:(NSUInteger)index;
 -(void) addImage:(UIImage*)image;
