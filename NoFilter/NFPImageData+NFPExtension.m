@@ -19,20 +19,23 @@
 
 @implementation NFPImageData (NFPExtension)
 
-+ (NFPImageData*)addImage:(UIImage*)image;
++ (NFPImageData*)addImage:(UIImage*)image context:(NSManagedObjectContext*)context;
 {
-    
-    NFPImageManagedObjectContext* moc = [[AppDelegate delegate] managedObjectContext];
+        
     NFPImageData* imageData =
-        [NSEntityDescription
-         insertNewObjectForEntityForName:NSStringFromClass([self class])
-         inManagedObjectContext:moc];
+    [NSEntityDescription
+     insertNewObjectForEntityForName:NSStringFromClass([self class])
+     inManagedObjectContext:context];
     
     imageData.image = image;
     imageData.thumbnail =  nil;
     imageData.hasThumbnail = NO;
     imageData.dateCreated = [NSDate date];
     
+    NSError* error;
+    if (![context save:&error]){
+        NSLog(@"Unable to insert new entity: %@",[error localizedDescription]);
+    }
     return imageData;
 }
 

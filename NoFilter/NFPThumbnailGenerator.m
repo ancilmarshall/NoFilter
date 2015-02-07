@@ -109,7 +109,7 @@
 -(void)addImage:(UIImage *)image;
 {
     
-    NFPImageData* imageData = [NFPImageData addImage:image];
+    NFPImageData* imageData = [NFPImageData addImage:image context:self.childContext];
     
     // Start the thumbnail generation by adding to background queue
     [self startThumbnailGeneration:imageData];

@@ -21,7 +21,6 @@
     // Leave a giant delay in Debug builds to stress the importance of threading this method
     sleep(2);
 #endif
-    
     CGSize currentSize = [self size];
     CGFloat scaleFactor = MIN(maximumSize.width / currentSize.width, maximumSize.height / currentSize.height) * contentScale;
     

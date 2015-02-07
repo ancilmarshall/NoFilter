@@ -54,7 +54,6 @@
         return;
     
     [self.moc performBlock:^{
-        
         self.imageData.hasThumbnail = YES;
         NSError* error = nil;
         if (![self.moc save:&error]){
