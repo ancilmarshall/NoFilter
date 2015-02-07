@@ -13,8 +13,6 @@
 
 @property (strong, nonatomic) UIWindow *window;
 @property (strong, nonatomic) NFPImageManagedObjectContext* managedObjectContext;
-- (void) setUserImage:(UIImage*)image;
-- (UIImage*) getUserImage;
 + (AppDelegate*) delegate;
 
 @end

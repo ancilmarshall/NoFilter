@@ -10,11 +10,6 @@
 #import "NFPImageManagedObjectContext.h"
 
 @interface AppDelegate ()
-
-// This image property can be set by other objects in the application.
-// When it is set it can be observed by these other objects using KVO to perform
-// some action. For example when user picks image for photo libary or the camera
-@property (nonatomic,strong) UIImage* image;
 @end
 
 @implementation AppDelegate
@@ -31,17 +26,6 @@
         NSLog(@"Failed to seed random color data: %@", error);
     }
     return YES;
-}
-
-#pragma mark - userImage Accessor methods
-- (void) setUserImage:(UIImage *)image;
-{
-    self.image = image;
-}
-
-- (UIImage*)getUserImage;
-{
-    return self.image;
 }
 
 #pragma mark - Shared AppDelegate helper function

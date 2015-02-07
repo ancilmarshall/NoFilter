@@ -36,10 +36,6 @@ static NSString * const kDebugSegueIdentifier = @"debugSegue";
     // Register cell classes
     [self.collectionView registerClass:[UICollectionViewCell class]
             forCellWithReuseIdentifier:reuseIdentifier];
-    
-    // Set self as observer of AppDelegate's image property
-    [self registerAppDelegateObserver];
-    
 }
 
 
@@ -242,31 +238,6 @@ minimumLineSpacingForSectionAtIndex:(NSInteger)section
     [self.thumbnailgenerator clearAllThumbnails];
 }
 
-#pragma  mark - KVO for AppDelegate's image property
-
-- (void) registerAppDelegateObserver;
-{
-    [[AppDelegate delegate] addObserver:self
-                             forKeyPath:@"image"
-                                options:NSKeyValueObservingOptionNew
-                                context:nil];
-}
-
-- (void) observeValueForKeyPath:(NSString *)keyPath
-                       ofObject:(id)object
-                         change:(NSDictionary *)change
-                        context:(void *)context;
-{
-    AppDelegate* appDel = (AppDelegate*)object;
-    UIImage* image = [appDel getUserImage];
-    [self.thumbnailgenerator addImage:image];
-}
-
-// Perform clean before this object is deallocated and the AppDelegate still exists
-- (void) removeAppDelegateObserver;
-{
-    [[AppDelegate delegate] removeObserver:self forKeyPath:@"image"];
-}
 
 #pragma mark - Long Press Gesture Recognizer
 -(IBAction) showDebugViewController:(UILongPressGestureRecognizer*)gesture;
@@ -278,12 +249,6 @@ minimumLineSpacingForSectionAtIndex:(NSInteger)section
         [self performSegueWithIdentifier:kDebugSegueIdentifier sender:gesture];
     }
 
-}
-
-#pragma mark - dealloc methods
--(void) dealloc;
-{
-    [self removeAppDelegateObserver];
 }
 
 
