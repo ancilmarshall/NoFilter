@@ -22,6 +22,7 @@
 @property (nonatomic,strong) NSFetchedResultsController* fetchedResultsController;
 @property (nonatomic,strong) BatchUpdateManager* batchUpdateManager;
 @property (nonatomic,strong) NFPImageManagedObjectContext* managedObjectContext;
+@property (nonatomic,strong) NSManagedObjectContext* childContext;
 @end
 
 @implementation NFPThumbnailGenerator
@@ -51,6 +52,9 @@
                             ascending:YES] ];
         
         self.managedObjectContext = [[AppDelegate delegate] managedObjectContext];
+        self.childContext = [[NSManagedObjectContext alloc] initWithConcurrencyType:NSPrivateQueueConcurrencyType];
+        self.childContext.parentContext = self.managedObjectContext;
+
         self.fetchedResultsController = [[NSFetchedResultsController alloc]
                                          initWithFetchRequest:fetchRequest
                                          managedObjectContext:self.managedObjectContext
@@ -167,14 +171,10 @@
 
 -(void)startThumbnailGeneration:(NFPImageData*)imageData;
 {
-    //Create a child context
-    NSManagedObjectContext* childContext = [[NSManagedObjectContext alloc] initWithConcurrencyType:NSPrivateQueueConcurrencyType];
-    childContext.parentContext = self.managedObjectContext;
-    
     //Initiate and start NSOperation
     NFPThumbnailOperation* operation =
         [[NFPThumbnailOperation alloc] initWithNFPImageData:imageData
-                                                    context:childContext];
+                                                    context:self.childContext];
     [self.thumbnailGeneratorQueue addOperation:operation];
 }
 
