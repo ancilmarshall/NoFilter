@@ -27,7 +27,7 @@
         NSLog(@"Failed to seed random color data: %@", error);
     }
     
-    self.isGeneratingThumbnails = NO;
+    self.isAppPerformingTasks = NO;
     self.backgroundOperationTask = UIBackgroundTaskInvalid;
     [self addIsGeneratingThumbnailObserver];
     
@@ -55,7 +55,7 @@
 # pragma mark - Background tasks
 -(void)applicationDidEnterBackground:(UIApplication *)application;
 {
-    if (self.isGeneratingThumbnails) {
+    if (self.isAppPerformingTasks) {
         NSAssert(self.backgroundOperationTask == UIBackgroundTaskInvalid, @"Should never take out two BG tasks for the one queue");
         
         self.backgroundOperationTask = [application beginBackgroundTaskWithExpirationHandler:^{
@@ -78,7 +78,7 @@ static NSUInteger kIsGeneratingObserverContext;
 -(void)addIsGeneratingThumbnailObserver;
 {
     [self addObserver:self
-           forKeyPath:NSStringFromSelector(@selector(isGeneratingThumbnails))
+           forKeyPath:NSStringFromSelector(@selector(isAppPerformingTasks))
               options:NSKeyValueObservingOptionNew
               context:&kIsGeneratingObserverContext];
 
@@ -88,9 +88,9 @@ static NSUInteger kIsGeneratingObserverContext;
 -(void)observeValueForKeyPath:(NSString *)keyPath ofObject:(id)object change:(NSDictionary *)change context:(void *)context;
 {
     NSParameterAssert([object isKindOfClass:[AppDelegate class]]);
-    NSParameterAssert([keyPath isEqualToString:NSStringFromSelector(@selector(isGeneratingThumbnails))]);
+    NSParameterAssert([keyPath isEqualToString:NSStringFromSelector(@selector(isAppPerformingTasks))]);
     
-    if (!self.isGeneratingThumbnails)
+    if (!self.isAppPerformingTasks)
     {
         if (self.backgroundOperationTask != UIBackgroundTaskInvalid){
             [[UIApplication sharedApplication] endBackgroundTask:self.backgroundOperationTask];
@@ -104,7 +104,7 @@ static NSUInteger kIsGeneratingObserverContext;
 -(void)removeIsGeneratingThumbnailObserver;
 {
     [self removeObserver:self
-              forKeyPath:NSStringFromSelector(@selector(isGeneratingThumbnails))
+              forKeyPath:NSStringFromSelector(@selector(isAppPerformingTasks))
                  context:&kIsGeneratingObserverContext];
     
 }

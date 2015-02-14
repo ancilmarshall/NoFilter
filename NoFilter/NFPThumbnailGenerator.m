@@ -187,10 +187,10 @@ static NSUInteger kThumbnailGeneratorQueueObserverContext;
     
     NSUInteger opCount = [((NSOperationQueue*)object) operationCount];
     if (opCount == 0){
-        [AppDelegate delegate].isGeneratingThumbnails = NO;
+        [AppDelegate delegate].isAppPerformingTasks = NO;
     }
     else {
-        [AppDelegate delegate].isGeneratingThumbnails = YES;
+        [AppDelegate delegate].isAppPerformingTasks = YES;
     }
 }
 

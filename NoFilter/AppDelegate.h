@@ -14,7 +14,7 @@
 @property (strong, nonatomic) UIWindow *window;
 @property (strong, nonatomic) NFPImageManagedObjectContext* managedObjectContext;
 + (AppDelegate*) delegate;
-@property (nonatomic,assign) BOOL isGeneratingThumbnails;
+@property (nonatomic,assign) BOOL isAppPerformingTasks;
 
 @end
 
