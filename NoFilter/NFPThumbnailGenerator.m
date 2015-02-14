@@ -68,6 +68,10 @@
             NSLog(@"Failed to perform initial fetch: %@", error);
         }
         
+        
+        // add KVO observer on the thumbnailGeneratorQueue
+        [self addQueueObserver];
+        
     }
     return self;
 }
@@ -162,6 +166,43 @@
     }
 }
 
+#pragma mark - KVO 
+static NSUInteger kThumbnailGeneratorQueueObserverContext;
+
+-(void) addQueueObserver;
+{
+    [self.thumbnailGeneratorQueue addObserver:self
+                                   forKeyPath:NSStringFromSelector(@selector(operationCount))
+                                      options:NSKeyValueObservingOptionNew
+                                      context:&kThumbnailGeneratorQueueObserverContext];
+    
+}
+
+
+-(void)observeValueForKeyPath:(NSString *)keyPath ofObject:(id)object change:(NSDictionary *)change context:(void *)context;
+{
+    
+    NSParameterAssert([object isKindOfClass:[NSOperationQueue class]]);
+    //NSParameterAssert(object == self.thumbnailGeneratorQueue);
+    
+    NSUInteger opCount = [((NSOperationQueue*)object) operationCount];
+    if (opCount == 0){
+        [AppDelegate delegate].isGeneratingThumbnail = NO;
+    }
+    else {
+        [AppDelegate delegate].isGeneratingThumbnail = YES;
+    }
+}
+
+
+-(void) removeQueueObsever;
+{
+    [self.thumbnailGeneratorQueue removeObserver:self
+                                      forKeyPath:NSStringFromSelector(@selector(operationCount))
+                                         context:&kThumbnailGeneratorQueueObserverContext];
+}
+
+
 #pragma mark - Helper functions
 
 -(NSUInteger)count;
@@ -196,6 +237,14 @@
     }
 }
 
+
+#pragma mark - clean up and dealloc
+
+-(void)dealloc;
+{
+    [self removeQueueObsever];
+    
+}
 
 
 

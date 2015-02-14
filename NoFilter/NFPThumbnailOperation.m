@@ -6,7 +6,7 @@
 //  Copyright (c) 2015 Ancil Marshall. All rights reserved.
 //
 
-#import "AppDelegate.h"
+//#import "AppDelegate.h"
 #import "NFPImageData.h"
 #import "NFPThumbnailOperation.h"
 #import "NFPImageManagedObjectContext.h"
@@ -53,6 +53,9 @@
     if (self.isCancelled)
         return;
     
+    // call performBlock to ensure that all this work is taken into account
+    // in the managed object context's queue (either private or main, but we
+    // don't know or need to know to keep the interface abstract
     [self.moc performBlock:^{
         self.imageData.hasThumbnail = YES;
         NSError* error = nil;
