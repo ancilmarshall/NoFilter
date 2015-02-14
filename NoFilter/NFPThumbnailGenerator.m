@@ -183,14 +183,14 @@ static NSUInteger kThumbnailGeneratorQueueObserverContext;
 {
     
     NSParameterAssert([object isKindOfClass:[NSOperationQueue class]]);
-    //NSParameterAssert(object == self.thumbnailGeneratorQueue);
+    NSParameterAssert([keyPath isEqualToString:NSStringFromSelector(@selector(operationCount))]);
     
     NSUInteger opCount = [((NSOperationQueue*)object) operationCount];
     if (opCount == 0){
-        [AppDelegate delegate].isGeneratingThumbnail = NO;
+        [AppDelegate delegate].isGeneratingThumbnails = NO;
     }
     else {
-        [AppDelegate delegate].isGeneratingThumbnail = YES;
+        [AppDelegate delegate].isGeneratingThumbnails = YES;
     }
 }
 

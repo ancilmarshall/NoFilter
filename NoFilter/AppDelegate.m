@@ -10,6 +10,7 @@
 #import "NFPImageManagedObjectContext.h"
 
 @interface AppDelegate ()
+@property (atomic,assign) UIBackgroundTaskIdentifier backgroundOperationTask;
 @end
 
 @implementation AppDelegate
@@ -25,6 +26,11 @@
     if (![self.managedObjectContext save:&error]) {
         NSLog(@"Failed to seed random color data: %@", error);
     }
+    
+    self.isGeneratingThumbnails = NO;
+    self.backgroundOperationTask = UIBackgroundTaskInvalid;
+    [self addIsGeneratingThumbnailObserver];
+    
     return YES;
 }
 
@@ -46,5 +52,68 @@
     return [[documentDirectory URLByAppendingPathComponent:@"tasks"] URLByAppendingPathExtension:@"sqlite"];
 }
 
+# pragma mark - Background tasks
+-(void)applicationDidEnterBackground:(UIApplication *)application;
+{
+    if (self.isGeneratingThumbnails) {
+        NSAssert(self.backgroundOperationTask == UIBackgroundTaskInvalid, @"Should never take out two BG tasks for the one queue");
+        
+        self.backgroundOperationTask = [application beginBackgroundTaskWithExpirationHandler:^{
+            [application endBackgroundTask:self.backgroundOperationTask];
+            self.backgroundOperationTask = UIBackgroundTaskInvalid;
+        }];
+    }
+}
+
+-(void)applicationDidBecomeActive:(UIApplication *)application;
+{
+    if (self.backgroundOperationTask != UIBackgroundTaskInvalid) {
+        [application endBackgroundTask:self.backgroundOperationTask];
+        self.backgroundOperationTask = UIBackgroundTaskInvalid;
+    }
+}
+
+#pragma mark -  KVO on isGeneratingThumbnail
+static NSUInteger kIsGeneratingObserverContext;
+-(void)addIsGeneratingThumbnailObserver;
+{
+    [self addObserver:self
+           forKeyPath:NSStringFromSelector(@selector(isGeneratingThumbnails))
+              options:NSKeyValueObservingOptionNew
+              context:&kIsGeneratingObserverContext];
+
+}
+
+
+-(void)observeValueForKeyPath:(NSString *)keyPath ofObject:(id)object change:(NSDictionary *)change context:(void *)context;
+{
+    NSParameterAssert([object isKindOfClass:[AppDelegate class]]);
+    NSParameterAssert([keyPath isEqualToString:NSStringFromSelector(@selector(isGeneratingThumbnails))]);
+    
+    if (!self.isGeneratingThumbnails)
+    {
+        if (self.backgroundOperationTask != UIBackgroundTaskInvalid){
+            [[UIApplication sharedApplication] endBackgroundTask:self.backgroundOperationTask];
+            self.backgroundOperationTask = UIBackgroundTaskInvalid;
+
+        }
+    }
+    
+}
+
+-(void)removeIsGeneratingThumbnailObserver;
+{
+    [self removeObserver:self
+              forKeyPath:NSStringFromSelector(@selector(isGeneratingThumbnails))
+                 context:&kIsGeneratingObserverContext];
+    
+}
+
+
+#pragma mark - clean up
+-(void)dealloc;
+{
+    [self removeIsGeneratingThumbnailObserver];
+}
 
 @end
