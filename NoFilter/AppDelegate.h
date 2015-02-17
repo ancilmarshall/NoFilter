@@ -14,7 +14,7 @@
 @property (strong, nonatomic) UIWindow *window;
 @property (strong, nonatomic) NFPImageManagedObjectContext* managedObjectContext;
 + (AppDelegate*) delegate;
-@property (nonatomic,assign) BOOL isAppPerformingTasks;
+@property (nonatomic,assign) BOOL shouldPerformBackgroundTask;
 
 @end
 

@@ -186,11 +186,11 @@ static NSUInteger kThumbnailGeneratorQueueObserverContext;
     NSParameterAssert([keyPath isEqualToString:NSStringFromSelector(@selector(operationCount))]);
     
     NSUInteger opCount = [((NSOperationQueue*)object) operationCount];
-    if (opCount == 0){
-        [AppDelegate delegate].isAppPerformingTasks = NO;
+    if (opCount > 0){
+        [AppDelegate delegate].shouldPerformBackgroundTask = YES;
     }
     else {
-        [AppDelegate delegate].isAppPerformingTasks = YES;
+        [AppDelegate delegate].shouldPerformBackgroundTask = NO;
     }
 }
 

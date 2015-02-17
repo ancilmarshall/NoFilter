@@ -9,6 +9,12 @@
 #import "AppDelegate.h"
 #import "NFPImageManagedObjectContext.h"
 
+#if 1 && defined(DEBUG)
+#define APP_DELEGATE_DEBUG_LOG(format, ...) NSLog(@"OPERATION: " format, ## __VA_ARGS__)
+#else
+#define APP_DELEGATE_DEBUG_LOG(format, ...)
+#endif
+
 @interface AppDelegate ()
 @property (atomic,assign) UIBackgroundTaskIdentifier backgroundOperationTask;
 @end
@@ -27,9 +33,9 @@
         NSLog(@"Failed to seed random color data: %@", error);
     }
     
-    self.isAppPerformingTasks = NO;
+    self.shouldPerformBackgroundTask = NO;
     self.backgroundOperationTask = UIBackgroundTaskInvalid;
-    [self addIsGeneratingThumbnailObserver];
+    [self registerShouldPerformBackgroundTaskObserver];
     
     return YES;
 }
@@ -55,57 +61,63 @@
 # pragma mark - Background tasks
 -(void)applicationDidEnterBackground:(UIApplication *)application;
 {
-    if (self.isAppPerformingTasks) {
+    APP_DELEGATE_DEBUG_LOG(@"Application did enter background");
+    
+    if (self.shouldPerformBackgroundTask) {
         NSAssert(self.backgroundOperationTask == UIBackgroundTaskInvalid, @"Should never take out two BG tasks for the one queue");
         
+        APP_DELEGATE_DEBUG_LOG(@"Starting background task");
         self.backgroundOperationTask = [application beginBackgroundTaskWithExpirationHandler:^{
-            [application endBackgroundTask:self.backgroundOperationTask];
-            self.backgroundOperationTask = UIBackgroundTaskInvalid;
+            [self endBackgroundTaskIfNecessary];
         }];
     }
 }
 
 -(void)applicationDidBecomeActive:(UIApplication *)application;
 {
+    APP_DELEGATE_DEBUG_LOG(@"Application did become active");
+    [self endBackgroundTaskIfNecessary];
+}
+
+-(void)endBackgroundTaskIfNecessary;
+{
     if (self.backgroundOperationTask != UIBackgroundTaskInvalid) {
-        [application endBackgroundTask:self.backgroundOperationTask];
+        APP_DELEGATE_DEBUG_LOG(@"Ending background task");
+        [[UIApplication sharedApplication] endBackgroundTask:self.backgroundOperationTask];
         self.backgroundOperationTask = UIBackgroundTaskInvalid;
     }
 }
 
-#pragma mark -  KVO on isGeneratingThumbnail
-static NSUInteger kIsGeneratingObserverContext;
--(void)addIsGeneratingThumbnailObserver;
+#pragma mark -  KVO on shouldPerformBackgroundTask
+
+static NSUInteger ShouldPerformBackgroundTaskContext;
+-(void)registerShouldPerformBackgroundTaskObserver;
 {
     [self addObserver:self
-           forKeyPath:NSStringFromSelector(@selector(isAppPerformingTasks))
+           forKeyPath:NSStringFromSelector(@selector(shouldPerformBackgroundTask))
               options:NSKeyValueObservingOptionNew
-              context:&kIsGeneratingObserverContext];
+              context:&ShouldPerformBackgroundTaskContext];
 
 }
 
 
 -(void)observeValueForKeyPath:(NSString *)keyPath ofObject:(id)object change:(NSDictionary *)change context:(void *)context;
 {
-    NSParameterAssert([object isKindOfClass:[AppDelegate class]]);
-    NSParameterAssert([keyPath isEqualToString:NSStringFromSelector(@selector(isAppPerformingTasks))]);
+    NSParameterAssert(object == self);
+    NSParameterAssert(context == &ShouldPerformBackgroundTaskContext);
+    NSParameterAssert([keyPath isEqualToString:NSStringFromSelector(@selector(shouldPerformBackgroundTask))]);
     
-    if (!self.isAppPerformingTasks)
+    if (!self.shouldPerformBackgroundTask )
     {
-        if (self.backgroundOperationTask != UIBackgroundTaskInvalid){
-            [[UIApplication sharedApplication] endBackgroundTask:self.backgroundOperationTask];
-            self.backgroundOperationTask = UIBackgroundTaskInvalid;
-
-        }
+        [self endBackgroundTaskIfNecessary];
     }
-    
 }
 
--(void)removeIsGeneratingThumbnailObserver;
+-(void)unregisterShouldPerformBackgroundTaskObserver;
 {
     [self removeObserver:self
-              forKeyPath:NSStringFromSelector(@selector(isAppPerformingTasks))
-                 context:&kIsGeneratingObserverContext];
+              forKeyPath:NSStringFromSelector(@selector(shouldPerformBackgroundTask))
+                 context:&ShouldPerformBackgroundTaskContext];
     
 }
 
@@ -113,7 +125,7 @@ static NSUInteger kIsGeneratingObserverContext;
 #pragma mark - clean up
 -(void)dealloc;
 {
-    [self removeIsGeneratingThumbnailObserver];
+    [self unregisterShouldPerformBackgroundTaskObserver];
 }
 
 @end
