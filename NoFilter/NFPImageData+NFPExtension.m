@@ -19,7 +19,7 @@
 
 @implementation NFPImageData (NFPExtension)
 
-+ (NFPImageData*)addImage:(UIImage*)image context:(NSManagedObjectContext*)context;
++ (void)addImage:(UIImage*)image context:(NSManagedObjectContext*)context;
 {
         
     NFPImageData* imageData =
@@ -36,7 +36,6 @@
     if (![context save:&error]){
         NSLog(@"Unable to insert new entity: %@",[error localizedDescription]);
     }
-    return imageData;
 }
 
 #pragma mark - Simplified accessors

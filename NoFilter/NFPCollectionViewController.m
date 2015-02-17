@@ -78,9 +78,9 @@ static NSString * const kDebugSegueIdentifier = @"debugSegue";
          initWithActivityIndicatorStyle:UIActivityIndicatorViewStyleGray];
     activityIndicatorView.translatesAutoresizingMaskIntoConstraints = NO;
     
-    // If there is no thumbnail, then the thumbnailGenerator is not yet finished
-    // with processing the raw image. Thus start the activity view animation
-    if (![self.thumbnailgenerator hasThumbnailAtIndex:indexPath.item]){
+    UIImage* thumbnail = [self.thumbnailgenerator thumbnailAtIndex:indexPath.item];
+    
+    if (!thumbnail){
         [cell.contentView addSubview:activityIndicatorView];
         
         // Perform auto-layout constraints. Center activityIndicatorView in cell
@@ -107,8 +107,8 @@ static NSString * const kDebugSegueIdentifier = @"debugSegue";
                                       initWithFrame:CGRectMake(0, 0, 100,100)];
         thumbnailView.contentMode = UIViewContentModeScaleAspectFit;
         thumbnailView.clipsToBounds = YES;
-        UIImage* thumbnail = [self.thumbnailgenerator
-                              thumbnailAtIndex:indexPath.item];
+//        UIImage* thumbnail = [self.thumbnailgenerator
+//                              thumbnailAtIndex:indexPath.item];
         thumbnailView.image = thumbnail;
         cell.contentView.clipsToBounds = YES;
         [cell.contentView addSubview:thumbnailView];

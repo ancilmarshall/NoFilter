@@ -97,26 +97,25 @@
 #pragma mark - Accessor methods
 -(UIImage*)thumbnailAtIndex:(NSUInteger)index;
 {
-    NFPImageData* imageData = [self.fetchedResultsController
-       objectAtIndexPath:[NSIndexPath indexPathForItem:index inSection:0]];
-                          
-    return imageData.thumbnail;
+    if ([[self imageDataAtIndex:index] hasThumbnail]){
+        return [[self imageDataAtIndex:index] thumbnail];
+    }
+    else {
+        [self startThumbnailGeneration:[self imageDataAtIndex:index]];
+        return nil;
+    }
 }
 
--(BOOL)hasThumbnailAtIndex:(NSUInteger)index;
+
+-(NFPImageData*)imageDataAtIndex:(NSUInteger)index;
 {
-    NFPImageData* imageData = [self.fetchedResultsController
-        objectAtIndexPath:[NSIndexPath indexPathForItem:index inSection:0]];
-    return imageData.hasThumbnail;
+    return [self.fetchedResultsController
+            objectAtIndexPath:[NSIndexPath indexPathForItem:index inSection:0]];
 }
 
 -(void)addImage:(UIImage *)image;
 {
-    
-    NFPImageData* imageData = [NFPImageData addImage:image context:self.childContext];
-    
-    // Start the thumbnail generation by adding to background queue
-    [self startThumbnailGeneration:imageData];
+    [NFPImageData addImage:image context:self.childContext];
 }
 
 #pragma mark - NSFetchedResultsControllerDelegate
@@ -167,14 +166,14 @@
 }
 
 #pragma mark - KVO 
-static NSUInteger kThumbnailGeneratorQueueObserverContext;
+static NSUInteger ThumbnailGeneratorQueueContext;
 
 -(void) addQueueObserver;
 {
     [self.thumbnailGeneratorQueue addObserver:self
                                    forKeyPath:NSStringFromSelector(@selector(operationCount))
                                       options:NSKeyValueObservingOptionNew
-                                      context:&kThumbnailGeneratorQueueObserverContext];
+                                      context:&ThumbnailGeneratorQueueContext];
     
 }
 
@@ -199,7 +198,7 @@ static NSUInteger kThumbnailGeneratorQueueObserverContext;
 {
     [self.thumbnailGeneratorQueue removeObserver:self
                                       forKeyPath:NSStringFromSelector(@selector(operationCount))
-                                         context:&kThumbnailGeneratorQueueObserverContext];
+                                         context:&ThumbnailGeneratorQueueContext];
 }
 
 
