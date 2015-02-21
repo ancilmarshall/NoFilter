@@ -15,6 +15,7 @@
 @property (strong, nonatomic) NFPImageManagedObjectContext* managedObjectContext;
 + (AppDelegate*) delegate;
 @property (nonatomic,assign) BOOL shouldPerformBackgroundTask;
+@property (nonatomic,strong) NSDictionary* webAppPlistDictionary;
 
 @end
 

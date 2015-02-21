@@ -37,6 +37,12 @@
     self.backgroundOperationTask = UIBackgroundTaskInvalid;
     [self registerShouldPerformBackgroundTaskObserver];
     
+    
+    NSURL* webAppPlistURL = [[NSBundle mainBundle] URLForResource:@"NoFilterWebApp" withExtension:@"plist"];
+    self.webAppPlistDictionary = [NSDictionary dictionaryWithContentsOfURL:webAppPlistURL];
+    
+    NSURL* serverBaseURL = [NSURL URLWithString:@"http://nofilter.pneumaticsystem.com/api/v1"];
+    
     return YES;
 }
 

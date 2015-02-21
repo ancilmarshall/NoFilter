@@ -119,7 +119,11 @@
 }
 
 #pragma mark - NSFetchedResultsControllerDelegate
-
+/*
+ *  NSFetchedResultsController responds to changes in its context through
+ *  this delegate. Changes such as additions, deletions, updates etc are observed
+ *  here.
+ */
 -(void) controllerWillChangeContent:(NSFetchedResultsController *)controller;
 {
 }
@@ -161,6 +165,7 @@
                   [error localizedDescription]);
         }
 
+        // reset the batchUpdateManager after completion
         self.batchUpdateManager = nil;
     }
 }
