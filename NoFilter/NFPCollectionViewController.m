@@ -14,7 +14,6 @@
 #import "BatchUpdateManager.h"
 #import "NFPServerManager.h"
 
-
 @interface NFPCollectionViewController () <NFPThumbnailGeneratorProtocol>
 @property (nonatomic,strong) NFPThumbnailGenerator* thumbnailgenerator;
 @property (nonatomic,strong) NFPServerManager* serverManager;

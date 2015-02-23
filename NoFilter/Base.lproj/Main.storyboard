@@ -2,12 +2,57 @@
 <document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="6254" systemVersion="14C109" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" initialViewController="mZ0-16-wDc">
     <dependencies>
         <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="6247"/>
+        <capability name="Constraints to layout margins" minToolsVersion="6.0"/>
     </dependencies>
     <scenes>
+        <!--Log Into NoFilter Client App-->
+        <scene sceneID="7ia-fO-doQ">
+            <objects>
+                <viewController storyboardIdentifier="Login" title="Log Into NoFilter Client App" id="JyG-tG-q4W" sceneMemberID="viewController">
+                    <layoutGuides>
+                        <viewControllerLayoutGuide type="top" id="J57-i9-Y9A"/>
+                        <viewControllerLayoutGuide type="bottom" id="JYC-uS-Qvm"/>
+                    </layoutGuides>
+                    <view key="view" contentMode="scaleToFill" id="olG-2f-DTD">
+                        <rect key="frame" x="0.0" y="0.0" width="600" height="600"/>
+                        <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                        <subviews>
+                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" textAlignment="center" lineBreakMode="tailTruncation" numberOfLines="2" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="Mjc-tb-Uj6">
+                                <rect key="frame" x="16" y="57" width="568" height="92"/>
+                                <string key="text">Welcome to the NoFilter Client App 
+Please enter your login details</string>
+                                <fontDescription key="fontDescription" type="system" pointSize="17"/>
+                                <color key="textColor" cocoaTouchSystemColor="darkTextColor"/>
+                                <nil key="highlightedColor"/>
+                            </label>
+                            <textField opaque="NO" clipsSubviews="YES" contentMode="scaleToFill" fixedFrame="YES" contentHorizontalAlignment="left" contentVerticalAlignment="center" borderStyle="roundedRect" placeholder="Username" minimumFontSize="17" clearButtonMode="always" translatesAutoresizingMaskIntoConstraints="NO" id="k6X-GH-W35">
+                                <rect key="frame" x="16" y="187" width="568" height="30"/>
+                                <fontDescription key="fontDescription" type="system" pointSize="14"/>
+                                <textInputTraits key="textInputTraits"/>
+                            </textField>
+                            <textField opaque="NO" clipsSubviews="YES" contentMode="scaleToFill" fixedFrame="YES" contentHorizontalAlignment="left" contentVerticalAlignment="center" borderStyle="roundedRect" placeholder="Password" minimumFontSize="17" clearButtonMode="always" translatesAutoresizingMaskIntoConstraints="NO" id="RZI-aN-Ori">
+                                <rect key="frame" x="16" y="238" width="568" height="30"/>
+                                <fontDescription key="fontDescription" type="system" pointSize="14"/>
+                                <textInputTraits key="textInputTraits" secureTextEntry="YES"/>
+                            </textField>
+                        </subviews>
+                        <color key="backgroundColor" red="0.0" green="0.47843137250000001" blue="1" alpha="1" colorSpace="calibratedRGB"/>
+                        <constraints>
+                            <constraint firstItem="Mjc-tb-Uj6" firstAttribute="top" secondItem="J57-i9-Y9A" secondAttribute="bottom" constant="37" id="Dm5-mv-30f"/>
+                            <constraint firstItem="Mjc-tb-Uj6" firstAttribute="leading" secondItem="olG-2f-DTD" secondAttribute="leadingMargin" id="bES-mY-pLE"/>
+                            <constraint firstItem="Mjc-tb-Uj6" firstAttribute="trailing" secondItem="olG-2f-DTD" secondAttribute="trailingMargin" id="c3T-aq-RZ7"/>
+                            <constraint firstItem="JYC-uS-Qvm" firstAttribute="top" secondItem="Mjc-tb-Uj6" secondAttribute="bottom" constant="451" id="ybN-cd-vuZ"/>
+                        </constraints>
+                    </view>
+                </viewController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="mlU-M2-Ali" userLabel="First Responder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="1891" y="392"/>
+        </scene>
         <!--Collection View Controller-->
         <scene sceneID="DAK-M6-Alq">
             <objects>
-                <collectionViewController id="M27-FK-AWi" customClass="NFPCollectionViewController" sceneMemberID="viewController">
+                <collectionViewController storyboardIdentifier="ThumbnailCollection" id="M27-FK-AWi" customClass="NFPCollectionViewController" sceneMemberID="viewController">
                     <collectionView key="view" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" dataMode="prototypes" id="dUy-Vk-Dkw">
                         <rect key="frame" x="0.0" y="0.0" width="600" height="600"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>

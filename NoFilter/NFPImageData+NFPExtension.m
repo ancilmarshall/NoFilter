@@ -36,6 +36,8 @@
     if (![context save:&error]){
         NSLog(@"Unable to insert new entity: %@",[error localizedDescription]);
     }
+    
+    
 }
 
 #pragma mark - Simplified accessors
