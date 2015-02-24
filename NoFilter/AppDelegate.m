@@ -17,6 +17,7 @@
 
 @interface AppDelegate ()
 @property (atomic,assign) UIBackgroundTaskIdentifier backgroundOperationTask;
+
 @end
 
 @implementation AppDelegate
@@ -37,6 +38,8 @@
     self.backgroundOperationTask = UIBackgroundTaskInvalid;
     [self registerShouldPerformBackgroundTaskObserver];
     
+    [self setRootViewControllerWithIdentifier:@"NFPLoginViewController"];
+    
     return YES;
 }
 
@@ -47,6 +50,19 @@
     NSAssert([delegate isKindOfClass:[AppDelegate class]], @"Expected to use our app delegate class");
     return (AppDelegate *)delegate;
 
+}
+
+- (void)setRootViewControllerWithIdentifier:(NSString*)identifier;
+{
+    
+    //then add the new view controller
+    UIStoryboard* storyboad = [UIStoryboard storyboardWithName:@"Main" bundle:nil];
+    UINavigationController* navController = [storyboad instantiateViewControllerWithIdentifier:identifier];
+    
+    dispatch_async(dispatch_get_main_queue(), ^{
+        self.window.rootViewController = navController;
+    });
+  
 }
 
 # pragma mark - CoreData helper functions

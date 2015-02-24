@@ -13,9 +13,12 @@
 
 @property (strong, nonatomic) UIWindow *window;
 @property (strong, nonatomic) NFPImageManagedObjectContext* managedObjectContext;
-+ (AppDelegate*) delegate;
 @property (nonatomic,assign) BOOL shouldPerformBackgroundTask;
 @property (nonatomic,strong) NSDictionary* webAppPlistDictionary;
+
+
++ (AppDelegate*) delegate;
+- (void)setRootViewControllerWithIdentifier:(NSString*)identifier;
 
 @end
 

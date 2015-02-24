@@ -9,13 +9,15 @@
 #import "NFPLoginViewController.h"
 #import "KeyChainManager.h"
 #import "NFPServerManager.h"
+#import "AppDelegate.h"
 
 static NSString* const kMissingInputErrorString = @"Missing Input";
 static NSString* const kDuplicateHostnameErrorString = @"Duplicate Hostname";
 
-@interface NFPLoginViewController () <UITextFieldDelegate, KeyChainManagerDelegate>
+@interface NFPLoginViewController () <UITextFieldDelegate, KeyChainManagerDelegate, NFPServerManagerProtocol>
 @property (nonatomic,weak) IBOutlet UITextField* usernameTextField;
 @property (nonatomic,weak) IBOutlet UITextField* passwordTextField;
+@property (weak, nonatomic) IBOutlet UIActivityIndicatorView *logonActivityIndicator;
 
 @property (nonatomic,strong) NSString* hostname;
 @property (nonatomic,strong) NSString* username;
@@ -31,9 +33,9 @@ static NSString* const kDuplicateHostnameErrorString = @"Duplicate Hostname";
 
 #pragma mark  - initalization
 
-- (instancetype)init;
+- (instancetype)initWithCoder:(NSCoder *)aDecoder;
 {
-    self = [super init];
+    self = [super initWithCoder:aDecoder];
     if (self){
         
         _keyChainManager = [KeyChainManager sharedInstance];
@@ -41,6 +43,10 @@ static NSString* const kDuplicateHostnameErrorString = @"Duplicate Hostname";
         
         _hostname = NFPServerHost;
         _username = [_keyChainManager usernameForHostname:_hostname];
+        
+        NSLog(@"Hostname: %@",_hostname);
+        NSLog(@"Username: %@",_username);
+        
         
     }
     return self;
@@ -55,7 +61,8 @@ static NSString* const kDuplicateHostnameErrorString = @"Duplicate Hostname";
     //TODO: what would happen if values were nil??
     self.usernameTextField.text = self.username;
     self.passwordTextField.text = [self.keyChainManager passwordForHostname:self.hostname];
-    
+    self.logonActivityIndicator.alpha = 0.0f;
+
 }
 
 #pragma mark - KeyChainManagerDelegate
@@ -63,11 +70,20 @@ static NSString* const kDuplicateHostnameErrorString = @"Duplicate Hostname";
 -(void)keyChainManagerDidUpdateItem;{}
 
 
+#pragma mark - NFPServerManagerDelegate
+-(void)tokenReceivedFromServer;
+{
+    [self.logonActivityIndicator stopAnimating];
+    self.logonActivityIndicator.alpha = 0.0f;
+    
+    [[AppDelegate delegate] setRootViewControllerWithIdentifier:@"NFPCollectionViewController"];
+    
+}
+
 #pragma mark - Navigation Segues
 
--(BOOL)shouldPerformSegueWithIdentifier:(NSString *)identifier sender:(id)sender;
+-(IBAction)logOnButtonPressed:(id)sender
 {
-    NSParameterAssert([identifier isEqualToString:@"postLoginSegue"]);
     
     NSString* inputHostname = NFPServerHost;
     NSString* inputUsername = self.usernameTextField.text;
@@ -76,7 +92,6 @@ static NSString* const kDuplicateHostnameErrorString = @"Duplicate Hostname";
     //validate input
     if (inputUsername == 0 || inputPassword == 0){
         [self showAlert:kMissingInputErrorString];
-        return NO;
     }
     
     //check for duplicate hostname in KeyChainManager database
@@ -90,9 +105,10 @@ static NSString* const kDuplicateHostnameErrorString = @"Duplicate Hostname";
     }
     
     self.serverManager = [NFPServerManager sharedInstance];
+    self.serverManager.delegate = self;
+    self.logonActivityIndicator.alpha = 1.0f;
+    [self.logonActivityIndicator startAnimating];
     
-    
-    return YES;
 }
 
 // show alert based on the error message

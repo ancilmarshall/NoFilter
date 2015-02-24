@@ -7,8 +7,20 @@
 //
 
 #import <Foundation/Foundation.h>
+extern NSString* const NFPServerHost;
+@protocol NFPServerManagerProtocol;
+
 
 @interface NFPServerManager : NSObject
+
+@property (nonatomic,weak) id<NFPServerManagerProtocol> delegate;
+
 +(instancetype) sharedInstance;
-extern NSString* const NFPServerHost;
+
+@end
+
+@protocol NFPServerManagerProtocol <NSObject>
+
+-(void)tokenReceivedFromServer;
+
 @end

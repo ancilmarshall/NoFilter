@@ -8,7 +8,7 @@
         <!--Log Into NoFilter Client App-->
         <scene sceneID="7ia-fO-doQ">
             <objects>
-                <viewController storyboardIdentifier="Login" title="Log Into NoFilter Client App" id="JyG-tG-q4W" customClass="NFPLoginViewController" sceneMemberID="viewController">
+                <viewController title="Log Into NoFilter Client App" id="JyG-tG-q4W" customClass="NFPLoginViewController" sceneMemberID="viewController">
                     <layoutGuides>
                         <viewControllerLayoutGuide type="top" id="J57-i9-Y9A"/>
                         <viewControllerLayoutGuide type="bottom" id="JYC-uS-Qvm"/>
@@ -19,17 +19,11 @@
                         <subviews>
                             <textField opaque="NO" clipsSubviews="YES" contentMode="scaleToFill" contentHorizontalAlignment="left" contentVerticalAlignment="center" borderStyle="roundedRect" placeholder="Username" minimumFontSize="17" clearButtonMode="always" translatesAutoresizingMaskIntoConstraints="NO" id="k6X-GH-W35">
                                 <rect key="frame" x="16" y="187" width="568" height="30"/>
-                                <constraints>
-                                    <constraint firstAttribute="height" constant="30" id="js7-qf-Jsb"/>
-                                </constraints>
                                 <fontDescription key="fontDescription" type="system" pointSize="14"/>
                                 <textInputTraits key="textInputTraits"/>
                             </textField>
                             <textField opaque="NO" clipsSubviews="YES" contentMode="scaleToFill" contentHorizontalAlignment="left" contentVerticalAlignment="center" borderStyle="roundedRect" placeholder="Password" minimumFontSize="17" clearButtonMode="always" translatesAutoresizingMaskIntoConstraints="NO" id="RZI-aN-Ori">
                                 <rect key="frame" x="16" y="238" width="568" height="30"/>
-                                <constraints>
-                                    <constraint firstAttribute="height" constant="30" id="xgt-eG-zPi"/>
-                                </constraints>
                                 <fontDescription key="fontDescription" type="system" pointSize="14"/>
                                 <textInputTraits key="textInputTraits" secureTextEntry="YES"/>
                             </textField>
@@ -40,11 +34,14 @@
                                     <color key="titleShadowColor" white="0.5" alpha="1" colorSpace="calibratedWhite"/>
                                 </state>
                                 <connections>
-                                    <segue destination="M27-FK-AWi" kind="show" identifier="postLoginSegue" id="9GD-bN-sle"/>
+                                    <action selector="logOnButtonPressed:" destination="JyG-tG-q4W" eventType="touchUpInside" id="o6r-WY-Kil"/>
                                 </connections>
                             </button>
+                            <activityIndicatorView opaque="NO" userInteractionEnabled="NO" contentMode="scaleToFill" horizontalHuggingPriority="750" verticalHuggingPriority="750" style="whiteLarge" translatesAutoresizingMaskIntoConstraints="NO" id="KaD-XJ-cz3">
+                                <rect key="frame" x="282" y="323" width="37" height="37"/>
+                            </activityIndicatorView>
                             <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" textAlignment="center" lineBreakMode="tailTruncation" numberOfLines="2" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="Mjc-tb-Uj6">
-                                <rect key="frame" x="16" y="101" width="568" height="48"/>
+                                <rect key="frame" x="163" y="93" width="275" height="41"/>
                                 <string key="text">Welcome to the NoFilter Client App 
 Please enter your login details</string>
                                 <fontDescription key="fontDescription" type="system" pointSize="17"/>
@@ -54,35 +51,35 @@ Please enter your login details</string>
                         </subviews>
                         <color key="backgroundColor" red="0.0" green="0.47843137250000001" blue="1" alpha="1" colorSpace="calibratedRGB"/>
                         <constraints>
-                            <constraint firstItem="gow-Lu-jHG" firstAttribute="leading" secondItem="olG-2f-DTD" secondAttribute="leading" constant="277" id="3F7-2y-vgP"/>
-                            <constraint firstItem="k6X-GH-W35" firstAttribute="leading" secondItem="RZI-aN-Ori" secondAttribute="leading" id="59X-fZ-Bpb"/>
-                            <constraint firstItem="k6X-GH-W35" firstAttribute="trailing" secondItem="RZI-aN-Ori" secondAttribute="trailing" id="DeG-17-FFo"/>
-                            <constraint firstItem="Mjc-tb-Uj6" firstAttribute="top" secondItem="J57-i9-Y9A" secondAttribute="bottom" constant="37" id="E2W-gL-VxA"/>
-                            <constraint firstItem="k6X-GH-W35" firstAttribute="top" secondItem="Mjc-tb-Uj6" secondAttribute="bottom" constant="38" id="IpN-l8-mZJ"/>
-                            <constraint firstItem="RZI-aN-Ori" firstAttribute="top" secondItem="k6X-GH-W35" secondAttribute="bottom" constant="21" id="J4Z-bD-ZpF"/>
-                            <constraint firstItem="RZI-aN-Ori" firstAttribute="trailing" secondItem="olG-2f-DTD" secondAttribute="trailingMargin" id="dHK-pr-bQU"/>
-                            <constraint firstItem="gow-Lu-jHG" firstAttribute="top" secondItem="RZI-aN-Ori" secondAttribute="bottom" constant="17" id="fLJ-O4-gFB"/>
-                            <constraint firstItem="k6X-GH-W35" firstAttribute="leading" secondItem="olG-2f-DTD" secondAttribute="leadingMargin" id="hIU-UW-mjv"/>
-                            <constraint firstItem="gow-Lu-jHG" firstAttribute="centerY" secondItem="olG-2f-DTD" secondAttribute="centerY" id="nUz-h7-pQg"/>
-                            <constraint firstItem="Mjc-tb-Uj6" firstAttribute="trailing" secondItem="k6X-GH-W35" secondAttribute="trailing" id="tDq-nG-Prt"/>
-                            <constraint firstItem="Mjc-tb-Uj6" firstAttribute="leading" secondItem="k6X-GH-W35" secondAttribute="leading" id="tXA-KS-YgD"/>
-                            <constraint firstItem="JYC-uS-Qvm" firstAttribute="top" secondItem="gow-Lu-jHG" secondAttribute="bottom" constant="285" id="zQh-Iw-XiP"/>
+                            <constraint firstItem="gow-Lu-jHG" firstAttribute="top" secondItem="RZI-aN-Ori" secondAttribute="bottom" constant="17" id="5V7-x4-XQt"/>
+                            <constraint firstItem="RZI-aN-Ori" firstAttribute="top" secondItem="k6X-GH-W35" secondAttribute="bottom" constant="21" id="Bd7-kP-3Hb"/>
+                            <constraint firstItem="k6X-GH-W35" firstAttribute="top" secondItem="Mjc-tb-Uj6" secondAttribute="bottom" constant="53" id="DSy-zg-0Oi"/>
+                            <constraint firstItem="KaD-XJ-cz3" firstAttribute="top" secondItem="gow-Lu-jHG" secondAttribute="bottom" constant="8" id="MHU-sn-O1r"/>
+                            <constraint firstAttribute="centerX" secondItem="gow-Lu-jHG" secondAttribute="centerX" constant="-2.5" id="R22-8S-ygW"/>
+                            <constraint firstItem="RZI-aN-Ori" firstAttribute="leading" secondItem="olG-2f-DTD" secondAttribute="leadingMargin" id="VrH-1t-Qf6"/>
+                            <constraint firstItem="k6X-GH-W35" firstAttribute="leading" secondItem="olG-2f-DTD" secondAttribute="leadingMargin" id="ZeY-vs-5ub"/>
+                            <constraint firstItem="RZI-aN-Ori" firstAttribute="trailing" secondItem="olG-2f-DTD" secondAttribute="trailingMargin" id="eVb-EJ-JT6"/>
+                            <constraint firstAttribute="centerX" secondItem="Mjc-tb-Uj6" secondAttribute="centerX" constant="-0.5" id="gjc-yl-Nkf"/>
+                            <constraint firstItem="k6X-GH-W35" firstAttribute="trailing" secondItem="olG-2f-DTD" secondAttribute="trailingMargin" id="mvi-z6-94I"/>
+                            <constraint firstItem="Mjc-tb-Uj6" firstAttribute="top" secondItem="J57-i9-Y9A" secondAttribute="bottom" constant="73" id="nij-qo-vhG"/>
+                            <constraint firstAttribute="centerX" secondItem="KaD-XJ-cz3" secondAttribute="centerX" id="yfT-RR-3pd"/>
                         </constraints>
                     </view>
                     <navigationItem key="navigationItem" id="l59-gB-P7H"/>
                     <connections>
+                        <outlet property="logonActivityIndicator" destination="KaD-XJ-cz3" id="fnh-FS-Wyk"/>
                         <outlet property="passwordTextField" destination="RZI-aN-Ori" id="ZZz-Lr-taM"/>
                         <outlet property="usernameTextField" destination="k6X-GH-W35" id="89c-ub-tOz"/>
                     </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="mlU-M2-Ali" userLabel="First Responder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="1171" y="1050"/>
+            <point key="canvasLocation" x="2705" y="358"/>
         </scene>
         <!--Collection View Controller-->
         <scene sceneID="DAK-M6-Alq">
             <objects>
-                <collectionViewController storyboardIdentifier="ThumbnailCollection" id="M27-FK-AWi" customClass="NFPCollectionViewController" sceneMemberID="viewController">
+                <collectionViewController id="M27-FK-AWi" customClass="NFPCollectionViewController" sceneMemberID="viewController">
                     <collectionView key="view" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" dataMode="prototypes" id="dUy-Vk-Dkw">
                         <rect key="frame" x="0.0" y="0.0" width="600" height="600"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
@@ -133,7 +130,7 @@ Please enter your login details</string>
                     </connections>
                 </pongPressGestureRecognizer>
             </objects>
-            <point key="canvasLocation" x="1893" y="1050"/>
+            <point key="canvasLocation" x="2705" y="1050"/>
         </scene>
         <!--Add Image Table View Controller-->
         <scene sceneID="UfB-hW-tPH">
@@ -167,7 +164,7 @@ Please enter your login details</string>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="u5Y-dA-gVT" userLabel="First Responder" sceneMemberID="firstResponder"/>
                 <exit id="pQs-Ue-e9c" userLabel="Exit" sceneMemberID="exit"/>
             </objects>
-            <point key="canvasLocation" x="3486" y="1050"/>
+            <point key="canvasLocation" x="4298" y="1050"/>
         </scene>
         <!--Navigation Controller-->
         <scene sceneID="YBK-Au-pNB">
@@ -179,13 +176,10 @@ Please enter your login details</string>
                         <autoresizingMask key="autoresizingMask"/>
                     </navigationBar>
                     <nil name="viewControllers"/>
-                    <connections>
-                        <segue destination="JyG-tG-q4W" kind="relationship" relationship="rootViewController" id="8Kb-ZT-GKP"/>
-                    </connections>
                 </navigationController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="UJk-Zr-BSq" userLabel="First Responder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="467" y="1050"/>
+            <point key="canvasLocation" x="511" y="1050"/>
         </scene>
         <!--Navigation Controller-->
         <scene sceneID="cg4-1n-Q5e">
@@ -203,7 +197,7 @@ Please enter your login details</string>
                 </navigationController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="NS1-ec-LLK" userLabel="First Responder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="2674" y="1050"/>
+            <point key="canvasLocation" x="3486" y="1050"/>
         </scene>
         <!--Debug View Controller-->
         <scene sceneID="s7V-Jn-Cng">
@@ -286,6 +280,42 @@ Please enter your login details</string>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="5Xr-2n-Aio" userLabel="First Responder" sceneMemberID="firstResponder"/>
             </objects>
             <point key="canvasLocation" x="1893" y="1768"/>
+        </scene>
+        <!--Navigation Controller-->
+        <scene sceneID="uXF-9W-bBq">
+            <objects>
+                <navigationController storyboardIdentifier="NFPCollectionViewController" automaticallyAdjustsScrollViewInsets="NO" id="SAP-bt-BYR" sceneMemberID="viewController">
+                    <toolbarItems/>
+                    <navigationBar key="navigationBar" contentMode="scaleToFill" id="Ds2-im-wTl">
+                        <rect key="frame" x="0.0" y="0.0" width="320" height="44"/>
+                        <autoresizingMask key="autoresizingMask"/>
+                    </navigationBar>
+                    <nil name="viewControllers"/>
+                    <connections>
+                        <segue destination="M27-FK-AWi" kind="relationship" relationship="rootViewController" id="Q0b-xY-FvW"/>
+                    </connections>
+                </navigationController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="ZCf-mZ-jQI" userLabel="First Responder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="1893" y="1050"/>
+        </scene>
+        <!--Navigation Controller-->
+        <scene sceneID="e9I-be-m1m">
+            <objects>
+                <navigationController storyboardIdentifier="NFPLoginViewController" automaticallyAdjustsScrollViewInsets="NO" id="sPb-iK-yHe" sceneMemberID="viewController">
+                    <toolbarItems/>
+                    <navigationBar key="navigationBar" contentMode="scaleToFill" id="hBF-2v-lfV">
+                        <rect key="frame" x="0.0" y="0.0" width="320" height="44"/>
+                        <autoresizingMask key="autoresizingMask"/>
+                    </navigationBar>
+                    <nil name="viewControllers"/>
+                    <connections>
+                        <segue destination="JyG-tG-q4W" kind="relationship" relationship="rootViewController" id="hRa-n8-U0u"/>
+                    </connections>
+                </navigationController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="xfN-9n-Usu" userLabel="First Responder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="1893" y="358"/>
         </scene>
     </scenes>
 </document>

@@ -106,7 +106,7 @@ NSString* const NFPServerHost = @"nofilter.pneumaticsystem.com";
                         if (jsonResp[@"success"]){
                             
                             self.token = jsonResp[@"result"][@"token"];
-                            NSLog(@"token is: %@",self.token);
+                            [self tokenRenewed];
                             
                         } else {
                             NSLog(@"Reponse data reports a failure");
@@ -127,9 +127,14 @@ NSString* const NFPServerHost = @"nofilter.pneumaticsystem.com";
         }];
     
     [task resume];
-    
-    
-    
+
+}
+
+-(void)tokenRenewed;
+{
+    NSLog(@"token is: %@",self.token);
+    [self.delegate tokenReceivedFromServer];
+
 }
 
 -(NSURLComponents*)NSURLComponentsFromEndpoint:(NSString*)endpoint queryItems:(NSArray*)queryItems;
