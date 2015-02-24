@@ -7,10 +7,11 @@
 //
 
 #import "NFPServerManager.h"
+#import "KeyChainManager.h"
 
 static NSString* const NFPServerScheme = @"http";
-static NSString* const NFPServerHost = @"nofilter.pneumaticsystem.com";
 static NSString* const NFPServerPath = @"/api/v1/";
+NSString* const NFPServerHost = @"nofilter.pneumaticsystem.com";
 
 
 @interface NFPServerManager()
@@ -58,6 +59,17 @@ static NSString* const NFPServerPath = @"/api/v1/";
     [queryItems addObject:[NSURLQueryItem
                            queryItemWithName:[NFPServerManager serverKeys][@"appSecret"]
                            value:self.clientPlistDict[[NFPServerManager serverKeys][@"appSecret"]]]];
+    
+    [queryItems addObject:[NSURLQueryItem
+                           queryItemWithName:[NFPServerManager serverKeys][@"username"]
+                           value:[[KeyChainManager sharedInstance] usernameForHostname:NFPServerHost]]];
+    
+    [queryItems addObject:[NSURLQueryItem
+                           queryItemWithName:[NFPServerManager serverKeys][@"password"]
+                           value:[[KeyChainManager sharedInstance] passwordForHostname:NFPServerHost]]];
+    
+    
+    
     
     NSURLComponents* URLcomponents =
         [self NSURLComponentsFromEndpoint:[NFPServerManager serverEndpoints][@"token"]

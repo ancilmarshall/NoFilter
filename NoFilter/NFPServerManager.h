@@ -10,4 +10,5 @@
 
 @interface NFPServerManager : NSObject
 +(instancetype) sharedInstance;
+extern NSString* const NFPServerHost;
 @end

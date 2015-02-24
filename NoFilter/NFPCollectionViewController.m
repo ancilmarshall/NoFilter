@@ -16,7 +16,7 @@
 
 @interface NFPCollectionViewController () <NFPThumbnailGeneratorProtocol>
 @property (nonatomic,strong) NFPThumbnailGenerator* thumbnailgenerator;
-@property (nonatomic,strong) NFPServerManager* serverManager;
+//@property (nonatomic,strong) NFPServerManager* serverManager;
 
 @end
 
@@ -36,7 +36,7 @@ static NSString * const kDebugSegueIdentifier = @"debugSegue";
     self.thumbnailgenerator = [NFPThumbnailGenerator sharedInstance];
     self.thumbnailgenerator.delegate = self;
     
-    self.serverManager = [NFPServerManager sharedInstance];
+//    self.serverManager = [NFPServerManager sharedInstance];
     
     // Register cell classes
     [self.collectionView registerClass:[UICollectionViewCell class]

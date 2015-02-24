@@ -27,7 +27,8 @@
 		1DBD528D1A741BEF00AAEDAD /* PhotoTableViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 1DBD528B1A741BEF00AAEDAD /* PhotoTableViewController.m */; };
 		1DC56B9D1A7D259400A1DB38 /* BatchUpdateManager.m in Sources */ = {isa = PBXBuildFile; fileRef = 1DC56B9C1A7D259400A1DB38 /* BatchUpdateManager.m */; };
 		1DC7C5931A9B636100B8F5C1 /* NFPServerManager.m in Sources */ = {isa = PBXBuildFile; fileRef = 1DC7C5921A9B636100B8F5C1 /* NFPServerManager.m */; };
-		1DC7C5961A9BABB400B8F5C1 /* NFPLoginViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 1DC7C5951A9BABB400B8F5C1 /* NFPLoginViewController.m */; };
+		1DC7C5991A9C6E8100B8F5C1 /* KeyChainManager.m in Sources */ = {isa = PBXBuildFile; fileRef = 1DC7C5981A9C6E8100B8F5C1 /* KeyChainManager.m */; };
+		1DC7C59C1A9C70EB00B8F5C1 /* NFPLoginViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 1DC7C59B1A9C70EB00B8F5C1 /* NFPLoginViewController.m */; };
 		1DD9728D1A7FE5C800B7752A /* NFPImageData.m in Sources */ = {isa = PBXBuildFile; fileRef = 1DD9728C1A7FE5C800B7752A /* NFPImageData.m */; };
 		1DF2B4D91A758D0400977E57 /* NFPDebugViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 1DF2B4D81A758D0400977E57 /* NFPDebugViewController.m */; };
 /* End PBXBuildFile section */
@@ -80,8 +81,10 @@
 		1DC56B9C1A7D259400A1DB38 /* BatchUpdateManager.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BatchUpdateManager.m; sourceTree = "<group>"; };
 		1DC7C5911A9B636100B8F5C1 /* NFPServerManager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = NFPServerManager.h; sourceTree = "<group>"; };
 		1DC7C5921A9B636100B8F5C1 /* NFPServerManager.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = NFPServerManager.m; sourceTree = "<group>"; };
-		1DC7C5941A9BABB400B8F5C1 /* NFPLoginViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = NFPLoginViewController.h; sourceTree = "<group>"; };
-		1DC7C5951A9BABB400B8F5C1 /* NFPLoginViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = NFPLoginViewController.m; sourceTree = "<group>"; };
+		1DC7C5971A9C6E8100B8F5C1 /* KeyChainManager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = KeyChainManager.h; sourceTree = "<group>"; };
+		1DC7C5981A9C6E8100B8F5C1 /* KeyChainManager.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = KeyChainManager.m; sourceTree = "<group>"; };
+		1DC7C59A1A9C70EB00B8F5C1 /* NFPLoginViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = NFPLoginViewController.h; sourceTree = "<group>"; };
+		1DC7C59B1A9C70EB00B8F5C1 /* NFPLoginViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = NFPLoginViewController.m; sourceTree = "<group>"; };
 		1DD9728B1A7FE5C800B7752A /* NFPImageData.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = NFPImageData.h; sourceTree = "<group>"; };
 		1DD9728C1A7FE5C800B7752A /* NFPImageData.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = NFPImageData.m; sourceTree = "<group>"; };
 		1DF2B4D71A758D0400977E57 /* NFPDebugViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = NFPDebugViewController.h; sourceTree = "<group>"; };
@@ -170,6 +173,8 @@
 		1DBD52741A738E2D00AAEDAD /* ViewControllers */ = {
 			isa = PBXGroup;
 			children = (
+				1DC7C59A1A9C70EB00B8F5C1 /* NFPLoginViewController.h */,
+				1DC7C59B1A9C70EB00B8F5C1 /* NFPLoginViewController.m */,
 				1DBD52881A741BEF00AAEDAD /* PhotoCollectionViewController.h */,
 				1DBD52891A741BEF00AAEDAD /* PhotoCollectionViewController.m */,
 				1DBD528A1A741BEF00AAEDAD /* PhotoTableViewController.h */,
@@ -180,8 +185,6 @@
 				1DBD52861A73DF3E00AAEDAD /* NFPAddImageTableViewController.m */,
 				1DF2B4D71A758D0400977E57 /* NFPDebugViewController.h */,
 				1DF2B4D81A758D0400977E57 /* NFPDebugViewController.m */,
-				1DC7C5941A9BABB400B8F5C1 /* NFPLoginViewController.h */,
-				1DC7C5951A9BABB400B8F5C1 /* NFPLoginViewController.m */,
 			);
 			name = ViewControllers;
 			sourceTree = "<group>";
@@ -213,6 +216,8 @@
 		1DC56B9A1A7D249500A1DB38 /* Utility */ = {
 			isa = PBXGroup;
 			children = (
+				1DC7C5971A9C6E8100B8F5C1 /* KeyChainManager.h */,
+				1DC7C5981A9C6E8100B8F5C1 /* KeyChainManager.m */,
 				1DC56B9B1A7D259400A1DB38 /* BatchUpdateManager.h */,
 				1DC56B9C1A7D259400A1DB38 /* BatchUpdateManager.m */,
 			);
@@ -327,16 +332,17 @@
 				1DBD52871A73DF3E00AAEDAD /* NFPAddImageTableViewController.m in Sources */,
 				1D4622721A69BEA7009C514A /* main.m in Sources */,
 				1DBD528D1A741BEF00AAEDAD /* PhotoTableViewController.m in Sources */,
-				1DC7C5961A9BABB400B8F5C1 /* NFPLoginViewController.m in Sources */,
 				1D42A4331A7AAA79004D45C4 /* NFPImageData+NFPExtension.m in Sources */,
 				1DC56B9D1A7D259400A1DB38 /* BatchUpdateManager.m in Sources */,
 				1DD9728D1A7FE5C800B7752A /* NFPImageData.m in Sources */,
 				1DB274ED1A991E45005AD0A6 /* NSData+NFExtensions.m in Sources */,
 				1DBD528C1A741BEF00AAEDAD /* PhotoCollectionViewController.m in Sources */,
+				1DC7C59C1A9C70EB00B8F5C1 /* NFPLoginViewController.m in Sources */,
 				1DC7C5931A9B636100B8F5C1 /* NFPServerManager.m in Sources */,
 				1DBD52781A738E8E00AAEDAD /* NFPCollectionViewController.m in Sources */,
 				1DF2B4D91A758D0400977E57 /* NFPDebugViewController.m in Sources */,
 				1D42A43C1A7B6821004D45C4 /* NFPImageManagedObjectContext.m in Sources */,
+				1DC7C5991A9C6E8100B8F5C1 /* KeyChainManager.m in Sources */,
 				1D42A4361A7B6599004D45C4 /* Model.xcdatamodeld in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
