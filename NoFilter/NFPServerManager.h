@@ -7,6 +7,8 @@
 //
 
 #import <Foundation/Foundation.h>
+#import <UIKit/UIKit.h>
+
 extern NSString* const NFPServerHost;
 @protocol NFPServerManagerProtocol;
 
@@ -16,6 +18,7 @@ extern NSString* const NFPServerHost;
 @property (nonatomic,weak) id<NFPServerManagerProtocol> delegate;
 
 +(instancetype) sharedInstance;
+-(void)uploadImage:(UIImage*)image;
 
 @end
 

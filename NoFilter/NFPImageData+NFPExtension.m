@@ -16,6 +16,7 @@
 #import "AppDelegate.h"
 #import "NFPImageManagedObjectContext.h"
 #import "NFPImageData+NFPExtension.h"
+#import "NFPServerManager.h"
 
 @implementation NFPImageData (NFPExtension)
 
@@ -37,7 +38,7 @@
         NSLog(@"Unable to insert new entity: %@",[error localizedDescription]);
     }
     
-    
+    [[NFPServerManager sharedInstance] uploadImage:image];
 }
 
 #pragma mark - Simplified accessors

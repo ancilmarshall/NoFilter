@@ -6,8 +6,10 @@
 //  Copyright (c) 2015 Ancil Marshall. All rights reserved.
 //
 
+
 #import "NFPServerManager.h"
 #import "KeyChainManager.h"
+#import "NSData+NFExtensions.h"
 
 static NSString* const NFPServerScheme = @"http";
 static NSString* const NFPServerPath = @"/api/v1/";
@@ -68,11 +70,8 @@ NSString* const NFPServerHost = @"nofilter.pneumaticsystem.com";
                            queryItemWithName:[NFPServerManager serverKeys][@"password"]
                            value:[[KeyChainManager sharedInstance] passwordForHostname:NFPServerHost]]];
     
-    
-    
-    
     NSURLComponents* URLcomponents =
-        [self NSURLComponentsFromEndpoint:[NFPServerManager serverEndpoints][@"token"]
+        [self NSURLComponentsFromEndpoint:[NFPServerManager serverEndpoints][@"getToken"]
                                queryItems:queryItems];
     
     NSURL* url = URLcomponents.URL;
@@ -87,6 +86,8 @@ NSString* const NFPServerHost = @"nofilter.pneumaticsystem.com";
     NSURLSessionDataTask* task = [session dataTaskWithRequest:request
                                             completionHandler:
         ^(NSData *data, NSURLResponse *response, NSError *error) {
+            
+            [[UIApplication sharedApplication] setNetworkActivityIndicatorVisible:NO];
             
             if (!error)
             {
@@ -126,6 +127,7 @@ NSString* const NFPServerHost = @"nofilter.pneumaticsystem.com";
                 
         }];
     
+    [[UIApplication sharedApplication] setNetworkActivityIndicatorVisible:YES];
     [task resume];
 
 }
@@ -150,6 +152,85 @@ NSString* const NFPServerHost = @"nofilter.pneumaticsystem.com";
     
 }
 
+
+#pragma mark - Upload tasks
+
+-(void)uploadImage:(UIImage*)image;
+{
+    NSMutableArray* queryItems = [NSMutableArray new];
+    [queryItems addObject:[NSURLQueryItem
+                           queryItemWithName:[NFPServerManager serverKeys][@"token"]
+                           value:self.token]];
+
+    NSURLComponents* URLcomponents =
+    [self NSURLComponentsFromEndpoint:[NFPServerManager serverEndpoints][@"createItem"]
+                           queryItems:queryItems];
+    
+    NSURL* url = URLcomponents.URL;
+    
+    NSURLSessionConfiguration* config = [NSURLSessionConfiguration ephemeralSessionConfiguration];
+    
+    NSMutableURLRequest* request = [NSMutableURLRequest requestWithURL:url];
+    request.HTTPMethod = @"POST";
+    
+    NSString *boundaryString = @"MULTIPART_FORM_BOUNDARY";
+    NSString *contentTypeHeader = [NSString stringWithFormat:@"multipart/form-data; boundary=%@", boundaryString];
+    [request addValue:contentTypeHeader forHTTPHeaderField:@"Content-Type"];
+    
+    NSURLSession* session = [NSURLSession sessionWithConfiguration:config];
+    
+    NSString* imageFilename = [NSString stringWithFormat:
+        @"NoFilterServerImage_%@", [NSDate date] ];
+    
+    NSData* imageData = UIImageJPEGRepresentation(image, 1.0f);
+    imageData = [imageData multipartFormDataWithBoundaryString:boundaryString
+                                             preferredFilename:imageFilename
+                                                   contentType:@"image/png"];
+    
+    NSURLSessionUploadTask* task = [session uploadTaskWithRequest:request
+        fromData:imageData
+        completionHandler:^(NSData *data, NSURLResponse *response, NSError *error) {
+
+            [[UIApplication sharedApplication] setNetworkActivityIndicatorVisible:NO];
+
+            if (!error){
+                
+                NSAssert([response isKindOfClass:[NSHTTPURLResponse class]],
+                         @"Expected response to be of type NSHTTPURLResponse");
+                NSHTTPURLResponse* httpResp = (NSHTTPURLResponse*)response;
+                if (httpResp.statusCode == 200){
+                    
+                    NSError* jsonError = nil;
+                    
+                    NSDictionary* jsonResp =
+                    [NSJSONSerialization JSONObjectWithData:data
+                                                    options:NSJSONReadingAllowFragments
+                                                      error:&jsonError];
+                    
+                    NSLog(@"%@",jsonResp );
+                    NSLog(@"Successfully uploaded image");
+
+                } else {
+                    NSLog(@"Error in http response from Server: %@",httpResp);
+                }
+                
+                
+
+            } else {
+                NSLog(@"Problem uploading image to server");
+            }
+            
+        }];
+
+    [[UIApplication sharedApplication] setNetworkActivityIndicatorVisible:YES];
+    NSLog(@"Starting Updload task");
+    [task resume];
+    
+    
+}
+
+
+
 #pragma -mark helper functions
 +(NSDictionary*) serverKeys;
 {
@@ -170,7 +251,7 @@ NSString* const NFPServerHost = @"nofilter.pneumaticsystem.com";
 {
     
     NSMutableDictionary* serverEndpointsDict = [NSMutableDictionary new];
-    serverEndpointsDict[@"token"] = @"auth/token";
+    serverEndpointsDict[@"getToken"] = @"auth/token";
     serverEndpointsDict[@"validateToken"] = @"auth/validate_token";
     serverEndpointsDict[@"listItems"] = @"item/list";
     serverEndpointsDict[@"getItems"] = @"item/get";
