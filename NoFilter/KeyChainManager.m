@@ -11,38 +11,11 @@
 // Use a kSecAttrLabel to specify all secure items  with this application
 static NSString* const kPasswordManagerAppLabel = @"NoFilterPasswordManagerApp";
 
-#pragma mark - Private KeychainItem object, used to store the hostname
-
-@interface KeyChainItem : NSObject
-
-@property (nonatomic,strong) NSString* hostname;
-
--(instancetype)initWithHostname:(NSString*)hostname NS_DESIGNATED_INITIALIZER;
-@end
-
-@implementation KeyChainItem
--(instancetype)initWithHostname:(NSString*)hostname;
-{
-    if (self = [super init]){
-        _hostname = hostname;
-    }
-    return self;
-}
-
-//overload the isEqual so that we can perform searches in an array of keyChainItems
-//only match the hostnames for equality
--(BOOL)isEqual:(KeyChainItem*)other
-{
-    return [self.hostname isEqual:other.hostname];
-    
-}
-@end
 
 #pragma mark - KeyChainManager
 
 @interface KeyChainManager()
-@property (nonatomic,strong) NSMutableArray* keyChainItems; // used to keep quickly
-    //keep track of items without need to search and use the KeyChain Services API
+@property (nonatomic,strong) NSMutableArray* usernames;
 @end
 
 @implementation KeyChainManager
@@ -70,7 +43,7 @@ static NSString* const kPasswordManagerAppLabel = @"NoFilterPasswordManagerApp";
 {
     self = [super init];
     if (self){
-        _keyChainItems = [NSMutableArray new];
+        _usernames = [NSMutableArray new];
         [self getAllkeyChainItems];
     }
     return self;
@@ -94,22 +67,12 @@ static NSString* const kPasswordManagerAppLabel = @"NoFilterPasswordManagerApp";
     if (result != NULL){
         NSArray* resultsArray = (__bridge NSArray*)result;
         
-//        for (NSDictionary* pair in resultsArray)
-//        {
-//            //only search for the kSecAttrServer attribute in the returned
-//            // dictionary which stores the hostname
-//            NSString* hostname =pair[(__bridge id)kSecAttrServer];
-//            KeyChainItem* item = [[KeyChainItem alloc] initWithHostname:hostname];
-//            [self.keyChainItems addObject:item];
-//        }
-        
-        // Try also using the block enumeration, just for fun
+        // Use the block enumeration, just for fun and practice
         [resultsArray enumerateObjectsUsingBlock:^(NSDictionary* pair, NSUInteger idx, BOOL *stop) {
-            //only search for the kSecAttrServer attribute in the returned
-            // dictionary which stores the hostname
-            NSString* hostname =pair[(__bridge id)kSecAttrServer];
-            KeyChainItem* item = [[KeyChainItem alloc] initWithHostname:hostname];
-            [self.keyChainItems addObject:item];
+            //only search for the kSecAttrAccount attribute in the returned
+            // dictionary which stores the username
+            NSString* username =pair[(__bridge id)kSecAttrAccount];
+            [self.usernames addObject:username];
         }];
         
     }
@@ -125,15 +88,12 @@ static NSString* const kPasswordManagerAppLabel = @"NoFilterPasswordManagerApp";
 
 #pragma mark - Accessors and Modifiers
 
--(OSStatus)addHostname:(NSString*)hostname username:(NSString*)username password:(NSString*)password;
+-(OSStatus)addUsername:(NSString*)username password:(NSString*)password;
 {
-    KeyChainItem* item = [[KeyChainItem alloc] initWithHostname:hostname];
-    [self.keyChainItems addObject:item];
     
     //perform secure keychain operations here
-    // Add three attributes and one value data
+    // Add two attributes and one value data
     NSDictionary* attributes = @{ (__bridge id)kSecClass : (__bridge id)kSecClassInternetPassword,
-                                  (__bridge id)kSecAttrServer : hostname,
                                   (__bridge id)kSecAttrAccount : username,
                                   (__bridge id)kSecAttrLabel : kPasswordManagerAppLabel,
                                   (__bridge id)kSecValueData : [password dataUsingEncoding:NSUTF8StringEncoding ]};
@@ -144,21 +104,18 @@ static NSString* const kPasswordManagerAppLabel = @"NoFilterPasswordManagerApp";
         [self KeyChainAssert:@"Error adding to KeyChainManager" status:status];
     }
     
-    //notify the delegate
-    [self.delegate keyChainManagerDidAddItem];
-    
+    [self.usernames addObject:username];
     return status;
 }
 
--(OSStatus)updateHostname:(NSString*)hostname username:(NSString*)username password:(NSString*)password;
+-(OSStatus)updateUsername:(NSString*)username password:(NSString*)password;
 {
-    KeyChainItem* newItem = [[KeyChainItem alloc] initWithHostname:hostname];
-    NSUInteger index = [self.keyChainItems indexOfObject:newItem];
-    [self.keyChainItems replaceObjectAtIndex:index withObject:newItem];
+    NSUInteger index = [self.usernames indexOfObject:username];
+    [self.usernames replaceObjectAtIndex:index withObject:username];
     
     //set up query to match the hostname and kCommonPasswordManagerAppLabel string
     NSDictionary* query = @{ (__bridge id)kSecClass : (__bridge id)kSecClassInternetPassword,
-                             (__bridge id)kSecAttrServer : hostname,
+                             (__bridge id)kSecAttrAccount : username,
                              (__bridge id)kSecAttrLabel : kPasswordManagerAppLabel};
     
     NSDictionary* attributes = @{ (__bridge id)kSecAttrAccount : username,
@@ -172,66 +129,20 @@ static NSString* const kPasswordManagerAppLabel = @"NoFilterPasswordManagerApp";
         [self KeyChainAssert:@"Error updating KeyChainManager" status:status];
     }
 
-    //notify the delegate that changes were made to the manager
-    [self.delegate keyChainManagerDidUpdateItem];
-
     return status;
 }
 
 
--(NSString*)hostnameForIndex:(NSInteger)index;
+-(NSString*)passwordForUsername:(NSString *)username;
 {
-    return [[self.keyChainItems objectAtIndex:index] hostname];
-}
-
--(NSString*)usernameForIndex:(NSInteger)index;
-{
-    NSString* hostname = [self hostnameForIndex:index];
-    return [self usernameForHostname:hostname];
-}
-
--(NSString*)usernameForHostname:(NSString*)hostname;
-{
+    NSAssert([self containsUsername:username],@"Username does not exist in KeyChainManager");
     
-    NSString* username;
-    
-    //set up query to match the hostname and kCommonPasswordManagerAppLabel string and
-    //return the attributes (clear text data)
-    NSDictionary* query =  @{ (__bridge id)kSecClass : (__bridge id)kSecClassInternetPassword,
-                              (__bridge id)kSecAttrServer : hostname ,
-                              (__bridge id)kSecAttrLabel : kPasswordManagerAppLabel,
-                              (__bridge id)kSecReturnAttributes : (__bridge id)kCFBooleanTrue};
-    
-    CFTypeRef result = NULL;
-    
-    OSStatus status = SecItemCopyMatching((__bridge CFDictionaryRef)query, &result);
-    
-    if (result !=NULL){
-        NSDictionary* resultDictionary = (__bridge NSDictionary*)result;
-        username = resultDictionary[(__bridge id)kSecAttrAccount];
-    }
-    if ( status != errSecSuccess)
-    {
-        [self KeyChainAssert:@"Error getting username" status:status];
-    }
-    
-    return username;
-}
-
--(NSString*)passwordForIndex:(NSInteger)index;
-{
-    NSString* hostname = [self hostnameForIndex:index];
-    return [self passwordForHostname:hostname];
-}
-
--(NSString*)passwordForHostname:(NSString *)hostname;
-{
     NSString* password;
-    
-    //set up query to match the hostname and kCommonPasswordManagerAppLabel string
+
+    //set up query to match the username and kCommonPasswordManagerAppLabel string
     // and return the secure data
     NSDictionary* query =  @{ (__bridge id)kSecClass : (__bridge id)kSecClassInternetPassword,
-                              (__bridge id)kSecAttrServer : hostname ,
+                              (__bridge id)kSecAttrAccount : username ,
                               (__bridge id)kSecAttrLabel : kPasswordManagerAppLabel,
                               (__bridge id)kSecReturnData : (__bridge id)kCFBooleanTrue};
     
@@ -251,17 +162,9 @@ static NSString* const kPasswordManagerAppLabel = @"NoFilterPasswordManagerApp";
 }
 
 
-#pragma mark - Helpers
-
--(NSInteger)count;
+-(BOOL)containsUsername:(NSString*)username;
 {
-    return [self.keyChainItems count];
-}
-
--(BOOL)containsHostname:(NSString*)hostname;
-{
-    KeyChainItem* item = [[KeyChainItem alloc] initWithHostname:hostname];
-    return [self.keyChainItems containsObject:item];
+    return [self.usernames containsObject:username];
 }
 
 -(void)KeyChainAssert:(NSString*)msg status:(OSStatus)status

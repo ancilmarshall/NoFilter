@@ -10,10 +10,11 @@
 #import "NFPServerManager.h"
 #import "KeyChainManager.h"
 #import "NSData+NFExtensions.h"
+#import "NFPLoginViewController.h"
 
 static NSString* const NFPServerScheme = @"http";
 static NSString* const NFPServerPath = @"/api/v1/";
-NSString* const NFPServerHost = @"nofilter.pneumaticsystem.com";
+static NSString* const NFPServerHost = @"nofilter.pneumaticsystem.com";
 
 
 @interface NFPServerManager()
@@ -43,15 +44,11 @@ NSString* const NFPServerHost = @"nofilter.pneumaticsystem.com";
         
         NSURL* clientPlistURL = [[NSBundle mainBundle] URLForResource:@"NoFilterWebApp" withExtension:@"plist"];
         self.clientPlistDict = [NSDictionary dictionaryWithContentsOfURL:clientPlistURL];
-        
-        [self renewToken];
-        
     }
     return self;
 }
 
-
--(void)renewToken;
+-(void)logonToServer;
 {
     NSMutableArray* queryItems = [NSMutableArray new];
     [queryItems addObject:[NSURLQueryItem
@@ -62,13 +59,14 @@ NSString* const NFPServerHost = @"nofilter.pneumaticsystem.com";
                            queryItemWithName:[NFPServerManager serverKeys][@"appSecret"]
                            value:self.clientPlistDict[[NFPServerManager serverKeys][@"appSecret"]]]];
     
+    NSString* username = [[NSUserDefaults standardUserDefaults] valueForKey:kUserDefaultUsername];
     [queryItems addObject:[NSURLQueryItem
                            queryItemWithName:[NFPServerManager serverKeys][@"username"]
-                           value:[[KeyChainManager sharedInstance] usernameForHostname:NFPServerHost]]];
+                           value:username]];
     
     [queryItems addObject:[NSURLQueryItem
                            queryItemWithName:[NFPServerManager serverKeys][@"password"]
-                           value:[[KeyChainManager sharedInstance] passwordForHostname:NFPServerHost]]];
+                           value:[[KeyChainManager sharedInstance] passwordForUsername:username]]];
     
     NSURLComponents* URLcomponents =
         [self NSURLComponentsFromEndpoint:[NFPServerManager serverEndpoints][@"getToken"]
@@ -104,25 +102,32 @@ NSString* const NFPServerHost = @"nofilter.pneumaticsystem.com";
                                                       error:&jsonError];
 
                     if (!jsonError){
-                        if (jsonResp[@"success"]){
-                            
+                        
+                        BOOL success = [(NSNumber*)jsonResp[@"success"] boolValue];
+                        if (success){
                             self.token = jsonResp[@"result"][@"token"];
-                            [self tokenRenewed];
+                            [self serverDidRespondWithSuccess:YES msg:nil];
                             
                         } else {
-                            NSLog(@"Reponse data reports a failure");
+                            [self serverDidRespondWithSuccess:NO
+                                                          msg:jsonResp[@"error"]];
+
                         }
                         
                     } else {
-                        NSLog(@"Error serializing json data in NFPServerManager -renewToken: %@",[jsonError localizedDescription]);
+                        [self serverDidRespondWithSuccess:NO
+                          msg:[NSString stringWithFormat:@"Error serializing JSON data: %@",[jsonError localizedDescription]]];
                     }
                 } else {
-                    NSLog(@"Error reported from NoFilter server during the NFPServerManager -renewToken function request");
+                    [self serverDidRespondWithSuccess:NO
+                      msg:[NSString stringWithFormat:
+                           @"Error in HTTP Repsonse with status code: %tu",httpResp.statusCode]];
                 }
                 
             } else {
-                NSLog(@"Error in NFPServerMangager -renewToken function: %@",
-                      [error localizedDescription]);
+                [self serverDidRespondWithSuccess:NO
+                  msg:[NSString stringWithFormat:@"Error in dataTaskWithRequest: %@",
+                       [error localizedDescription]]];
             }
                 
         }];
@@ -132,11 +137,11 @@ NSString* const NFPServerHost = @"nofilter.pneumaticsystem.com";
 
 }
 
--(void)tokenRenewed;
+-(void)serverDidRespondWithSuccess:(BOOL)success msg:(NSString*)msg;
 {
-    NSLog(@"token is: %@",self.token);
-    [self.delegate tokenReceivedFromServer];
-
+    dispatch_async(dispatch_get_main_queue(), ^{
+        [self.delegate NFPServerManagerDidCompleteWithSuccess:success msg:msg];
+    });
 }
 
 -(NSURLComponents*)NSURLComponentsFromEndpoint:(NSString*)endpoint queryItems:(NSArray*)queryItems;
@@ -244,6 +249,9 @@ NSString* const NFPServerHost = @"nofilter.pneumaticsystem.com";
     serverKeysDict[@"file"] = @"file";
     serverKeysDict[@"appName"] = @"app_name";
     serverKeysDict[@"appID"] = @"app_id";
+    serverKeysDict[@"success"] = @"success";
+    serverKeysDict[@"error"] = @"error";
+    serverKeysDict[@"request"] = @"request";
     return [NSDictionary dictionaryWithDictionary:serverKeysDict];
 }
 

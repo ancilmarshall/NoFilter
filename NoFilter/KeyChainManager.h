@@ -9,33 +9,15 @@
 #import <Foundation/Foundation.h>
 #import <UIKit/UIKit.h>
 
-@protocol KeyChainManagerDelegate;
 
 @interface KeyChainManager : NSObject
-@property (nonatomic,weak) id<KeyChainManagerDelegate> delegate;
 
 + (instancetype)sharedInstance; // for the singleton pattern
 
--(OSStatus)addHostname:(NSString*)hostname
-              username:(NSString*)username
-              password:(NSString*)password;
+-(OSStatus)addUsername:(NSString*)username password:(NSString*)password;
+-(OSStatus)updateUsername:(NSString*)username password:(NSString*)password;
+-(BOOL)containsUsername:(NSString*)username;
+-(NSString*)passwordForUsername:(NSString*)username;
 
--(OSStatus)updateHostname:(NSString*)hostname
-                 username:(NSString*)username
-                 password:(NSString*)password;
-
--(NSInteger)count;
--(BOOL)containsHostname:(NSString*)hostname;
--(NSString*)hostnameForIndex:(NSInteger)index;
--(NSString*)usernameForIndex:(NSInteger)index;
--(NSString*)passwordForIndex:(NSInteger)index;
-
--(NSString*)usernameForHostname:(NSString*)hostname;
--(NSString*)passwordForHostname:(NSString*)hostname;
 @end
 
-//define a delegate protocol to communicate with delegate when there are changes to manager
-@protocol KeyChainManagerDelegate <NSObject>
--(void)keyChainManagerDidAddItem;
--(void)keyChainManagerDidUpdateItem;
-@end

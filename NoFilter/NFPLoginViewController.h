@@ -8,7 +8,8 @@
 
 #import <UIKit/UIKit.h>
 
-@class KeyChainTableViewController;
+extern NSString* const kUserDefaultUsername;
+extern NSString* const kUserDefaultRememberLogin;
 
 @interface NFPLoginViewController : UIViewController
 

@@ -15,9 +15,11 @@
 #define APP_DELEGATE_DEBUG_LOG(format, ...)
 #endif
 
+extern NSString* const kUserDefaultUsername;
+extern NSString* const kUserDefaultRememberLogin;
+
 @interface AppDelegate ()
 @property (atomic,assign) UIBackgroundTaskIdentifier backgroundOperationTask;
-
 @end
 
 @implementation AppDelegate
@@ -39,6 +41,22 @@
     [self registerShouldPerformBackgroundTaskObserver];
     
     [self setRootViewControllerWithIdentifier:@"NFPLoginViewController"];
+    
+    
+    //setup user defaults and register with notification center to synchronize
+    [[NSUserDefaults standardUserDefaults]
+         registerDefaults:@{kUserDefaultUsername:@"",
+                            kUserDefaultRememberLogin:@(NO)}];
+    
+    [[NSNotificationCenter defaultCenter]
+         addObserverForName:NSUserDefaultsDidChangeNotification
+         object:[NSUserDefaults standardUserDefaults]
+         queue:[NSOperationQueue mainQueue]
+         usingBlock:^(NSNotification *note)
+         {
+             [[NSUserDefaults standardUserDefaults] synchronize];
+         }
+     ];
     
     return YES;
 }

@@ -9,7 +9,6 @@
 #import <Foundation/Foundation.h>
 #import <UIKit/UIKit.h>
 
-extern NSString* const NFPServerHost;
 @protocol NFPServerManagerProtocol;
 
 
@@ -19,11 +18,11 @@ extern NSString* const NFPServerHost;
 
 +(instancetype) sharedInstance;
 -(void)uploadImage:(UIImage*)image;
-
+-(void)logonToServer;
 @end
 
 @protocol NFPServerManagerProtocol <NSObject>
 
--(void)tokenReceivedFromServer;
+-(void)NFPServerManagerDidCompleteWithSuccess:(BOOL)success msg:(NSString*)msg;
 
 @end
