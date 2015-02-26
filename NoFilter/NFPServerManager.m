@@ -6,7 +6,6 @@
 //  Copyright (c) 2015 Ancil Marshall. All rights reserved.
 //
 
-
 #import "NFPServerManager.h"
 #import "KeyChainManager.h"
 #import "NSData+NFExtensions.h"
@@ -15,7 +14,6 @@
 static NSString* const NFPServerScheme = @"http";
 static NSString* const NFPServerPath = @"/api/v1/";
 static NSString* const NFPServerHost = @"nofilter.pneumaticsystem.com";
-
 
 @interface NFPServerManager()
 
@@ -53,7 +51,7 @@ static NSString* const NFPServerHost = @"nofilter.pneumaticsystem.com";
  */
 -(void)logonToServer;
 {
-    
+    // Setup the necessary URL query items to pass to the server endpoint for getting token
     NSMutableArray* queryItems = [NSMutableArray new];
     [queryItems addObject:[NSURLQueryItem
        queryItemWithName:[NFPServerManager serverKeys][@"appKey"]
@@ -63,6 +61,7 @@ static NSString* const NFPServerHost = @"nofilter.pneumaticsystem.com";
        queryItemWithName:[NFPServerManager serverKeys][@"appSecret"]
        value:self.clientPlistDict[[NFPServerManager serverKeys][@"appSecret"]]]];
     
+    // Always get username from the Standard User Defaults which should be set before
     NSString* username = [[NSUserDefaults standardUserDefaults]
                           valueForKey:kUserDefaultUsername];
     
@@ -74,12 +73,14 @@ static NSString* const NFPServerHost = @"nofilter.pneumaticsystem.com";
        queryItemWithName:[NFPServerManager serverKeys][@"password"]
        value:[[KeyChainManager sharedInstance] passwordForUsername:username]]];
 
+    // Call helper function to build URL component from host, server enpoint and query items
     NSURLComponents* URLcomponents =
         [self NSURLComponentsFromEndpoint:[NFPServerManager serverEndpoints][@"getToken"]
                                queryItems:queryItems];
     
     NSURL* url = URLcomponents.URL;
     
+    // Configure the NSURLSession
     NSURLSessionConfiguration* config = [NSURLSessionConfiguration ephemeralSessionConfiguration];
     
     NSMutableURLRequest* request = [NSMutableURLRequest requestWithURL:url];
@@ -87,6 +88,7 @@ static NSString* const NFPServerHost = @"nofilter.pneumaticsystem.com";
     
     NSURLSession* session = [NSURLSession sessionWithConfiguration:config];
     
+    // Call NSRULSession task and implement its completion handler
     NSURLSessionDataTask* task = [session dataTaskWithRequest:request
                                             completionHandler:
         ^(NSData *data, NSURLResponse *response, NSError *error) {
@@ -98,28 +100,30 @@ static NSString* const NFPServerHost = @"nofilter.pneumaticsystem.com";
                 NSAssert([response isKindOfClass:[NSHTTPURLResponse class]],
                          @"Expected response to be of type NSHTTPURLResponse");
                 NSHTTPURLResponse* httpResp = (NSHTTPURLResponse*)response;
+                
+                //Verify http response returns 'ok' i.e. status code 200
                 if (httpResp.statusCode == 200){
                     
+                    // Parse returned JSON data
                     NSError* jsonError = nil;
-                    
                     NSDictionary* jsonResp =
                     [NSJSONSerialization JSONObjectWithData:data
                                                     options:NSJSONReadingAllowFragments
                                                       error:&jsonError];
 
                     if (!jsonError){
-                        
+                        //Note JSON data returns objects. Convert success key's value to BOOL
                         BOOL success = [(NSNumber*)jsonResp[@"success"] boolValue];
                         if (success){
+                            
+                            //Update the cached token value to be used for other server calls
                             self.token = jsonResp[@"result"][@"token"];
                             [self taskDidRespondWithSuccess:YES msg:nil];
                             
                         } else {
                             [self taskDidRespondWithSuccess:NO
                                                           msg:jsonResp[@"error"]];
-
                         }
-                        
                     } else {
                         [self taskDidRespondWithSuccess:NO
                           msg:[NSString stringWithFormat:@"Error serializing JSON data: %@",[jsonError localizedDescription]]];
@@ -129,13 +133,11 @@ static NSString* const NFPServerHost = @"nofilter.pneumaticsystem.com";
                       msg:[NSString stringWithFormat:
                            @"Error in HTTP Repsonse. Status code: %tu",httpResp.statusCode]];
                 }
-                
             } else {
                 [self taskDidRespondWithSuccess:NO
                   msg:[NSString stringWithFormat:@"Error in dataTaskWithRequest: %@",
                        [error localizedDescription]]];
             }
-                
         }];
     
     [[UIApplication sharedApplication] setNetworkActivityIndicatorVisible:YES];
@@ -160,7 +162,6 @@ static NSString* const NFPServerHost = @"nofilter.pneumaticsystem.com";
     components.queryItems = queryItems;
     
     return  components;
-    
 }
 
 
@@ -168,17 +169,21 @@ static NSString* const NFPServerHost = @"nofilter.pneumaticsystem.com";
 
 -(void)uploadImage:(UIImage*)image;
 {
+    // Setup query items needed to upload image
     NSMutableArray* queryItems = [NSMutableArray new];
     [queryItems addObject:[NSURLQueryItem
                            queryItemWithName:[NFPServerManager serverKeys][@"token"]
                            value:self.token]];
 
+    // Get URL components
     NSURLComponents* URLcomponents =
     [self NSURLComponentsFromEndpoint:[NFPServerManager serverEndpoints][@"createItem"]
                            queryItems:queryItems];
     
     NSURL* url = URLcomponents.URL;
     
+    // Setup NSURLSession. Note that becuase the upload task uses a request, it needs
+    // to setup the multi-form encoding for the request that is used for the image data
     NSURLSessionConfiguration* config = [NSURLSessionConfiguration ephemeralSessionConfiguration];
     
     NSMutableURLRequest* request = [NSMutableURLRequest requestWithURL:url];
@@ -198,6 +203,7 @@ static NSString* const NFPServerHost = @"nofilter.pneumaticsystem.com";
                                              preferredFilename:imageFilename
                                                    contentType:@"image/png"];
     
+    // Perform upload task and implement completion handler
     NSURLSessionUploadTask* task = [session uploadTaskWithRequest:request
         fromData:imageData
         completionHandler:^(NSData *data, NSURLResponse *response, NSError *error) {
@@ -216,7 +222,6 @@ static NSString* const NFPServerHost = @"nofilter.pneumaticsystem.com";
 //                    [NSJSONSerialization JSONObjectWithData:data
 //                                                    options:NSJSONReadingAllowFragments
 //                                                      error:&jsonError];
-//
                 } else {
                     NSLog(@"Error in http response from Server: %@",httpResp);
                 }
