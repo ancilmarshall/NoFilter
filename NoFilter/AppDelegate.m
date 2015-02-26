@@ -9,7 +9,7 @@
 #import "AppDelegate.h"
 #import "NFPImageManagedObjectContext.h"
 
-#if 1 && defined(DEBUG)
+#if 0 && defined(DEBUG)
 #define APP_DELEGATE_DEBUG_LOG(format, ...) NSLog(@"OPERATION: " format, ## __VA_ARGS__)
 #else
 #define APP_DELEGATE_DEBUG_LOG(format, ...)

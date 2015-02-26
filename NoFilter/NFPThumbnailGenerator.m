@@ -63,11 +63,10 @@
         
         self.fetchedResultsController.delegate = self;
         
-        NSError *error = nil;
+        NSError* error;
         if (![self.fetchedResultsController performFetch:&error]) {
             NSLog(@"Failed to perform initial fetch: %@", error);
         }
-        
         
         // add KVO observer on the thumbnailGeneratorQueue
         [self addQueueObserver];
@@ -75,6 +74,7 @@
     }
     return self;
 }
+
 
 -(NSOperationQueue*)thumbnailGeneratorQueue;
 {

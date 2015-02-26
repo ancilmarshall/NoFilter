@@ -211,22 +211,15 @@ static NSString* const NFPServerHost = @"nofilter.pneumaticsystem.com";
                 NSHTTPURLResponse* httpResp = (NSHTTPURLResponse*)response;
                 if (httpResp.statusCode == 200){
                     
-                    NSError* jsonError = nil;
-                    
-                    NSDictionary* jsonResp =
-                    [NSJSONSerialization JSONObjectWithData:data
-                                                    options:NSJSONReadingAllowFragments
-                                                      error:&jsonError];
-                    
-                    NSLog(@"%@",jsonResp );
-                    NSLog(@"Successfully uploaded image");
-
+//                    NSError* jsonError = nil;
+//                    NSDictionary* jsonResp =
+//                    [NSJSONSerialization JSONObjectWithData:data
+//                                                    options:NSJSONReadingAllowFragments
+//                                                      error:&jsonError];
+//
                 } else {
                     NSLog(@"Error in http response from Server: %@",httpResp);
                 }
-                
-                
-
             } else {
                 NSLog(@"Problem uploading image to server");
             }
@@ -234,10 +227,7 @@ static NSString* const NFPServerHost = @"nofilter.pneumaticsystem.com";
         }];
 
     [[UIApplication sharedApplication] setNetworkActivityIndicatorVisible:YES];
-    NSLog(@"Starting Updload task");
     [task resume];
-    
-    
 }
 
 

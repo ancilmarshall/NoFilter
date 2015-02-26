@@ -21,12 +21,9 @@ NSString* const kUserDefaultRememberLogin = @"Remember Login";
 @property (nonatomic,weak) IBOutlet UITextField* passwordTextField;
 @property (weak, nonatomic) IBOutlet UIActivityIndicatorView *logonActivityIndicator;
 @property (weak, nonatomic) IBOutlet NSLayoutConstraint *usernameTextFieldConstraint;
-@property (weak, nonatomic) IBOutlet UILabel *welcomeMessage;
-
 @property (weak, nonatomic) IBOutlet UISwitch *rememberLoginSwitch;
 
 @property (nonatomic,strong) NSString* username;
-
 @property (nonatomic,strong) KeyChainManager* keyChainManager;
 @property (nonatomic,strong) NFPServerManager* serverManager;
 @property (nonatomic,strong) NSUserDefaults* defaults;
@@ -35,7 +32,6 @@ NSString* const kUserDefaultRememberLogin = @"Remember Login";
 @end
 
 @implementation NFPLoginViewController
-
 
 #pragma mark  - initalization
 
@@ -51,7 +47,7 @@ NSString* const kUserDefaultRememberLogin = @"Remember Login";
     self.rememberLogin = [[self.defaults valueForKey:kUserDefaultRememberLogin] boolValue];
     self.rememberLoginSwitch.on = self.rememberLogin;
     
-    //update text field 
+    //update input text fields
     if (self.rememberLogin){
         self.usernameTextField.text = self.username;
         self.passwordTextField.text = [self.keyChainManager
@@ -100,13 +96,24 @@ NSString* const kUserDefaultRememberLogin = @"Remember Login";
     self.logonActivityIndicator.alpha  = 0.0f;
     
     if (success){
+        //TODO: this is taking a long time on my device when it has many images in the collection
+        //view. Need to figure out how to speed up this process.
         [[AppDelegate delegate] setRootViewControllerWithIdentifier:@"NFPCollectionViewController"];
     } else {
         [self showAlert:msg];
     }
 }
 
-#pragma mark - Navigation Segues
+#pragma mark - Remember Login
+-(IBAction)rememberLoginButtonPressed:(UISwitch*)sender;
+{
+    NSParameterAssert(sender == self.rememberLoginSwitch);
+    BOOL switchValue = self.rememberLoginSwitch.isOn;
+    [self.defaults setValue:@(switchValue) forKey:kUserDefaultRememberLogin];
+    
+}
+
+#pragma mark - Login to Server
 
 -(IBAction)logOnButtonPressed:(id)sender
 {
@@ -217,13 +224,6 @@ NSString* const kUserDefaultRememberLogin = @"Remember Login";
     return YES;
 }
 
-#pragma mark - Remember Login 
--(IBAction)rememberLoginButtonPressed:(UISwitch*)sender;
-{
-    NSParameterAssert(sender == self.rememberLoginSwitch);
-    BOOL switchValue = self.rememberLoginSwitch.isOn;
-    [self.defaults setValue:@(switchValue) forKey:kUserDefaultRememberLogin];
-    
-}
+
 
 @end
