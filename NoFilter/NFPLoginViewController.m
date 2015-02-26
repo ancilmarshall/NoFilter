@@ -21,6 +21,8 @@ NSString* const kUserDefaultRememberLogin = @"Remember Login";
 @property (nonatomic,weak) IBOutlet UITextField* passwordTextField;
 @property (weak, nonatomic) IBOutlet UIActivityIndicatorView *logonActivityIndicator;
 @property (weak, nonatomic) IBOutlet NSLayoutConstraint *usernameTextFieldConstraint;
+@property (weak, nonatomic) IBOutlet UILabel *welcomeMessage;
+
 @property (weak, nonatomic) IBOutlet UISwitch *rememberLoginSwitch;
 
 @property (nonatomic,strong) NSString* username;
@@ -41,14 +43,15 @@ NSString* const kUserDefaultRememberLogin = @"Remember Login";
     [super viewDidLoad];
     
     self.navigationItem.title = @"NoFilter Client Log In";
-    
+    self.navigationController.view.backgroundColor = [UIColor whiteColor];
     self.keyChainManager = [KeyChainManager sharedInstance];
     
     self.defaults = [NSUserDefaults standardUserDefaults];
     self.username = [self.defaults valueForKey:kUserDefaultUsername];
     self.rememberLogin = [[self.defaults valueForKey:kUserDefaultRememberLogin] boolValue];
+    self.rememberLoginSwitch.on = self.rememberLogin;
     
-    //update text field (if the values are non-nil)
+    //update text field 
     if (self.rememberLogin){
         self.usernameTextField.text = self.username;
         self.passwordTextField.text = [self.keyChainManager
@@ -58,23 +61,25 @@ NSString* const kUserDefaultRememberLogin = @"Remember Login";
         self.passwordTextField.text = @"";
     }
     self.logonActivityIndicator.alpha = 0.0f;
+
+    self.serverManager = [NFPServerManager sharedInstance];
+    self.serverManager.delegate = self;
     
     //simple animation effects
     self.usernameTextField.alpha = 0.1;
     self.passwordTextField.alpha = 0.1;
-    self.usernameTextField.translatesAutoresizingMaskIntoConstraints = NO;
+    [self.view layoutIfNeeded];
+    self.usernameTextFieldConstraint.constant =+30;
+
     [UIView animateWithDuration:0.5
-                          delay:0.0
+                          delay:0.1
                         options:UIViewAnimationOptionCurveEaseIn
                      animations:^{
                          self.usernameTextField.alpha = 1.0f;
                          self.passwordTextField.alpha = 1.0f;
-                         self.usernameTextFieldConstraint.constant += 10;
+                         [self.view layoutIfNeeded];
                      } completion:nil];
     
-    self.serverManager = [NFPServerManager sharedInstance];
-    self.serverManager.delegate = self;
-
 }
 
 #pragma mark - NFPServerManagerDelegate
@@ -83,11 +88,12 @@ NSString* const kUserDefaultRememberLogin = @"Remember Login";
     [self.logonActivityIndicator stopAnimating];
     self.logonActivityIndicator.alpha = 0.0f;
     
-    [[AppDelegate delegate] setRootViewControllerWithIdentifier:@"NFPCollectionViewController"];
+    [[AppDelegate delegate]
+        setRootViewControllerWithIdentifier:@"NFPCollectionViewController"];
     
 }
 
--(void)NFPServerManagerDidCompleteWithSuccess:(BOOL)success msg:(NSString *)msg;
+-(void)NFPServerManagerSessionDidCompleteWithSuccess:(BOOL)success msg:(NSString *)msg;
 {
     NSAssert([NSThread isMainThread],@"Need to be on the Main Thread");
     [self.logonActivityIndicator stopAnimating];
@@ -104,6 +110,7 @@ NSString* const kUserDefaultRememberLogin = @"Remember Login";
 
 -(IBAction)logOnButtonPressed:(id)sender
 {
+    [self.view endEditing:YES]; //dismiss the keyboard
     
     NSString* inputUsername = self.usernameTextField.text;
     NSString* inputPassword = self.passwordTextField.text;
@@ -114,14 +121,15 @@ NSString* const kUserDefaultRememberLogin = @"Remember Login";
         return;
     }
     
-    
+    //add new username & password pair if username not already in key chain
     if (![self.keyChainManager containsUsername:inputUsername] )
     {
         [self.keyChainManager addUsername:inputUsername
                                  password:inputPassword];
         
-    } else {
-        if (![inputPassword isEqualToString:[self.keyChainManager passwordForUsername:inputUsername]]){
+    } else { // validate that username and password pair matches
+        if (![inputPassword isEqualToString:[self.keyChainManager
+                                             passwordForUsername:inputUsername]]){
             [self showAlert:kIncorrectPassword]; //ask user if he would like to override
             return; //let alert determine what function to call next
         }
@@ -163,7 +171,7 @@ NSString* const kUserDefaultRememberLogin = @"Remember Login";
     }
     else if ([errMsg isEqualToString:kIncorrectPassword])
     {
-        alertController.title = @"Keychain username/password does not match";
+        alertController.title = @"Username & password does not match";
         alertController.message = @"Do you want to update Keychain?";
         
         UIAlertAction* cancelAction = [UIAlertAction actionWithTitle:@"No"
@@ -177,8 +185,6 @@ NSString* const kUserDefaultRememberLogin = @"Remember Login";
         {
             [self.keyChainManager updateUsername:self.usernameTextField.text
                                         password:self.passwordTextField.text];
-            
-            [self dismissViewControllerAnimated:YES completion:nil];
             [self logonToServer];
 
         }];
@@ -194,8 +200,6 @@ NSString* const kUserDefaultRememberLogin = @"Remember Login";
         UIAlertAction* okAction = [UIAlertAction actionWithTitle:@"OK"
                                                            style:UIAlertActionStyleDefault
                                                          handler:^(UIAlertAction *action) {
-//                                                             [self dismissViewControllerAnimated:YES completion:nil];
-
                                                          }];
         
         [alertController addAction:okAction];
@@ -211,6 +215,15 @@ NSString* const kUserDefaultRememberLogin = @"Remember Login";
 {
     [textField resignFirstResponder];
     return YES;
+}
+
+#pragma mark - Remember Login 
+-(IBAction)rememberLoginButtonPressed:(UISwitch*)sender;
+{
+    NSParameterAssert(sender == self.rememberLoginSwitch);
+    BOOL switchValue = self.rememberLoginSwitch.isOn;
+    [self.defaults setValue:@(switchValue) forKey:kUserDefaultRememberLogin];
+    
 }
 
 @end

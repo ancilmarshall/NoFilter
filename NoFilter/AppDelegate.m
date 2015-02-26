@@ -58,6 +58,11 @@ extern NSString* const kUserDefaultRememberLogin;
          }
      ];
     
+    
+    [[UINavigationBar appearance] setBarStyle:UIBarStyleBlackOpaque];
+    [[UINavigationBar appearance] setBarTintColor:[UIColor blueColor]];
+
+    
     return YES;
 }
 
@@ -78,7 +83,17 @@ extern NSString* const kUserDefaultRememberLogin;
     UINavigationController* navController = [storyboad instantiateViewControllerWithIdentifier:identifier];
     
     dispatch_async(dispatch_get_main_queue(), ^{
-        self.window.rootViewController = navController;
+//        [((UINavigationController*)self.window.rootViewController) pushViewController:navController.topViewController animated:YES];
+    
+        if ([identifier isEqualToString:@"NFPLoginViewController.h"]){
+            [((UINavigationController*)self.window.rootViewController)
+                setViewControllers:@[navController.topViewController] animated:NO];
+            
+        } else {
+            [((UINavigationController*)self.window.rootViewController)
+                setViewControllers:@[navController.topViewController] animated:YES];
+        }
+        
     });
   
 }

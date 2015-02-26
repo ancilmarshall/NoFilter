@@ -48,26 +48,32 @@ static NSString* const NFPServerHost = @"nofilter.pneumaticsystem.com";
     return self;
 }
 
+/*
+ * Get a token from the server and cache the results
+ */
 -(void)logonToServer;
 {
+    
     NSMutableArray* queryItems = [NSMutableArray new];
     [queryItems addObject:[NSURLQueryItem
-                   queryItemWithName:[NFPServerManager serverKeys][@"appKey"]
-                   value:self.clientPlistDict[[NFPServerManager serverKeys][@"appKey"]]]];
+       queryItemWithName:[NFPServerManager serverKeys][@"appKey"]
+       value:self.clientPlistDict[[NFPServerManager serverKeys][@"appKey"]]]];
     
     [queryItems addObject:[NSURLQueryItem
-                           queryItemWithName:[NFPServerManager serverKeys][@"appSecret"]
-                           value:self.clientPlistDict[[NFPServerManager serverKeys][@"appSecret"]]]];
+       queryItemWithName:[NFPServerManager serverKeys][@"appSecret"]
+       value:self.clientPlistDict[[NFPServerManager serverKeys][@"appSecret"]]]];
     
-    NSString* username = [[NSUserDefaults standardUserDefaults] valueForKey:kUserDefaultUsername];
-    [queryItems addObject:[NSURLQueryItem
-                           queryItemWithName:[NFPServerManager serverKeys][@"username"]
-                           value:username]];
+    NSString* username = [[NSUserDefaults standardUserDefaults]
+                          valueForKey:kUserDefaultUsername];
     
     [queryItems addObject:[NSURLQueryItem
-                           queryItemWithName:[NFPServerManager serverKeys][@"password"]
-                           value:[[KeyChainManager sharedInstance] passwordForUsername:username]]];
+       queryItemWithName:[NFPServerManager serverKeys][@"username"]
+       value:username]];
     
+    [queryItems addObject:[NSURLQueryItem
+       queryItemWithName:[NFPServerManager serverKeys][@"password"]
+       value:[[KeyChainManager sharedInstance] passwordForUsername:username]]];
+
     NSURLComponents* URLcomponents =
         [self NSURLComponentsFromEndpoint:[NFPServerManager serverEndpoints][@"getToken"]
                                queryItems:queryItems];
@@ -106,26 +112,26 @@ static NSString* const NFPServerHost = @"nofilter.pneumaticsystem.com";
                         BOOL success = [(NSNumber*)jsonResp[@"success"] boolValue];
                         if (success){
                             self.token = jsonResp[@"result"][@"token"];
-                            [self serverDidRespondWithSuccess:YES msg:nil];
+                            [self taskDidRespondWithSuccess:YES msg:nil];
                             
                         } else {
-                            [self serverDidRespondWithSuccess:NO
+                            [self taskDidRespondWithSuccess:NO
                                                           msg:jsonResp[@"error"]];
 
                         }
                         
                     } else {
-                        [self serverDidRespondWithSuccess:NO
+                        [self taskDidRespondWithSuccess:NO
                           msg:[NSString stringWithFormat:@"Error serializing JSON data: %@",[jsonError localizedDescription]]];
                     }
                 } else {
-                    [self serverDidRespondWithSuccess:NO
+                    [self taskDidRespondWithSuccess:NO
                       msg:[NSString stringWithFormat:
-                           @"Error in HTTP Repsonse with status code: %tu",httpResp.statusCode]];
+                           @"Error in HTTP Repsonse. Status code: %tu",httpResp.statusCode]];
                 }
                 
             } else {
-                [self serverDidRespondWithSuccess:NO
+                [self taskDidRespondWithSuccess:NO
                   msg:[NSString stringWithFormat:@"Error in dataTaskWithRequest: %@",
                        [error localizedDescription]]];
             }
@@ -137,10 +143,10 @@ static NSString* const NFPServerHost = @"nofilter.pneumaticsystem.com";
 
 }
 
--(void)serverDidRespondWithSuccess:(BOOL)success msg:(NSString*)msg;
+-(void)taskDidRespondWithSuccess:(BOOL)success msg:(NSString*)msg;
 {
     dispatch_async(dispatch_get_main_queue(), ^{
-        [self.delegate NFPServerManagerDidCompleteWithSuccess:success msg:msg];
+        [self.delegate NFPServerManagerSessionDidCompleteWithSuccess:success msg:msg];
     });
 }
 

@@ -15,14 +15,13 @@
 @interface NFPServerManager : NSObject
 
 @property (nonatomic,weak) id<NFPServerManagerProtocol> delegate;
-
 +(instancetype) sharedInstance;
--(void)uploadImage:(UIImage*)image;
 -(void)logonToServer;
+-(void)uploadImage:(UIImage*)image;
 @end
 
 @protocol NFPServerManagerProtocol <NSObject>
 
--(void)NFPServerManagerDidCompleteWithSuccess:(BOOL)success msg:(NSString*)msg;
+-(void)NFPServerManagerSessionDidCompleteWithSuccess:(BOOL)success msg:(NSString*)msg;
 
 @end
