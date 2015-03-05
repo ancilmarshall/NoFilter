@@ -63,7 +63,6 @@
             NSLog(@"Error saving thumbnail to NFPImageData: %@",
                   [error localizedDescription]);
         }
-        
     }];
     
 }

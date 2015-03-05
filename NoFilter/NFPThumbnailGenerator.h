@@ -18,6 +18,7 @@
 +(instancetype) sharedInstance;
 -(UIImage*) thumbnailAtIndex:(NSUInteger)index;
 -(void) addImage:(UIImage*)image;
+-(void)addDownloadedImage:(UIImage*)image withID:(NSUInteger)imageID;
 -(NSUInteger) count;
 -(void) performRegenerationOfAllThumbnails;
 -(void) clearAllThumbnails;

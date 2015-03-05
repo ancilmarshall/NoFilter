@@ -10,14 +10,16 @@
 #import <UIKit/UIKit.h>
 
 @protocol NFPServerManagerProtocol;
-
+@class NFPImageData;
 
 @interface NFPServerManager : NSObject
 
 @property (nonatomic,weak) id<NFPServerManagerProtocol> delegate;
 +(instancetype) sharedInstance;
 -(void)logonToServer;
--(void)uploadImage:(UIImage*)image;
+-(void)uploadImage:(NFPImageData*)imageData context:(NSManagedObjectContext*)context;
+-(void) getItemList;
+
 @end
 
 @protocol NFPServerManagerProtocol <NSObject>

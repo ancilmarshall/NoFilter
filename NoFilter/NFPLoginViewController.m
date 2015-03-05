@@ -153,6 +153,7 @@ NSString* const kUserDefaultRememberLogin = @"Remember Login";
     [self.logonActivityIndicator startAnimating];
     
     [self.serverManager logonToServer];
+
    
 }
 

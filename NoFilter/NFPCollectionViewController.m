@@ -35,6 +35,7 @@ static NSString * const kDebugSegueIdentifier = @"debugSegue";
     self.thumbnailgenerator = [NFPThumbnailGenerator sharedInstance];
     self.thumbnailgenerator.delegate = self;
     
+    
     // Register cell classes
     [self.collectionView registerClass:[UICollectionViewCell class]
             forCellWithReuseIdentifier:reuseIdentifier];

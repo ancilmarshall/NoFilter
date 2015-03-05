@@ -3,10 +3,11 @@
     <entity name="NFPImageData" representedClassName="NFPImageData" syncable="YES">
         <attribute name="dateCreated" attributeType="Date" syncable="YES"/>
         <attribute name="hasThumbnailNumber" attributeType="Boolean" syncable="YES"/>
+        <attribute name="id" optional="YES" attributeType="Integer 16" defaultValueString="0" syncable="YES"/>
         <attribute name="imageData" attributeType="Binary" storedInTruthFile="YES" syncable="YES"/>
         <attribute name="thumbnailData" attributeType="Binary" storedInTruthFile="YES" syncable="YES"/>
     </entity>
     <elements>
-        <element name="NFPImageData" positionX="-63" positionY="-18" width="128" height="103"/>
+        <element name="NFPImageData" positionX="-63" positionY="-18" width="128" height="118"/>
     </elements>
 </model>

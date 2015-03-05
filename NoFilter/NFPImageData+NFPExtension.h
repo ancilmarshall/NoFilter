@@ -9,8 +9,9 @@
 #import "NFPImageData.h"
 
 @interface NFPImageData (NFPExtension)
-+ (void) addImage:(UIImage*)image context:(NSManagedObjectContext*)context;
++ (NFPImageData*) addImage:(UIImage*)image context:(NSManagedObjectContext*)context;
 @property (nonatomic,assign) BOOL hasThumbnail;
 @property (nonatomic,strong) UIImage* image;
 @property (nonatomic,strong) UIImage* thumbnail;
+@property (nonatomic,assign) NSUInteger imageID;
 @end

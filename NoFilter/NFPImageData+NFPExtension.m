@@ -16,11 +16,10 @@
 #import "AppDelegate.h"
 #import "NFPImageManagedObjectContext.h"
 #import "NFPImageData+NFPExtension.h"
-#import "NFPServerManager.h"
 
 @implementation NFPImageData (NFPExtension)
 
-+ (void)addImage:(UIImage*)image context:(NSManagedObjectContext*)context;
++ (NFPImageData*)addImage:(UIImage*)image context:(NSManagedObjectContext*)context;
 {
         
     NFPImageData* imageData =
@@ -32,13 +31,15 @@
     imageData.thumbnail =  nil;
     imageData.hasThumbnail = NO;
     imageData.dateCreated = [NSDate date];
+    imageData.imageID = 0;
     
     NSError* error;
     if (![context save:&error]){
         NSLog(@"Unable to insert new entity: %@",[error localizedDescription]);
     }
     
-    [[NFPServerManager sharedInstance] uploadImage:image];
+    return imageData;
+    
 }
 
 #pragma mark - Simplified accessors
@@ -76,6 +77,21 @@
       self.thumbnailData = [NSData new];
     else
         self.thumbnailData = UIImageJPEGRepresentation(image, 1.0);
+}
+
+-(void)setImageID:(NSUInteger)imageID;
+{
+    self.id = @(imageID);
+}
+
+-(NSUInteger)imageID;
+{
+    return [self.id unsignedIntegerValue];
+}
+
+-(NSString*)description;
+{
+    return [NSString stringWithFormat:@"Image id: %tu. Thumnail %d",self.imageID,self.hasThumbnail];
 }
 
 

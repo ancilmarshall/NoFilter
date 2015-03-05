@@ -7,6 +7,9 @@
 //
 
 #import <UIKit/UIKit.h>
+
+extern NSString* const kBackgroundSessionIdentifier;
+
 @class NFPImageManagedObjectContext;
 
 @interface AppDelegate : UIResponder <UIApplicationDelegate>

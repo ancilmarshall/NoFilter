@@ -2,7 +2,7 @@
 //  NFPImageData.m
 //  NoFilter
 //
-//  Created by Ancil on 2/2/15.
+//  Created by Ancil on 2/28/15.
 //  Copyright (c) 2015 Ancil Marshall. All rights reserved.
 //
 
@@ -15,5 +15,6 @@
 @dynamic hasThumbnailNumber;
 @dynamic imageData;
 @dynamic thumbnailData;
+@dynamic id;
 
 @end

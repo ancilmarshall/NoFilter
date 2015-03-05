@@ -18,6 +18,8 @@
 extern NSString* const kUserDefaultUsername;
 extern NSString* const kUserDefaultRememberLogin;
 
+NSString* const kBackgroundSessionIdentifier = @"NFPBackgroundSessionIdentifier";
+
 @interface AppDelegate ()
 @property (atomic,assign) UIBackgroundTaskIdentifier backgroundOperationTask;
 @end
@@ -40,8 +42,8 @@ extern NSString* const kUserDefaultRememberLogin;
     self.backgroundOperationTask = UIBackgroundTaskInvalid;
     [self registerShouldPerformBackgroundTaskObserver];
     
+    self.window.backgroundColor = [UIColor clearColor];
     [self setRootViewControllerWithIdentifier:@"NFPLoginViewController"];
-    
     
     //setup user defaults and register with notification center to synchronize
     [[NSUserDefaults standardUserDefaults]
@@ -61,7 +63,6 @@ extern NSString* const kUserDefaultRememberLogin;
     
     [[UINavigationBar appearance] setBarStyle:UIBarStyleBlackOpaque];
     [[UINavigationBar appearance] setBarTintColor:[UIColor blueColor]];
-
     
     return YES;
 }
@@ -85,7 +86,7 @@ extern NSString* const kUserDefaultRememberLogin;
     dispatch_async(dispatch_get_main_queue(), ^{
 //        [((UINavigationController*)self.window.rootViewController) pushViewController:navController.topViewController animated:YES];
     
-        if ([identifier isEqualToString:@"NFPLoginViewController.h"]){
+        if ([identifier isEqualToString:@"NFPLoginViewController"]){
             [((UINavigationController*)self.window.rootViewController)
                 setViewControllers:@[navController.topViewController] animated:NO];
             
