@@ -66,45 +66,97 @@ typedef void(^TaskCompletionHandlerType)(NSData*,NSURLResponse*,NSError*);
     return _taskIDImageIDDict;
 }
 
+#pragma mark - URL based on Query Items and Server Endpoints
 
+-(NSURL*)URLForQuery:(NSArray*)queryNames severEndpoint:(NSString*)endpoint info:(NSDictionary*)additionalInfo;
+{
+    //create queryItems
+    NSMutableArray* queryItems = [NSMutableArray new];
+    for (NSString* queryName in queryNames){
+        NSString* queryValue = [self queryValueForName:queryName];
+        [queryItems addObject:[NSURLQueryItem queryItemWithName:queryName value:queryValue]];
+    }
+    
+    //always add the token query item, except in the case when requesting the token
+    //TODO: distinquish between a general token and a user verified token based on flag
+    //TODO: validate token
+    if (![queryNames containsObject:@"app_key"] &&
+        ![queryNames containsObject:@"app_secret"])
+    {
+        NSAssert(self.token != nil,@"Cached token value not yet set");
+        [queryItems addObject:[NSURLQueryItem
+                               queryItemWithName:@"token"
+                               value:self.token]];
+    }
+    
+    //insert additional query name/value pair from the additional info dictionary
+    if (additionalInfo!=nil){
+        for (NSString* key in [additionalInfo allKeys]){
+        [queryItems addObject:
+            [NSURLQueryItem queryItemWithName:key value:additionalInfo[key]]];
+        }
+    }
+    
+    NSURLComponents* URLcomponents = [self NSURLComponentsFromEndpoint:endpoint
+                                                            queryItems:queryItems];
+
+    return URLcomponents.URL;
+    
+}
+
+
+-(NSURL*)URLForQuery:(NSArray*)queryNames severEndpoint:(NSString*)endpoint;
+{
+    return [self URLForQuery:queryNames severEndpoint:endpoint info:nil];
+}
+
+
+-(NSString*)queryValueForName:(NSString*)queryName;
+{
+    
+    typedef NSString*(^QueryBlockType)();
+    
+    NSDictionary* queryValueBlocks = @{
+        @"app_key" : ^NSString*{
+            return self.clientPlistDict[@"app_key"];
+        },
+        @"app_secret" : ^NSString*{
+            return self.clientPlistDict[@"app_secret"];
+        },
+        @"username" : ^NSString*{
+            return [[NSUserDefaults standardUserDefaults] valueForKey:kUserDefaultUsername];
+        },
+        @"password" : ^NSString*{
+            return [[KeyChainManager sharedInstance] passwordForUsername:[[NSUserDefaults standardUserDefaults] valueForKey:kUserDefaultUsername]];
+        },
+    };
+    
+    return ((QueryBlockType)queryValueBlocks[queryName])();
+}
+
+-(NSURLComponents*)NSURLComponentsFromEndpoint:(NSString*)endpoint queryItems:(NSArray*)queryItems;
+{
+    
+    NSURLComponents* components = [[NSURLComponents alloc] init];
+    components.scheme = NFPServerScheme;
+    components.host = NFPServerHost;
+    components.path = [NFPServerPath stringByAppendingString:endpoint];
+    components.queryItems = queryItems;
+    
+    return  components;
+}
+
+#pragma mark - NFPServerManager API to perform tasks on remote NoFilter Server
 /*
  * Get a token from the server and cache the results
  */
 -(void)logonToServer;
 {
-    // Setup the necessary URL query items to pass to the server endpoint for getting token
-    NSMutableArray* queryItems = [NSMutableArray new];
-    [queryItems addObject:[NSURLQueryItem
-       queryItemWithName:[NFPServerManager serverKeys][@"appKey"]
-       value:self.clientPlistDict[[NFPServerManager serverKeys][@"appKey"]]]];
     
-    [queryItems addObject:[NSURLQueryItem
-       queryItemWithName:[NFPServerManager serverKeys][@"appSecret"]
-       value:self.clientPlistDict[[NFPServerManager serverKeys][@"appSecret"]]]];
+    NSArray* queryItemNames = @[@"app_key",@"app_secret",@"username",@"password"];
+    NSURL* url = [self URLForQuery:queryItemNames severEndpoint:@"auth/token"];
     
-    // Always get username from the Standard User Defaults which should be set before
-    NSString* username = [[NSUserDefaults standardUserDefaults]
-                          valueForKey:kUserDefaultUsername];
-    
-    [queryItems addObject:[NSURLQueryItem
-       queryItemWithName:[NFPServerManager serverKeys][@"username"]
-       value:username]];
-    
-    [queryItems addObject:[NSURLQueryItem
-       queryItemWithName:[NFPServerManager serverKeys][@"password"]
-       value:[[KeyChainManager sharedInstance] passwordForUsername:username]]];
-
-    // Call helper function to build URL component from host, server enpoint and query items
-    NSURLComponents* URLcomponents =
-        [self NSURLComponentsFromEndpoint:[NFPServerManager serverEndpoints][@"getToken"]
-                               queryItems:queryItems];
-    
-    NSURL* url = URLcomponents.URL;
-    
-    // urlForServerAttributes:(NSArray*)attributes endpoint:(NSString*)endpoint;
-    // queryItemValueForName:(NSString*)name;
-    
-    
+    NSLog(@"%@",url);
     // Configure the NSURLSession
     NSURLSessionConfiguration* config = [NSURLSessionConfiguration ephemeralSessionConfiguration];
     
@@ -121,7 +173,7 @@ typedef void(^TaskCompletionHandlerType)(NSData*,NSURLResponse*,NSError*);
             JSONPaserBlockType jsonParserBlock = ^(NSDictionary* jsonResp){
                 self.token = jsonResp[@"result"][@"token"];
                 //Update the cached list of items on server during logon
-                [self getItemList];
+                //[self getItemList];
             };
             
             [self parseData:data response:response error:error handler:jsonParserBlock];
@@ -139,35 +191,11 @@ typedef void(^TaskCompletionHandlerType)(NSData*,NSURLResponse*,NSError*);
     });
 }
 
--(NSURLComponents*)NSURLComponentsFromEndpoint:(NSString*)endpoint queryItems:(NSArray*)queryItems;
-{
-    
-    NSURLComponents* components = [[NSURLComponents alloc] init];
-    components.scheme = NFPServerScheme;
-    components.host = NFPServerHost;
-    components.path = [NFPServerPath stringByAppendingString:endpoint];
-    components.queryItems = queryItems;
-    
-    return  components;
-}
-
-
-#pragma mark - Upload tasks
 
 -(void)uploadImage:(NFPImageData*)imageData context:(NSManagedObjectContext*)context;
 {
     // Setup query items needed to upload image
-    NSMutableArray* queryItems = [NSMutableArray new];
-    [queryItems addObject:[NSURLQueryItem
-                           queryItemWithName:[NFPServerManager serverKeys][@"token"]
-                           value:self.token]];
-
-    // Get URL components
-    NSURLComponents* URLcomponents =
-    [self NSURLComponentsFromEndpoint:[NFPServerManager serverEndpoints][@"createItem"]
-                           queryItems:queryItems];
-    
-    NSURL* url = URLcomponents.URL;
+    NSURL* url = [self URLForQuery:@[] severEndpoint:@"item/create"];
     
     // Setup NSURLSession. Note that becuase the upload task uses a request, it needs
     // to setup the multi-form encoding for the request that is used for the image data
@@ -218,42 +246,11 @@ typedef void(^TaskCompletionHandlerType)(NSData*,NSURLResponse*,NSError*);
 }
 
 
-#pragma mark - Get List of items
-/*
- item/list json response is a dictionary. The "result" key returns an array of
- dictionaries for each item on the server. Each dictionary contains the keys:
- 
-     "content_type"
-     "created_at"
-     "created_on"
-     filename
-     id
-     "updated_at"
-     "updated_on"
-     "user_id"
-     "user_username"
- 
- */
 -(void) getItemList;
 {
     
     // Setup query items needed to get list from server
-    NSMutableArray* queryItems = [NSMutableArray new];
-    [queryItems addObject:[NSURLQueryItem
-                           queryItemWithName:[NFPServerManager serverKeys][@"token"]
-                           value:self.token]];
-
-    [queryItems addObject:[NSURLQueryItem
-                           queryItemWithName:[NFPServerManager serverKeys][@"username"]
-                           value:[[NSUserDefaults standardUserDefaults]
-                                  valueForKey:kUserDefaultUsername]]];
-    
-    // Get URL components
-    NSURLComponents* URLcomponents =
-    [self NSURLComponentsFromEndpoint:[NFPServerManager serverEndpoints][@"listItems"]
-                           queryItems:queryItems];
-    
-    NSURL* url = URLcomponents.URL;
+    NSURL* url = [self URLForQuery:@[@"username"] severEndpoint:@"item/list"];
     
     // Setup NSURLSession.
     NSURLSessionConfiguration* config = [NSURLSessionConfiguration ephemeralSessionConfiguration];
@@ -286,85 +283,15 @@ typedef void(^TaskCompletionHandlerType)(NSData*,NSURLResponse*,NSError*);
 
 }
 
--(void)parseData:(NSData*)data response:(NSURLResponse*)response error:(NSError*)error handler:(JSONPaserBlockType)jsonParser;
-{
-    
-    [[UIApplication sharedApplication] setNetworkActivityIndicatorVisible:NO];
-    if (!error)
-    {
-        NSAssert([response isKindOfClass:[NSHTTPURLResponse class]],
-                 @"Expected response to be of type NSHTTPURLResponse");
-        NSHTTPURLResponse* httpResp = (NSHTTPURLResponse*)response;
-        
-        if (httpResp.statusCode == 200){
-            
-            [self parseJSONData:data usingBlock:jsonParser];
-            
-        } else {
-            [self taskDidRespondWithSuccess:NO
-                msg:[NSString stringWithFormat:
-                     @"Error in HTTP Repsonse. Status code: %tu",httpResp.statusCode]];
-        }
-    } else {
-        [self taskDidRespondWithSuccess:NO
-            msg:[NSString stringWithFormat:@"Error in dataTaskWithRequest: %@",
-                 [error localizedDescription]]];
-    }
-}
-
-
--(void)parseJSONData:(NSData*)data usingBlock:(JSONPaserBlockType)jsonParserBlock {
-    
-    
-    // Parse returned JSON data
-    NSError* jsonError = nil;
-    NSDictionary* jsonResp =
-    [NSJSONSerialization JSONObjectWithData:data
-                                    options:NSJSONReadingAllowFragments
-                                      error:&jsonError];
-    
-    if (!jsonError){
-        //Note JSON data returns objects. Convert success key's value to BOOL
-        BOOL success = [(NSNumber*)jsonResp[@"success"] boolValue];
-        if (success){
-            
-            //Call the parser block here
-            jsonParserBlock(jsonResp);
-            
-            [self taskDidRespondWithSuccess:YES msg:nil];
-            
-        } else {
-            [self taskDidRespondWithSuccess:NO
-                                        msg:jsonResp[@"error"]];
-        }
-    } else {
-        [self taskDidRespondWithSuccess:NO
-                                    msg:[NSString stringWithFormat:@"Error serializing JSON data: %@",[jsonError localizedDescription]]];
-    }
-}
-
 
 -(void) downloadItemWithID:(NSUInteger)itemID;
 {
     
     NSLog(@"Beginning download with id: %tu",itemID);
     
-    // Setup query items needed to get list from server
-    NSMutableArray* queryItems = [NSMutableArray new];
-    [queryItems addObject:[NSURLQueryItem
-                           queryItemWithName:[NFPServerManager serverKeys][@"token"]
-                           value:self.token]];
+    NSURL* url = [self URLForQuery:@[] severEndpoint:@"item/get_raw"
+                              info:@{@"item_id":[NSString stringWithFormat:@"%tu",itemID]}];
     
-    [queryItems addObject:[NSURLQueryItem
-                           queryItemWithName:[NFPServerManager serverKeys][@"itemID"]
-                           value:[NSString stringWithFormat:@"%tu",itemID]]];
-    
-    // Get URL components
-    NSURLComponents* URLcomponents =
-    [self NSURLComponentsFromEndpoint:[NFPServerManager serverEndpoints][@"getRawItem"]
-                           queryItems:queryItems];
-    
-    NSURL* url = URLcomponents.URL;
     NSMutableURLRequest* request = [NSMutableURLRequest requestWithURL:url];
     request.HTTPMethod = @"POST";
     
@@ -451,27 +378,13 @@ typedef void(^TaskCompletionHandlerType)(NSData*,NSURLResponse*,NSError*);
     
 }
 
-
 -(void)deleteImageWithID:(NSUInteger)itemID;
 {
     NSLog(@"Beginning deletion of item with id: %tu",itemID);
     
-    // Setup query items needed to get list from server
-    NSMutableArray* queryItems = [NSMutableArray new];
-    [queryItems addObject:[NSURLQueryItem
-                           queryItemWithName:[NFPServerManager serverKeys][@"token"]
-                           value:self.token]];
+    NSURL* url = [self URLForQuery:@[] severEndpoint:@"item/delete"
+                              info:@{@"item_id":[NSString stringWithFormat:@"%tu",itemID]}];
     
-    [queryItems addObject:[NSURLQueryItem
-                           queryItemWithName:[NFPServerManager serverKeys][@"itemID"]
-                           value:[NSString stringWithFormat:@"%tu",itemID]]];
-    
-    // Get URL components
-    NSURLComponents* URLcomponents =
-    [self NSURLComponentsFromEndpoint:[NFPServerManager serverEndpoints][@"deleteItem"]
-                           queryItems:queryItems];
-    
-    NSURL* url = URLcomponents.URL;
     NSMutableURLRequest* request = [NSMutableURLRequest requestWithURL:url];
     request.HTTPMethod = @"POST";
     
@@ -513,6 +426,70 @@ typedef void(^TaskCompletionHandlerType)(NSData*,NSURLResponse*,NSError*);
     [[UIApplication sharedApplication] setNetworkActivityIndicatorVisible:YES];
     [task resume];
 }
+
+
+
+#pragma mark - Helper Function Blocks to Handle Server Responses and Parse Data
+
+-(void)parseData:(NSData*)data response:(NSURLResponse*)response error:(NSError*)error handler:(JSONPaserBlockType)jsonParser;
+{
+    
+    [[UIApplication sharedApplication] setNetworkActivityIndicatorVisible:NO];
+    if (!error)
+    {
+        NSAssert([response isKindOfClass:[NSHTTPURLResponse class]],
+                 @"Expected response to be of type NSHTTPURLResponse");
+        NSHTTPURLResponse* httpResp = (NSHTTPURLResponse*)response;
+        
+        if (httpResp.statusCode == 200){
+            
+            [self parseJSONData:data usingBlock:jsonParser];
+            
+        } else {
+            [self taskDidRespondWithSuccess:NO
+                                        msg:[NSString stringWithFormat:
+                                             @"Error in HTTP Repsonse. Status code: %tu",httpResp.statusCode]];
+        }
+    } else {
+        [self taskDidRespondWithSuccess:NO
+                                    msg:[NSString stringWithFormat:@"Error in dataTaskWithRequest: %@",
+                                         [error localizedDescription]]];
+    }
+}
+
+
+-(void)parseJSONData:(NSData*)data usingBlock:(JSONPaserBlockType)jsonParserBlock {
+    
+    
+    // Parse returned JSON data
+    NSError* jsonError = nil;
+    NSDictionary* jsonResp =
+    [NSJSONSerialization JSONObjectWithData:data
+                                    options:NSJSONReadingAllowFragments
+                                      error:&jsonError];
+    
+    if (!jsonError){
+        //Note JSON data returns objects. Convert success key's value to BOOL
+        BOOL success = [(NSNumber*)jsonResp[@"success"] boolValue];
+        if (success){
+            
+            //Call the parser block here
+            jsonParserBlock(jsonResp);
+            
+            [self taskDidRespondWithSuccess:YES msg:nil];
+            
+        } else {
+            [self taskDidRespondWithSuccess:NO
+                                        msg:jsonResp[@"error"]];
+        }
+    } else {
+        [self taskDidRespondWithSuccess:NO
+                                    msg:[NSString stringWithFormat:@"Error serializing JSON data: %@",[jsonError localizedDescription]]];
+    }
+}
+
+
+
 
 #pragma mark - NSURLSessionDownloadDelegate
 /*
