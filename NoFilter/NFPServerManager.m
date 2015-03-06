@@ -15,6 +15,8 @@
 #import "AppDelegate.h"
 #import "NFPThumbnailGenerator.h"
 
+#define BACKGROUND_DOWNLOAD 1
+#define BACKGROUND_DOWNLOAD_JSON 1
 
 static NSString* const NFPServerScheme = @"http";
 static NSString* const NFPServerPath = @"/api/v1/";
@@ -68,7 +70,6 @@ typedef void(^TaskCompletionHandlerType)(NSData*,NSURLResponse*,NSError*);
 
 #pragma mark - URL based on Query Items and Server Endpoints
 
-//-(NSURL*)URLForQuery:(NSArray*)queryNames severEndpoint:(NSString*)endpoint info:(NSDictionary*)additionalInfo;
 -(NSURL*)URLForServerEndpoint:(NSString*)endpoint query:(NSArray*)queryNames optionalQueryData:(NSDictionary*)optionalData
 {
     //create queryItems
@@ -90,7 +91,7 @@ typedef void(^TaskCompletionHandlerType)(NSData*,NSURLResponse*,NSError*);
                                value:self.token]];
     }
     
-    //insert additional query name/value pair from the additional info dictionary
+    //insert additional query name/value pair from the optionalData dictionary
     if (optionalData!=nil){
         for (NSString* key in [optionalData allKeys]){
         [queryItems addObject:
@@ -156,8 +157,8 @@ typedef void(^TaskCompletionHandlerType)(NSData*,NSURLResponse*,NSError*);
  */
 -(void)logonToServer;
 {
-    NSArray* queryItemNames = @[@"app_key",@"app_secret",@"username",@"password"];
-    NSURL* url = [self URLForServerEndpoint:@"auth/token" query:queryItemNames];
+    NSURL* url = [self URLForServerEndpoint:@"auth/token"
+        query:@[@"app_key",@"app_secret",@"username",@"password"]];
     
     // Configure the NSURLSession
     NSURLSessionConfiguration* config = [NSURLSessionConfiguration ephemeralSessionConfiguration];
@@ -167,7 +168,6 @@ typedef void(^TaskCompletionHandlerType)(NSData*,NSURLResponse*,NSError*);
     
     NSURLSession* session = [NSURLSession sessionWithConfiguration:config];
     
-    // Call NSRULSession task and implement its completion handler
     NSURLSessionDataTask* task = [session dataTaskWithRequest:request
                                             completionHandler:
         ^(NSData *data, NSURLResponse *response, NSError *error) {
@@ -175,7 +175,7 @@ typedef void(^TaskCompletionHandlerType)(NSData*,NSURLResponse*,NSError*);
             JSONPaserBlockType jsonParserBlock = ^(NSDictionary* jsonResp){
                 self.token = jsonResp[@"result"][@"token"];
                 //Update the cached list of items on server during logon
-                //[self getItemList];
+                [self getItemList];
             };
             
             [self parseData:data response:response error:error handler:jsonParserBlock];
@@ -298,7 +298,8 @@ typedef void(^TaskCompletionHandlerType)(NSData*,NSURLResponse*,NSError*);
     
     // Setup NSURLSession.
     
-    if (1){
+    
+#ifdef BACKGROUND_DOWNLOAD
     
     NSURLSessionConfiguration* config = [NSURLSessionConfiguration
         backgroundSessionConfigurationWithIdentifier:kBackgroundSessionIdentifier];
@@ -316,67 +317,36 @@ typedef void(^TaskCompletionHandlerType)(NSData*,NSURLResponse*,NSError*);
     [[UIApplication sharedApplication] setNetworkActivityIndicatorVisible:YES];
     [task resume];
 
-    }
-    else {
-    
+#else
     
     NSURLSessionConfiguration* ephemconfig = [NSURLSessionConfiguration ephemeralSessionConfiguration];
     NSURLSession* session = [NSURLSession sessionWithConfiguration:ephemconfig];
         
     NSURLSessionDataTask* task = [session dataTaskWithRequest:request
         completionHandler:^(NSData *data, NSURLResponse *response, NSError *error) {
-            [[UIApplication sharedApplication] setNetworkActivityIndicatorVisible:NO];
-            NSLog(@"Download task complete");
-            if (!error)
-            {
-                NSAssert([response isKindOfClass:[NSHTTPURLResponse class]],
-                         @"Expected response to be of type NSHTTPURLResponse");
-                NSHTTPURLResponse* httpResp = (NSHTTPURLResponse*)response;
-                
-                //Verify http response returns 'ok' i.e. status code 200
-                if (httpResp.statusCode == 200){
-                    
-                    // Parse returned JSON data
-                    NSError* jsonError = nil;
-                    NSDictionary* jsonResp =
-                    [NSJSONSerialization JSONObjectWithData:data
-                                                    options:NSJSONReadingAllowFragments
-                                                      error:&jsonError];
-                    
-                    if (!jsonError){
-                        //Note JSON data returns objects. Convert success key's value to BOOL
-                        BOOL success = [(NSNumber*)jsonResp[@"success"] boolValue];
-                        if (success){
-                            //NSLog(@"%@",jsonResp);
-                            NSDictionary* result = jsonResp[@"result"];
-                            NSString* dataString = result[@"data"];
-                            NSData* returnedData=[[ NSData alloc] initWithBase64EncodedString:dataString options:NSDataBase64DecodingIgnoreUnknownCharacters];
-                            UIImage* image = [UIImage imageWithData:returnedData];
-                            //Update the cached token value to be used for other server calls
-                            [[NFPThumbnailGenerator sharedInstance] addDownloadedImage:image withID:itemID];
-                        }
-                    }
-                    
-                    NSLog(@"Not using JSON, but Raw Data");
-                    UIImage* image = [UIImage imageWithData:data];
-                    [[NFPThumbnailGenerator sharedInstance] addDownloadedImage:image withID:itemID];
-                    
-                }
-            }
             
+#ifdef BACKGROUND_DOWNLOAD_JSON
+            
+            JSONPaserBlockType jsonParser = ^(NSDictionary* jsonResp){
+                NSDictionary* result = jsonResp[@"result"];
+                NSString* dataString = result[@"data"];
+                NSData* returnedData=[[ NSData alloc] initWithBase64EncodedString:dataString options:NSDataBase64DecodingIgnoreUnknownCharacters];
+                UIImage* image = [UIImage imageWithData:returnedData];
+                //Update the cached token value to be used for other server calls
+                [[NFPThumbnailGenerator sharedInstance] addDownloadedImage:image withID:itemID];
+            };
+            [self parseData:data response:response error:error handler:jsonParser];
+#else
+            UIImage* image = [UIImage imageWithData:data];
+            [[NFPThumbnailGenerator sharedInstance] addDownloadedImage:image withID:itemID];
         }];
+#endif 
+    
     [[UIApplication sharedApplication] setNetworkActivityIndicatorVisible:YES];
     [task resume];
-    }
-}
 
--(void)deleteAllImagesOnServer;
-{
-    for (id item in self.imageIDs){
-        NSUInteger imageID = [(NSNumber*)item unsignedIntegerValue];
-        [self deleteImageWithID:imageID];
-    }
-    
+#endif
+
 }
 
 -(void)deleteImageWithID:(NSUInteger)itemID;
@@ -395,39 +365,28 @@ typedef void(^TaskCompletionHandlerType)(NSData*,NSURLResponse*,NSError*);
     
     NSURLSessionDataTask* task = [session dataTaskWithRequest:request
         completionHandler:^(NSData *data, NSURLResponse *response, NSError *error) {
-            [[UIApplication sharedApplication] setNetworkActivityIndicatorVisible:NO];
-            NSLog(@"Deletion task complete");
-            if (!error)
-            {
-                NSAssert([response isKindOfClass:[NSHTTPURLResponse class]],
-                         @"Expected response to be of type NSHTTPURLResponse");
-                NSHTTPURLResponse* httpResp = (NSHTTPURLResponse*)response;
-                
-                //Verify http response returns 'ok' i.e. status code 200
-                if (httpResp.statusCode == 200){
-                    
-                    // Parse returned JSON data
-                    NSError* jsonError = nil;
-                    NSDictionary* jsonResp =
-                    [NSJSONSerialization JSONObjectWithData:data
-                                                    options:NSJSONReadingAllowFragments
-                                                      error:&jsonError];
-                    
-                    if (!jsonError){
 
-                        BOOL success = [(NSNumber*)jsonResp[@"success"] boolValue];
-                        if (!success){
-                            NSLog(@"Error Returned from server when deleting item");
-                         }
-                    }
-                }
-            }
+            JSONPaserBlockType jsonParser = ^(NSDictionary* jsonResp){
+                //do nothing here with the returned response data
+                //TODO: Do I need to do something?
+                };
+            [self parseData:data response:response error:error handler:jsonParser];
+        
         }];
     
     [[UIApplication sharedApplication] setNetworkActivityIndicatorVisible:YES];
     [task resume];
 }
 
+
+-(void)deleteAllImagesOnServer;
+{
+    for (id item in self.imageIDs){
+        NSUInteger imageID = [(NSNumber*)item unsignedIntegerValue];
+        [self deleteImageWithID:imageID];
+    }
+    
+}
 
 
 #pragma mark - Helper Function Blocks to Handle Server Responses and Parse Data
