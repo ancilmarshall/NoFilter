@@ -20,6 +20,9 @@ static NSString* const NFPServerScheme = @"http";
 static NSString* const NFPServerPath = @"/api/v1/";
 static NSString* const NFPServerHost = @"nofilter.pneumaticsystem.com";
 
+typedef void(^JSONPaserBlockType)(NSDictionary*);
+typedef void(^TaskCompletionHandlerType)(NSData*,NSURLResponse*,NSError*);
+
 @interface NFPServerManager() <NSURLSessionDelegate,NSURLSessionDownloadDelegate>
 
 @property (nonatomic,strong) NSDictionary* clientPlistDict;
@@ -98,6 +101,10 @@ static NSString* const NFPServerHost = @"nofilter.pneumaticsystem.com";
     
     NSURL* url = URLcomponents.URL;
     
+    // urlForServerAttributes:(NSArray*)attributes endpoint:(NSString*)endpoint;
+    // queryItemValueForName:(NSString*)name;
+    
+    
     // Configure the NSURLSession
     NSURLSessionConfiguration* config = [NSURLSessionConfiguration ephemeralSessionConfiguration];
     
@@ -111,62 +118,20 @@ static NSString* const NFPServerHost = @"nofilter.pneumaticsystem.com";
                                             completionHandler:
         ^(NSData *data, NSURLResponse *response, NSError *error) {
             
-            [[UIApplication sharedApplication] setNetworkActivityIndicatorVisible:NO];
+            JSONPaserBlockType jsonParserBlock = ^(NSDictionary* jsonResp){
+                self.token = jsonResp[@"result"][@"token"];
+                //Update the cached list of items on server during logon
+                [self getItemList];
+            };
             
-            if (!error)
-            {
-                NSAssert([response isKindOfClass:[NSHTTPURLResponse class]],
-                         @"Expected response to be of type NSHTTPURLResponse");
-                NSHTTPURLResponse* httpResp = (NSHTTPURLResponse*)response;
-                
-                //Verify http response returns 'ok' i.e. status code 200
-                if (httpResp.statusCode == 200){
-                    
-                    // Parse returned JSON data
-                    NSError* jsonError = nil;
-                    NSDictionary* jsonResp =
-                    [NSJSONSerialization JSONObjectWithData:data
-                                                    options:NSJSONReadingAllowFragments
-                                                      error:&jsonError];
-
-                    if (!jsonError){
-                        //Note JSON data returns objects. Convert success key's value to BOOL
-                        BOOL success = [(NSNumber*)jsonResp[@"success"] boolValue];
-                        if (success){
-                            
-                            //Update the cached token value to be used for other server calls
-                            self.token = jsonResp[@"result"][@"token"];
-                            [self taskDidRespondWithSuccess:YES msg:nil];
-                            
-                            //Update the cached list of items on server during logon
-                            [self getItemList];
-                            
-                            
-                        } else {
-                            [self taskDidRespondWithSuccess:NO
-                                                          msg:jsonResp[@"error"]];
-                        }
-                    } else {
-                        [self taskDidRespondWithSuccess:NO
-                          msg:[NSString stringWithFormat:@"Error serializing JSON data: %@",[jsonError localizedDescription]]];
-                    }
-                } else {
-                    [self taskDidRespondWithSuccess:NO
-                      msg:[NSString stringWithFormat:
-                           @"Error in HTTP Repsonse. Status code: %tu",httpResp.statusCode]];
-                }
-            } else {
-                [self taskDidRespondWithSuccess:NO
-                  msg:[NSString stringWithFormat:@"Error in dataTaskWithRequest: %@",
-                       [error localizedDescription]]];
-            }
-        }];
+            [self parseData:data response:response error:error handler:jsonParserBlock];
+    }];
     
     [[UIApplication sharedApplication] setNetworkActivityIndicatorVisible:YES];
     [task resume];
-
 }
 
+//TODO: Change this
 -(void)taskDidRespondWithSuccess:(BOOL)success msg:(NSString*)msg;
 {
     dispatch_async(dispatch_get_main_queue(), ^{
@@ -231,38 +196,21 @@ static NSString* const NFPServerHost = @"nofilter.pneumaticsystem.com";
         fromData:imageDataToUpload
         completionHandler:^(NSData *data, NSURLResponse *response, NSError *error) {
 
-            [[UIApplication sharedApplication] setNetworkActivityIndicatorVisible:NO];
-
-            if (!error){
+            JSONPaserBlockType jsonParserBlock = ^(NSDictionary* jsonResp){
+                NSDictionary* result = jsonResp[@"result"];
+                NSUInteger imageID = [result[@"id"] integerValue];
+                imageData.imageID = imageID;
                 
-                NSAssert([response isKindOfClass:[NSHTTPURLResponse class]],
-                         @"Expected response to be of type NSHTTPURLResponse");
-                NSHTTPURLResponse* httpResp = (NSHTTPURLResponse*)response;
-                if (httpResp.statusCode == 200){
-                    
-                    NSError* jsonError = nil;
-                    NSDictionary* jsonResp =
-                    [NSJSONSerialization JSONObjectWithData:data
-                                                    options:NSJSONReadingAllowFragments
-                                                      error:&jsonError];
-                    NSDictionary* result = jsonResp[@"result"];
-                    NSUInteger imageID = [result[@"id"] integerValue];
-                    imageData.imageID = imageID;
-                    
-                    [context performBlock:^{
-                        NSError* error;
-                        if (![context save:&error]){
-                            NSLog(@"Unable to update entity: %@",
-                                  [error localizedDescription]);
-                        }
-                    }];
-                    
-                } else {
-                    NSLog(@"Error in http response from Server: %@",httpResp);
-                }
-            } else {
-                NSLog(@"Problem uploading image to server");
-            }
+                [context performBlock:^{
+                    NSError* error;
+                    if (![context save:&error]){
+                        NSLog(@"Unable to update entity: %@",
+                              [error localizedDescription]);
+                    }
+                }];
+            };
+            
+            [self parseData:data response:response error:error handler:jsonParserBlock];
         }];
 
     [[UIApplication sharedApplication] setNetworkActivityIndicatorVisible:YES];
@@ -320,65 +268,79 @@ static NSString* const NFPServerHost = @"nofilter.pneumaticsystem.com";
                                             completionHandler:
           ^(NSData *data, NSURLResponse *response, NSError *error) {
               
-              [[UIApplication sharedApplication] setNetworkActivityIndicatorVisible:NO];
-              
-              if (!error)
-              {
-                  NSAssert([response isKindOfClass:[NSHTTPURLResponse class]],
-                           @"Expected response to be of type NSHTTPURLResponse");
-                  NSHTTPURLResponse* httpResp = (NSHTTPURLResponse*)response;
-                  
-                  //Verify http response returns 'ok' i.e. status code 200
-                  if (httpResp.statusCode == 200){
-                      
-                      // Parse returned JSON data
-                      NSError* jsonError = nil;
-                      NSDictionary* jsonResp =
-                      [NSJSONSerialization JSONObjectWithData:data
-                                                      options:NSJSONReadingAllowFragments
-                                                        error:&jsonError];
-                      
-                      if (!jsonError){
-                          //Note JSON data returns objects. Convert success key's value to BOOL
-                          BOOL success = [(NSNumber*)jsonResp[@"success"] boolValue];
-                          if (success){
-                              self.itemList = jsonResp[@"result"];
-                              NSMutableArray* ids = [NSMutableArray new];
-                              for (NSDictionary* item in self.itemList){
-                                  NSUInteger itemID = [(NSNumber*)item[@"id"] unsignedIntegerValue];
-                                  [ids addObject:@(itemID)];
-                              }
-                              
-                              self.imageIDs = [NSArray arrayWithArray:ids];
-                              
-                              //TODO: Remove - testing only
-                              [self downloadItemWithID:
-                               [(NSNumber*)[self.imageIDs firstObject] unsignedIntegerValue]];
-                              [self taskDidRespondWithSuccess:YES msg:nil];
-                              
-                          } else {
-                              [self taskDidRespondWithSuccess:NO
-                                                          msg:jsonResp[@"error"]];
-                          }
-                      } else {
-                          [self taskDidRespondWithSuccess:NO
-                                                      msg:[NSString stringWithFormat:@"Error serializing JSON data: %@",[jsonError localizedDescription]]];
-                      }
-                  } else {
-                      [self taskDidRespondWithSuccess:NO
-                                                  msg:[NSString stringWithFormat:
-                                                       @"Error in HTTP Repsonse. Status code: %tu",httpResp.statusCode]];
+              JSONPaserBlockType jsonParser = ^(NSDictionary* jsonResp){
+                  self.itemList = jsonResp[@"result"];
+                  NSMutableArray* ids = [NSMutableArray new];
+                  for (NSDictionary* item in self.itemList){
+                      NSUInteger itemID = [(NSNumber*)item[@"id"] unsignedIntegerValue];
+                      [ids addObject:@(itemID)];
                   }
-              } else {
-                  [self taskDidRespondWithSuccess:NO
-                                              msg:[NSString stringWithFormat:@"Error in dataTaskWithRequest: %@",
-                                                   [error localizedDescription]]];
-              }
+              };
+              
+              [self parseData:data response:response error:error handler:jsonParser];
+              
           }];
     
     [[UIApplication sharedApplication] setNetworkActivityIndicatorVisible:YES];
     [task resume];
 
+}
+
+-(void)parseData:(NSData*)data response:(NSURLResponse*)response error:(NSError*)error handler:(JSONPaserBlockType)jsonParser;
+{
+    
+    [[UIApplication sharedApplication] setNetworkActivityIndicatorVisible:NO];
+    if (!error)
+    {
+        NSAssert([response isKindOfClass:[NSHTTPURLResponse class]],
+                 @"Expected response to be of type NSHTTPURLResponse");
+        NSHTTPURLResponse* httpResp = (NSHTTPURLResponse*)response;
+        
+        if (httpResp.statusCode == 200){
+            
+            [self parseJSONData:data usingBlock:jsonParser];
+            
+        } else {
+            [self taskDidRespondWithSuccess:NO
+                msg:[NSString stringWithFormat:
+                     @"Error in HTTP Repsonse. Status code: %tu",httpResp.statusCode]];
+        }
+    } else {
+        [self taskDidRespondWithSuccess:NO
+            msg:[NSString stringWithFormat:@"Error in dataTaskWithRequest: %@",
+                 [error localizedDescription]]];
+    }
+}
+
+
+-(void)parseJSONData:(NSData*)data usingBlock:(JSONPaserBlockType)jsonParserBlock {
+    
+    
+    // Parse returned JSON data
+    NSError* jsonError = nil;
+    NSDictionary* jsonResp =
+    [NSJSONSerialization JSONObjectWithData:data
+                                    options:NSJSONReadingAllowFragments
+                                      error:&jsonError];
+    
+    if (!jsonError){
+        //Note JSON data returns objects. Convert success key's value to BOOL
+        BOOL success = [(NSNumber*)jsonResp[@"success"] boolValue];
+        if (success){
+            
+            //Call the parser block here
+            jsonParserBlock(jsonResp);
+            
+            [self taskDidRespondWithSuccess:YES msg:nil];
+            
+        } else {
+            [self taskDidRespondWithSuccess:NO
+                                        msg:jsonResp[@"error"]];
+        }
+    } else {
+        [self taskDidRespondWithSuccess:NO
+                                    msg:[NSString stringWithFormat:@"Error serializing JSON data: %@",[jsonError localizedDescription]]];
+    }
 }
 
 
@@ -568,7 +530,11 @@ static NSString* const NFPServerHost = @"nofilter.pneumaticsystem.com";
     
     //TODO: error handling
     [[NSFileManager defaultManager] moveItemAtURL:location toURL:downloadURL error:NULL];
-    [[UIApplication sharedApplication] setNetworkActivityIndicatorVisible:NO];
+    dispatch_async(dispatch_get_main_queue(), ^{
+        
+        [[UIApplication sharedApplication] setNetworkActivityIndicatorVisible:NO];
+
+    });
     NSLog(@"Download Complete for id: %tu",imageID);
     
     //NSData* imageData = [NSData dataWithContentsOfURL:downloadURL];

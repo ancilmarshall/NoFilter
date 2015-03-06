@@ -79,7 +79,7 @@ NSString* const kBackgroundSessionIdentifier = @"NFPBackgroundSessionIdentifier"
 - (void)setRootViewControllerWithIdentifier:(NSString*)identifier;
 {
     
-    //then add the new view controller
+    //add the new view controller
     UIStoryboard* storyboad = [UIStoryboard storyboardWithName:@"Main" bundle:nil];
     UINavigationController* navController = [storyboad instantiateViewControllerWithIdentifier:identifier];
     
