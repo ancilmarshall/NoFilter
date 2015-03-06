@@ -68,7 +68,8 @@ typedef void(^TaskCompletionHandlerType)(NSData*,NSURLResponse*,NSError*);
 
 #pragma mark - URL based on Query Items and Server Endpoints
 
--(NSURL*)URLForQuery:(NSArray*)queryNames severEndpoint:(NSString*)endpoint info:(NSDictionary*)additionalInfo;
+//-(NSURL*)URLForQuery:(NSArray*)queryNames severEndpoint:(NSString*)endpoint info:(NSDictionary*)additionalInfo;
+-(NSURL*)URLForServerEndpoint:(NSString*)endpoint query:(NSArray*)queryNames optionalQueryData:(NSDictionary*)optionalData
 {
     //create queryItems
     NSMutableArray* queryItems = [NSMutableArray new];
@@ -90,10 +91,10 @@ typedef void(^TaskCompletionHandlerType)(NSData*,NSURLResponse*,NSError*);
     }
     
     //insert additional query name/value pair from the additional info dictionary
-    if (additionalInfo!=nil){
-        for (NSString* key in [additionalInfo allKeys]){
+    if (optionalData!=nil){
+        for (NSString* key in [optionalData allKeys]){
         [queryItems addObject:
-            [NSURLQueryItem queryItemWithName:key value:additionalInfo[key]]];
+            [NSURLQueryItem queryItemWithName:key value:optionalData[key]]];
         }
     }
     
@@ -104,12 +105,15 @@ typedef void(^TaskCompletionHandlerType)(NSData*,NSURLResponse*,NSError*);
     
 }
 
-
--(NSURL*)URLForQuery:(NSArray*)queryNames severEndpoint:(NSString*)endpoint;
+-(NSURL*)URLForServerEndpoint:(NSString*)endpoint query:(NSArray*)queryNames;
 {
-    return [self URLForQuery:queryNames severEndpoint:endpoint info:nil];
+    return [self URLForServerEndpoint:endpoint query:queryNames optionalQueryData:nil];
 }
 
+-(NSURL*)URLForServerEndpoint:(NSString*)endpoint;
+{
+    return [self URLForServerEndpoint:endpoint query:@[] optionalQueryData:nil];
+}
 
 -(NSString*)queryValueForName:(NSString*)queryName;
 {
@@ -152,11 +156,9 @@ typedef void(^TaskCompletionHandlerType)(NSData*,NSURLResponse*,NSError*);
  */
 -(void)logonToServer;
 {
-    
     NSArray* queryItemNames = @[@"app_key",@"app_secret",@"username",@"password"];
-    NSURL* url = [self URLForQuery:queryItemNames severEndpoint:@"auth/token"];
+    NSURL* url = [self URLForServerEndpoint:@"auth/token" query:queryItemNames];
     
-    NSLog(@"%@",url);
     // Configure the NSURLSession
     NSURLSessionConfiguration* config = [NSURLSessionConfiguration ephemeralSessionConfiguration];
     
@@ -195,7 +197,7 @@ typedef void(^TaskCompletionHandlerType)(NSData*,NSURLResponse*,NSError*);
 -(void)uploadImage:(NFPImageData*)imageData context:(NSManagedObjectContext*)context;
 {
     // Setup query items needed to upload image
-    NSURL* url = [self URLForQuery:@[] severEndpoint:@"item/create"];
+    NSURL* url = [self URLForServerEndpoint:@"item/create"];
     
     // Setup NSURLSession. Note that becuase the upload task uses a request, it needs
     // to setup the multi-form encoding for the request that is used for the image data
@@ -250,7 +252,7 @@ typedef void(^TaskCompletionHandlerType)(NSData*,NSURLResponse*,NSError*);
 {
     
     // Setup query items needed to get list from server
-    NSURL* url = [self URLForQuery:@[@"username"] severEndpoint:@"item/list"];
+    NSURL* url = [self URLForServerEndpoint:@"item/list" query:@[@"username"]];
     
     // Setup NSURLSession.
     NSURLSessionConfiguration* config = [NSURLSessionConfiguration ephemeralSessionConfiguration];
@@ -289,8 +291,7 @@ typedef void(^TaskCompletionHandlerType)(NSData*,NSURLResponse*,NSError*);
     
     NSLog(@"Beginning download with id: %tu",itemID);
     
-    NSURL* url = [self URLForQuery:@[] severEndpoint:@"item/get_raw"
-                              info:@{@"item_id":[NSString stringWithFormat:@"%tu",itemID]}];
+    NSURL* url = [self URLForServerEndpoint:@"item/get_raw" query:@[] optionalQueryData:@{@"item_id":[NSString stringWithFormat:@"%tu",itemID]}];
     
     NSMutableURLRequest* request = [NSMutableURLRequest requestWithURL:url];
     request.HTTPMethod = @"POST";
@@ -382,8 +383,8 @@ typedef void(^TaskCompletionHandlerType)(NSData*,NSURLResponse*,NSError*);
 {
     NSLog(@"Beginning deletion of item with id: %tu",itemID);
     
-    NSURL* url = [self URLForQuery:@[] severEndpoint:@"item/delete"
-                              info:@{@"item_id":[NSString stringWithFormat:@"%tu",itemID]}];
+    NSURL* url = [self URLForServerEndpoint:@"item/delete" query:@[]
+                          optionalQueryData:@{@"item_id":[NSString stringWithFormat:@"%tu",itemID]}];
     
     NSMutableURLRequest* request = [NSMutableURLRequest requestWithURL:url];
     request.HTTPMethod = @"POST";
