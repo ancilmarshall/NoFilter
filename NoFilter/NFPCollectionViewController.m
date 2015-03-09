@@ -164,7 +164,6 @@ minimumLineSpacingForSectionAtIndex:(NSInteger)section
             [self.collectionView reloadItemsAtIndexPaths:@[path]];
         }
     } completion:nil];
-    
 }
 
 

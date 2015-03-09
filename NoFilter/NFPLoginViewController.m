@@ -77,9 +77,8 @@ NSString* const kUserDefaultRememberLogin = @"Remember Login";
                      } completion:nil];
     
 }
-
 #pragma mark - NFPServerManagerDelegate
--(void)tokenReceivedFromServer;
+-(void)NFPServerManagerDidLoginSuccessfully;
 {
     [self.logonActivityIndicator stopAnimating];
     self.logonActivityIndicator.alpha = 0.0f;
@@ -89,19 +88,12 @@ NSString* const kUserDefaultRememberLogin = @"Remember Login";
     
 }
 
--(void)NFPServerManagerSessionDidCompleteWithSuccess:(BOOL)success msg:(NSString *)msg;
+-(void)NFPServerManagerTaskFailedWithErrorMessage:(NSString*)errorMsg;
 {
     NSAssert([NSThread isMainThread],@"Need to be on the Main Thread");
     [self.logonActivityIndicator stopAnimating];
     self.logonActivityIndicator.alpha  = 0.0f;
-    
-    if (success){
-        //TODO: this is taking a long time on my device when it has many images in the collection
-        //view. Need to figure out how to speed up this process.
-        [[AppDelegate delegate] setRootViewControllerWithIdentifier:@"NFPCollectionViewController"];
-    } else {
-        [self showAlert:msg];
-    }
+    [self showAlert:errorMsg];
 }
 
 #pragma mark - Remember Login

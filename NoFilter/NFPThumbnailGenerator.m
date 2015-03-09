@@ -161,14 +161,17 @@
 
 -(void)addImage:(UIImage *)image;
 {
-    NFPImageData* imageData = [NFPImageData addImage:image context:self.managedObjectContext]; //child or managedObject Context
-    [[NFPServerManager sharedInstance] uploadImage:imageData context:self.childContext]; //child or upload context
+    NFPImageData* imageData = [NFPImageData addImage:image
+        context:[self childContextForParentContext:self.managedObjectContext]];
+    [[NFPServerManager sharedInstance] uploadImage:imageData
+        context:[self childContextForParentContext:self.managedObjectContext]];
 }
 
 -(void)addDownloadedImage:(UIImage*)image withID:(NSUInteger)imageID;
 {
-    NFPImageData* imageData = [NFPImageData addImage:image context:self.managedObjectContext]; //child or managedObject Context
-    imageData.imageID = imageID;
+    [NFPImageData addImage:image
+         context:[self childContextForParentContext:self.managedObjectContext]
+          withID:imageID];
 }
 
 -(NSUInteger)count;
@@ -319,6 +322,12 @@ static NSUInteger ThumbnailGeneratorQueueContext;
     
 }
 
+-(NSManagedObjectContext*)childContextForParentContext:(NSManagedObjectContext*)parentContext;
+{
+    NSManagedObjectContext* childContext = [[NSManagedObjectContext alloc] initWithConcurrencyType:NSPrivateQueueConcurrencyType];
+    childContext.parentContext = parentContext;
+    return childContext;
+}
 
 #pragma mark - Debugging methods
 -(void) performRegenerationOfAllThumbnails;

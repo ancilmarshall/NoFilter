@@ -21,6 +21,11 @@
 
 + (NFPImageData*)addImage:(UIImage*)image context:(NSManagedObjectContext*)context;
 {
+    return [self addImage:image context:context withID:0];
+}
+
++ (NFPImageData*)addImage:(UIImage*)image context:(NSManagedObjectContext*)context withID:(NSUInteger)imageID;
+{
         
     NFPImageData* imageData =
     [NSEntityDescription
@@ -31,11 +36,11 @@
     imageData.thumbnail =  nil;
     imageData.hasThumbnail = NO;
     imageData.dateCreated = [NSDate date];
-    imageData.imageID = 0;
+    imageData.imageID = imageID;
     
     NSError* error;
     if (![context save:&error]){
-        NSLog(@"Unable to insert new entity: %@",[error localizedDescription]);
+        NSLog(@"\nUnable to insert new entity: %@\nwith error error:%@",imageData,[error localizedDescription]);
     }
     
     return imageData;
@@ -89,9 +94,14 @@
     return [self.id unsignedIntegerValue];
 }
 
+/*
+ * Override description to provide easily readable class print output
+ */
 -(NSString*)description;
 {
-    return [NSString stringWithFormat:@"Image id: %tu. Thumnail %d",self.imageID,self.hasThumbnail];
+    return [NSString stringWithFormat:
+        @"\nImage Details...\n\tID: %tu\n\tImage: %@\n\tThumbnail: %@",
+            self.imageID,self.image,self.thumbnail];
 }
 
 

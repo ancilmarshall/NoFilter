@@ -15,15 +15,19 @@
 @interface NFPServerManager : NSObject
 
 @property (nonatomic,weak) id<NFPServerManagerProtocol> delegate;
+@property (nonatomic,strong) void(^backgroundDownloadCompletionHandler)();
+
 +(instancetype) sharedInstance;
 -(void)logonToServer;
 -(void)uploadImage:(NFPImageData*)imageData context:(NSManagedObjectContext*)context;
 -(void) getItemList;
+-(void)createBackgroundDownloadSessionIfNeeded;
 
 @end
 
 @protocol NFPServerManagerProtocol <NSObject>
-
--(void)NFPServerManagerSessionDidCompleteWithSuccess:(BOOL)success msg:(NSString*)msg;
-
+//TODO: Why use a delegate when I could display the message in the manager
+// and return a bool if things were successful
+-(void)NFPServerManagerTaskFailedWithErrorMessage:(NSString*)errorMsg;
+-(void)NFPServerManagerDidLoginSuccessfully;
 @end

@@ -14,6 +14,7 @@
 @interface NFPThumbnailGenerator : NSObject
 
 @property (nonatomic,weak) id<NFPThumbnailGeneratorProtocol> delegate;
+@property (nonatomic,strong) NSArray* toUploadImageIDs;
 
 +(instancetype) sharedInstance;
 -(UIImage*) thumbnailAtIndex:(NSUInteger)index;
@@ -22,6 +23,7 @@
 -(NSUInteger) count;
 -(void) performRegenerationOfAllThumbnails;
 -(void) clearAllThumbnails;
+-(NSArray*)allImageIDs;
 @end
 
 

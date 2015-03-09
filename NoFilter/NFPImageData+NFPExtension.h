@@ -10,6 +10,7 @@
 
 @interface NFPImageData (NFPExtension)
 + (NFPImageData*) addImage:(UIImage*)image context:(NSManagedObjectContext*)context;
++ (NFPImageData*)addImage:(UIImage*)image context:(NSManagedObjectContext*)context withID:(NSUInteger)imageID;
 @property (nonatomic,assign) BOOL hasThumbnail;
 @property (nonatomic,strong) UIImage* image;
 @property (nonatomic,strong) UIImage* thumbnail;

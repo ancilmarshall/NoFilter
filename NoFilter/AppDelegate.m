@@ -8,6 +8,7 @@
 
 #import "AppDelegate.h"
 #import "NFPImageManagedObjectContext.h"
+#import "NFPServerManager.h"
 
 #if 0 && defined(DEBUG)
 #define APP_DELEGATE_DEBUG_LOG(format, ...) NSLog(@"OPERATION: " format, ## __VA_ARGS__)
@@ -18,7 +19,7 @@
 extern NSString* const kUserDefaultUsername;
 extern NSString* const kUserDefaultRememberLogin;
 
-NSString* const kBackgroundSessionIdentifier = @"NFPBackgroundSessionIdentifier";
+NSString* const kBackgroundSessionIdentifier = @"BackgroundSessionIdentifier";
 
 @interface AppDelegate ()
 @property (atomic,assign) UIBackgroundTaskIdentifier backgroundOperationTask;
@@ -67,6 +68,27 @@ NSString* const kBackgroundSessionIdentifier = @"NFPBackgroundSessionIdentifier"
     return YES;
 }
 
+/*
+ * This function is called by the system when it wakes up our app into the background
+ * to handle some background url session. The system actually passes us the completion
+ * handler so that we can call it when we are finished, which in turn calls the system
+ * to let it know we are finished. Its a hook back into the system.
+ */
+
+- (void)application:(UIApplication *)application handleEventsForBackgroundURLSession:(NSString *)identifier completionHandler:(void (^)())completionHandler;
+{
+    NSLog(@"Application awoken to handle background url session task");
+    
+    //ensure that we are waken up with the correct identifier.
+    NSParameterAssert([identifier isEqualToString:kBackgroundSessionIdentifier]);
+    
+    //create the same background session with this identifier.
+    [[NFPServerManager sharedInstance] createBackgroundDownloadSessionIfNeeded];
+    
+    //hold on to the completion handler for later use, since we are not ready yet
+    [NFPServerManager sharedInstance].backgroundDownloadCompletionHandler = completionHandler;
+}
+
 #pragma mark - Shared AppDelegate helper function
 + (AppDelegate*) delegate;
 {
@@ -78,7 +100,6 @@ NSString* const kBackgroundSessionIdentifier = @"NFPBackgroundSessionIdentifier"
 
 - (void)setRootViewControllerWithIdentifier:(NSString*)identifier;
 {
-    
     //add the new view controller
     UIStoryboard* storyboad = [UIStoryboard storyboardWithName:@"Main" bundle:nil];
     UINavigationController* navController = [storyboad instantiateViewControllerWithIdentifier:identifier];
