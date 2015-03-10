@@ -237,7 +237,7 @@ typedef void(^TaskCompletionHandlerType)(NSData*,NSURLResponse*,NSError*);
 {
     // Setup query items needed to upload image
     NSURL* url = [self URLForServerEndpoint:@"item/create"];
-    
+
     // Setup NSURLSession. Note that becuase the upload task uses a request, it needs
     // to setup the multi-form encoding for the request that is used for the image data
     // TODO: Should this be a background task? And can I go through the file system? 
@@ -259,8 +259,8 @@ typedef void(^TaskCompletionHandlerType)(NSData*,NSURLResponse*,NSError*);
         dateformatter = [[NSDateFormatter alloc] init];
     });
     
-    dateformatter.timeStyle = NSDateIntervalFormatterLongStyle;
-    dateformatter.dateStyle = NSDateIntervalFormatterLongStyle;
+    dateformatter.timeStyle = NSDateIntervalFormatterMediumStyle;
+    dateformatter.dateStyle = NSDateIntervalFormatterMediumStyle;
     
     NSString* imageFilename = [NSString stringWithFormat:
         @"NoFilterServerImage_%@", [dateformatter stringFromDate:[NSDate date]]];
@@ -270,12 +270,14 @@ typedef void(^TaskCompletionHandlerType)(NSData*,NSURLResponse*,NSError*);
                                              preferredFilename:imageFilename
                                                    contentType:@"image/png"];
     
+    
     // Perform upload task and implement completion handler
     NSURLSessionUploadTask* task = [session uploadTaskWithRequest:request
         fromData:imageDataToUpload
         completionHandler:^(NSData *data, NSURLResponse *response, NSError *error) {
 
             JSONPaserBlockType jsonParserBlock = ^(NSDictionary* jsonResp){
+                NSLog(@"Image uploaded");
                 NSDictionary* result = jsonResp[@"result"];
                 NSUInteger imageID = [result[@"id"] integerValue];
                 imageData.imageID = imageID;
@@ -444,9 +446,6 @@ typedef void(^TaskCompletionHandlerType)(NSData*,NSURLResponse*,NSError*);
         NSUInteger imageID = [toDownloadImageId unsignedIntegerValue];
         [self downloadItemWithID:imageID];
     }
-//    [self downloadItemWithID:[toDownloadSet[0] unsignedIntegerValue]];
-//    [self downloadItemWithID:[toDownloadSet[1] unsignedIntegerValue]];
-
     
 }
 
@@ -487,6 +486,7 @@ typedef void(^TaskCompletionHandlerType)(NSData*,NSURLResponse*,NSError*);
                 @"Error in HTTP Repsonse. Status code: %tu",httpResp.statusCode]];
         }
     } else {
+        NSLog(@"Server responded with error: %@",[error localizedDescription]);
         [self taskFailedWithErrorMessage:[NSString stringWithFormat:
             @"Error in NSURLSessionTask: %@",[error localizedDescription]]];
     }
