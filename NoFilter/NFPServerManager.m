@@ -232,7 +232,6 @@ typedef void(^TaskCompletionHandlerType)(NSData*,NSURLResponse*,NSError*);
     
 }
 
-
 -(void)uploadImage:(NFPImageData*)imageData context:(NSManagedObjectContext*)context;
 {
     // Setup query items needed to upload image
@@ -240,6 +239,7 @@ typedef void(^TaskCompletionHandlerType)(NSData*,NSURLResponse*,NSError*);
 
     // Setup NSURLSession. Note that becuase the upload task uses a request, it needs
     // to setup the multi-form encoding for the request that is used for the image data
+    
     // TODO: Should this be a background task? And can I go through the file system? 
     NSURLSessionConfiguration* config = [NSURLSessionConfiguration ephemeralSessionConfiguration];
     
@@ -277,7 +277,6 @@ typedef void(^TaskCompletionHandlerType)(NSData*,NSURLResponse*,NSError*);
         completionHandler:^(NSData *data, NSURLResponse *response, NSError *error) {
 
             JSONPaserBlockType jsonParserBlock = ^(NSDictionary* jsonResp){
-                NSLog(@"Image uploaded");
                 NSDictionary* result = jsonResp[@"result"];
                 NSUInteger imageID = [result[@"id"] integerValue];
                 imageData.imageID = imageID;
@@ -289,6 +288,9 @@ typedef void(^TaskCompletionHandlerType)(NSData*,NSURLResponse*,NSError*);
                               [error localizedDescription]);
                     }
                 }];
+                
+                NSLog(@"\nImage After Sync: %@",imageData);
+
             };
             
             [self parseData:data response:response error:error handler:jsonParserBlock];
@@ -297,9 +299,6 @@ typedef void(^TaskCompletionHandlerType)(NSData*,NSURLResponse*,NSError*);
     [[UIApplication sharedApplication] setNetworkActivityIndicatorVisible:YES];
     [task resume];
 }
-
-
-
 
 -(void) downloadItemWithID:(NSUInteger)itemID;
 {
@@ -418,7 +417,6 @@ typedef void(^TaskCompletionHandlerType)(NSData*,NSURLResponse*,NSError*);
     
 }
 
-
 -(void)syncImages;
 {
     //Ordered Set of NSNumbers (of NSUInteger)
@@ -445,6 +443,15 @@ typedef void(^TaskCompletionHandlerType)(NSData*,NSURLResponse*,NSError*);
     {
         NSUInteger imageID = [toDownloadImageId unsignedIntegerValue];
         [self downloadItemWithID:imageID];
+    }
+    
+    NSArray* toUploadImageDataArray = [[NFPThumbnailGenerator sharedInstance] imageDataArrayWithIDs:[toUploadSet array]];
+
+    //Note that after this step, the image will be assigned a new id on the
+    //sever, and the core data instance's id will be updated to relect this new id
+    for (NFPImageData* imageData in toUploadImageDataArray)
+    {
+        [self uploadImage:imageData context:nil];
     }
     
 }

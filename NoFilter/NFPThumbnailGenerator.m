@@ -23,8 +23,6 @@
 @property (nonatomic,strong) NSFetchedResultsController* fetchedResultsController;
 @property (nonatomic,strong) BatchUpdateManager* batchUpdateManager;
 @property (nonatomic,strong) NFPImageManagedObjectContext* managedObjectContext;
-@property (nonatomic,strong) NSManagedObjectContext* childContext;
-@property (nonatomic,strong) NSManagedObjectContext* uploadContext;
 @end
 
 @implementation NFPThumbnailGenerator
@@ -55,30 +53,7 @@
         //fetchRequest.fetchLimit = 1;
         
         self.managedObjectContext = [[AppDelegate delegate] managedObjectContext];
-        self.childContext = [[NSManagedObjectContext alloc] initWithConcurrencyType:NSPrivateQueueConcurrencyType];
-        self.childContext.parentContext = self.managedObjectContext;
         
-        //aim to observe the changes to core data model after the upload has been completed, so do this
-        // on a background context, and don't necessarily want to be observed by the fetchedManagedController
-        // since don't need to update the UI after the upload is complete. Only the returned image_id
-        // from the server needs to be updated into the Core Data model
-        self.uploadContext = [[NSManagedObjectContext alloc] initWithConcurrencyType:NSPrivateQueueConcurrencyType];
-        self.uploadContext.persistentStoreCoordinator = self.managedObjectContext.persistentStoreCoordinator;
-        
-//        [[NSNotificationCenter defaultCenter]
-//         addObserverForName: NSManagedObjectContextDidSaveNotification
-//                     object:self.childContext
-//                     queue:[[NSOperationQueue alloc] init]
-//            usingBlock:^(NSNotification *note) {
-//                
-//                dispatch_async(dispatch_get_main_queue(), ^{
-//                    [self.managedObjectContext  mergeChangesFromContextDidSaveNotification:note];
-//                });
-//                
-//                //[self printObjectsInContext:self.uploadContext name:@"Upload Context"];
-//                
-//            }];
-
         self.fetchedResultsController = [[NSFetchedResultsController alloc]
                                          initWithFetchRequest:fetchRequest
                                          managedObjectContext:self.managedObjectContext
@@ -161,9 +136,7 @@
 
 -(void)addImage:(UIImage *)image;
 {
-    NFPImageData* imageData = [NFPImageData addImage:image
-        context:[self childContextForParentContext:self.managedObjectContext]];
-    [[NFPServerManager sharedInstance] uploadImage:imageData
+    [NFPImageData addImage:image
         context:[self childContextForParentContext:self.managedObjectContext]];
 }
 
@@ -192,6 +165,21 @@
         }
     }
     return [NSArray arrayWithArray:ids];
+}
+
+-(NSArray*)imageDataArrayWithIDs:(NSArray*)imageIDs;
+{
+    NSArray* allObjects = [self.fetchedResultsController fetchedObjects];
+    NSMutableArray* imageDataArray = [NSMutableArray new];
+    
+    for (NFPImageData* imageData in allObjects)
+    {
+        if ( [imageIDs containsObject:@(imageData.imageID)]){
+            [imageDataArray addObject:imageData];
+        }
+    }
+    
+    return [NSArray arrayWithArray:imageDataArray];
 }
 
 #pragma mark - NSFetchedResultsControllerDelegate
@@ -291,7 +279,7 @@ static NSUInteger ThumbnailGeneratorQueueContext;
     //Initiate and start NSOperation
     NFPThumbnailOperation* operation =
         [[NFPThumbnailOperation alloc] initWithNFPImageData:imageData
-                                                    context:self.childContext];
+            context:[self childContextForParentContext:self.managedObjectContext]];
     [self.thumbnailGeneratorQueue addOperation:operation];
 }
 
@@ -345,6 +333,11 @@ static NSUInteger ThumbnailGeneratorQueueContext;
     for (NFPImageData* imageData in self.fetchedResultsController.fetchedObjects) {
         [self.managedObjectContext deleteObject:imageData];
     }
+}
+
+-(void)deleteAllImagesOnServer;
+{
+    [[NFPServerManager sharedInstance] deleteAllImagesOnServer];
 }
 
 

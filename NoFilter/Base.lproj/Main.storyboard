@@ -266,6 +266,18 @@ Please Sign In</string>
                                     <segue destination="nEm-fh-UhS" kind="unwind" unwindAction="clearAllThumbnails:" id="sUG-zs-IJb"/>
                                 </connections>
                             </button>
+                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="jnl-3S-grt">
+                                <rect key="frame" x="163" y="297" width="235" height="34"/>
+                                <color key="backgroundColor" red="0.0" green="0.47843137250000001" blue="1" alpha="1" colorSpace="calibratedRGB"/>
+                                <fontDescription key="fontDescription" type="system" pointSize="20"/>
+                                <inset key="contentEdgeInsets" minX="10" minY="5" maxX="10" maxY="5"/>
+                                <state key="normal" title="Delete All Server Images">
+                                    <color key="titleColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
+                                </state>
+                                <connections>
+                                    <segue destination="nEm-fh-UhS" kind="unwind" unwindAction="deleteAllImagesOnServer:" id="cAv-la-DZL"/>
+                                </connections>
+                            </button>
                         </subviews>
                         <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
                         <constraints>
@@ -274,7 +286,9 @@ Please Sign In</string>
                             <constraint firstAttribute="centerX" secondItem="obm-PF-y40" secondAttribute="centerX" constant="20.5" id="1cu-kx-rCN"/>
                             <constraint firstItem="obm-PF-y40" firstAttribute="top" secondItem="lWp-I4-7HE" secondAttribute="bottom" constant="115" id="7Up-Fu-U7l"/>
                             <constraint firstItem="aq7-eQ-vka" firstAttribute="top" secondItem="obm-PF-y40" secondAttribute="bottom" constant="25" id="Gx3-Le-xoZ"/>
+                            <constraint firstAttribute="centerX" secondItem="jnl-3S-grt" secondAttribute="centerX" constant="20" id="nWv-s1-e05"/>
                             <constraint firstItem="obm-PF-y40" firstAttribute="centerX" secondItem="aq7-eQ-vka" secondAttribute="centerX" id="rIx-Ph-VEx"/>
+                            <constraint firstItem="jnl-3S-grt" firstAttribute="top" secondItem="aq7-eQ-vka" secondAttribute="bottom" constant="25" id="vMa-ZR-pI1"/>
                         </constraints>
                     </view>
                     <navigationItem key="navigationItem" id="sRD-yD-6Ky">
@@ -286,6 +300,7 @@ Please Sign In</string>
                     </navigationItem>
                     <connections>
                         <outlet property="clearAllButton" destination="aq7-eQ-vka" id="T7x-zT-kZ3"/>
+                        <outlet property="deleteAllImagesOnServerButton" destination="jnl-3S-grt" id="FCH-TZ-P3j"/>
                         <outlet property="regenerateButton" destination="obm-PF-y40" id="mYy-Kf-WCm"/>
                     </connections>
                 </viewController>

@@ -23,7 +23,9 @@
 -(NSUInteger) count;
 -(void) performRegenerationOfAllThumbnails;
 -(void) clearAllThumbnails;
+-(void)deleteAllImagesOnServer;
 -(NSArray*)allImageIDs;
+-(NSArray*)imageDataArrayWithIDs:(NSArray*)imageIDs;
 @end
 
 

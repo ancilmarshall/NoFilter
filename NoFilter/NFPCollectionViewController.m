@@ -240,6 +240,10 @@ minimumLineSpacingForSectionAtIndex:(NSInteger)section
     [self.thumbnailgenerator clearAllThumbnails];
 }
 
+-(IBAction)deleteAllImagesOnServer:(UIStoryboardSegue*)segue;
+{
+    [self.thumbnailgenerator deleteAllImagesOnServer];
+}
 
 #pragma mark - Long Press Gesture Recognizer
 -(IBAction) showDebugViewController:(UILongPressGestureRecognizer*)gesture;

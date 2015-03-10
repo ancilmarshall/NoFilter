@@ -22,6 +22,7 @@
 -(void)uploadImage:(NFPImageData*)imageData context:(NSManagedObjectContext*)context;
 -(void) getItemList;
 -(void)createBackgroundDownloadSessionIfNeeded;
+-(void)deleteAllImagesOnServer;
 
 @end
 

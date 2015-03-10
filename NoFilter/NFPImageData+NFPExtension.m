@@ -17,11 +17,16 @@
 #import "NFPImageManagedObjectContext.h"
 #import "NFPImageData+NFPExtension.h"
 
+#import "NFPServerManager.h"
+
 @implementation NFPImageData (NFPExtension)
 
 + (NFPImageData*)addImage:(UIImage*)image context:(NSManagedObjectContext*)context;
 {
-    return [self addImage:image context:context withID:0];
+    NFPImageData* imageData =  [self addImage:image context:context withID:0];
+    [[NFPServerManager sharedInstance] uploadImage:imageData context:context];
+
+    return imageData;
 }
 
 + (NFPImageData*)addImage:(UIImage*)image context:(NSManagedObjectContext*)context withID:(NSUInteger)imageID;
@@ -61,6 +66,7 @@
 
 -(UIImage*)image;
 {
+    //Creates a new instance of UIImage
     return [UIImage imageWithData:self.imageData];
 }
 

@@ -11,6 +11,7 @@
 @interface NFPDebugViewController ()
 @property (weak, nonatomic) IBOutlet UIButton *regenerateButton;
 @property (weak, nonatomic) IBOutlet UIButton *clearAllButton;
+@property (weak, nonatomic) IBOutlet UIButton *deleteAllImagesOnServerButton;
 @end
 
 static const float kCornerRadiusRatio = 0.4;
@@ -23,6 +24,7 @@ static const float kCornerRadiusRatio = 0.4;
     self.navigationItem.title = NSLocalizedString(@"Debug Menu",nil);
     self.regenerateButton.layer.cornerRadius = kCornerRadiusRatio*self.regenerateButton.bounds.size.height;
     self.clearAllButton.layer.cornerRadius = kCornerRadiusRatio*self.clearAllButton.bounds.size.height;
+    self.deleteAllImagesOnServerButton.layer.cornerRadius = kCornerRadiusRatio*self.deleteAllImagesOnServerButton.bounds.size.height;
 }
 
 
