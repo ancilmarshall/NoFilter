@@ -16,7 +16,7 @@ static NSString* const kIncorrectPassword = @"Incorrect Password";
 NSString* const kUserDefaultUsername = @"Default Username";
 NSString* const kUserDefaultRememberLogin = @"Remember Login";
 
-@interface NFPLoginViewController () <UITextFieldDelegate, NFPServerManagerProtocol>
+@interface NFPLoginViewController () <UITextFieldDelegate>
 @property (nonatomic,weak) IBOutlet UITextField* usernameTextField;
 @property (nonatomic,weak) IBOutlet UITextField* passwordTextField;
 @property (weak, nonatomic) IBOutlet UIActivityIndicatorView *logonActivityIndicator;
@@ -33,7 +33,7 @@ NSString* const kUserDefaultRememberLogin = @"Remember Login";
 
 @implementation NFPLoginViewController
 
-#pragma mark  - initalization
+#pragma mark  - Initalization
 
 - (void)viewDidLoad {
     [super viewDidLoad];
@@ -59,8 +59,8 @@ NSString* const kUserDefaultRememberLogin = @"Remember Login";
     self.logonActivityIndicator.alpha = 0.0f;
 
     self.serverManager = [NFPServerManager sharedInstance];
-    self.serverManager.delegate = self;
-    
+    [self registerNotifications];
+
     //simple animation effects
     self.usernameTextField.alpha = 0.1;
     self.passwordTextField.alpha = 0.1;
@@ -77,32 +77,11 @@ NSString* const kUserDefaultRememberLogin = @"Remember Login";
                      } completion:nil];
     
 }
-#pragma mark - NFPServerManagerDelegate
--(void)NFPServerManagerDidLoginSuccessfully;
-{
-    [self.logonActivityIndicator stopAnimating];
-    self.logonActivityIndicator.alpha = 0.0f;
-    
-    [[AppDelegate delegate]
-        setRootViewControllerWithIdentifier:@"NFPCollectionViewController"];
-    
-}
 
--(void)NFPServerManagerTaskFailedWithErrorMessage:(NSString*)errorMsg;
+-(void)viewDidDisappear:(BOOL)animated;
 {
-    NSAssert([NSThread isMainThread],@"Need to be on the Main Thread");
-    [self.logonActivityIndicator stopAnimating];
-    self.logonActivityIndicator.alpha  = 0.0f;
-    [self showAlert:errorMsg];
-}
-
-#pragma mark - Remember Login
--(IBAction)rememberLoginButtonPressed:(UISwitch*)sender;
-{
-    NSParameterAssert(sender == self.rememberLoginSwitch);
-    BOOL switchValue = self.rememberLoginSwitch.isOn;
-    [self.defaults setValue:@(switchValue) forKey:kUserDefaultRememberLogin];
-    
+    [super viewDidDisappear:animated];
+    [self unregisterNotifications];
 }
 
 #pragma mark - Login to Server
@@ -149,7 +128,77 @@ NSString* const kUserDefaultRememberLogin = @"Remember Login";
    
 }
 
-// show alert based on the error message
+-(IBAction)rememberLoginButtonPressed:(UISwitch*)sender;
+{
+    NSParameterAssert(sender == self.rememberLoginSwitch);
+    BOOL switchValue = self.rememberLoginSwitch.isOn;
+    [self.defaults setValue:@(switchValue) forKey:kUserDefaultRememberLogin];
+    
+}
+
+
+#pragma mark - NFPServerManager Notifications
+
+/*
+ * This register/unregister pair uses these particular versions of the notification
+ * center's observer adding/removal since it seems to work best for unregistering
+ * Need to unregister when this view goes away since the NFPServerManager still posts
+ * notifications to other view controllers after this view controller disappears.
+ */
+-(void)registerNotifications;
+{
+    [[NSNotificationCenter defaultCenter]
+         addObserver:self
+         selector:@selector(serverSucceededNotification:)
+         name:NFPServerManagerLoginDidSucceedNotification
+         object:nil];
+    
+    [[NSNotificationCenter defaultCenter]
+         addObserver:self
+         selector:@selector(serverFailedNotification:)
+         name:NFPServerManagerTaskFailedNotification
+         object:nil];
+}
+
+-(void)unregisterNotifications;
+{
+    [[NSNotificationCenter defaultCenter]
+         removeObserver:self
+         name:NFPServerManagerLoginDidSucceedNotification
+         object:nil];
+
+    [[NSNotificationCenter defaultCenter]
+         removeObserver:self
+         name:NFPServerManagerTaskFailedNotification
+         object:nil];
+}
+
+-(void)serverFailedNotification:(NSNotification*)note;
+{
+    NSAssert([NSThread isMainThread],@"Need to be on the Main Thread");
+    
+    NSDictionary* userInfo = note.userInfo;
+    NSString* errorMsg = userInfo[@"error_msg"];
+    [self.logonActivityIndicator stopAnimating];
+    self.logonActivityIndicator.alpha  = 0.0f;
+    [self showAlert:errorMsg];
+    
+}
+
+-(void)serverSucceededNotification:(NSNotification*)note;
+{
+    NSAssert([NSThread isMainThread],@"Need to be on the Main Thread");
+    
+    [self.logonActivityIndicator stopAnimating];
+    self.logonActivityIndicator.alpha = 0.0f;
+    
+    [[AppDelegate delegate]
+     setRootViewControllerWithIdentifier:@"NFPCollectionViewController"];
+    
+}
+
+#pragma mark - Alert Controller
+
 - (void) showAlert:(NSString*)errMsg
 {
     //instantiate an empty alertController here. Fill in data depending on errMsg
@@ -192,8 +241,8 @@ NSString* const kUserDefaultRememberLogin = @"Remember Login";
         [alertController addAction:cancelAction];
         [alertController addAction:updateAction];
     }
-    else // else it is a server error
-    {
+    else { // Error from Server
+        
         alertController.title = @"No Filter Server Error";
         alertController.message = errMsg;
         
@@ -203,7 +252,6 @@ NSString* const kUserDefaultRememberLogin = @"Remember Login";
                                                          }];
         
         [alertController addAction:okAction];
-        
     }
     
     [alertController setModalPresentationStyle:UIModalPresentationNone];

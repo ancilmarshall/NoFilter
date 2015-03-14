@@ -9,12 +9,13 @@
 #import <Foundation/Foundation.h>
 #import <UIKit/UIKit.h>
 
-@protocol NFPServerManagerProtocol;
+extern NSString* NFPServerManagerTaskFailedNotification;
+extern NSString* NFPServerManagerLoginDidSucceedNotification;
+
 @class NFPImageData;
 
 @interface NFPServerManager : NSObject
 
-@property (nonatomic,weak) id<NFPServerManagerProtocol> delegate;
 @property (nonatomic,strong) void(^backgroundDownloadCompletionHandler)();
 
 +(instancetype) sharedInstance;
@@ -26,9 +27,3 @@
 
 @end
 
-@protocol NFPServerManagerProtocol <NSObject>
-//TODO: Why use a delegate when I could display the message in the manager
-// and return a bool if things were successful
--(void)NFPServerManagerTaskFailedWithErrorMessage:(NSString*)errorMsg;
--(void)NFPServerManagerDidLoginSuccessfully;
-@end

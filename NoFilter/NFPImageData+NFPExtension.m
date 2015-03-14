@@ -16,7 +16,6 @@
 #import "AppDelegate.h"
 #import "NFPImageManagedObjectContext.h"
 #import "NFPImageData+NFPExtension.h"
-
 #import "NFPServerManager.h"
 
 @implementation NFPImageData (NFPExtension)
@@ -31,7 +30,8 @@
 
 + (NFPImageData*)addImage:(UIImage*)image context:(NSManagedObjectContext*)context withID:(NSUInteger)imageID;
 {
-        
+    NSLog(@"Inserting image with ID: %tu",imageID);
+    
     NFPImageData* imageData =
     [NSEntityDescription
      insertNewObjectForEntityForName:NSStringFromClass([self class])
@@ -48,6 +48,7 @@
         NSLog(@"\nUnable to insert new entity: %@\nwith error error:%@",imageData,[error localizedDescription]);
     }
     
+
     return imageData;
     
 }

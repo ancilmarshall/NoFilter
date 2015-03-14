@@ -56,6 +56,9 @@
     // call performBlock to ensure that all this work is taken into account
     // in the managed object context's queue (either private or main, but we
     // don't know or need to know to keep the interface abstract
+    
+    NSLog(@"Thumbnail Updated for ImageID: %tu",self.imageData.imageID);
+    
     [self.moc performBlock:^{
         self.imageData.hasThumbnail = YES;
         NSError* error = nil;

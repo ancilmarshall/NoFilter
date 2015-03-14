@@ -12,6 +12,7 @@
 #import "NFPCollectionViewController.h"
 #import "NFPThumbnailGenerator.h"
 #import "BatchUpdateManager.h"
+#import "NFPServerManager.h"
 
 @interface NFPCollectionViewController () <NFPThumbnailGeneratorProtocol>
 @property (nonatomic,strong) NFPThumbnailGenerator* thumbnailgenerator;
@@ -35,19 +36,52 @@ static NSString * const kDebugSegueIdentifier = @"debugSegue";
     self.thumbnailgenerator = [NFPThumbnailGenerator sharedInstance];
     self.thumbnailgenerator.delegate = self;
     
-    
     // Register cell classes
     [self.collectionView registerClass:[UICollectionViewCell class]
             forCellWithReuseIdentifier:reuseIdentifier];
+    
+    
+    [[NSNotificationCenter defaultCenter]
+     addObserverForName:NFPServerManagerTaskFailedNotification
+     object:nil
+     queue:[NSOperationQueue mainQueue]
+     usingBlock:^(NSNotification *note) {
+         
+         NSDictionary* userInfo = note.userInfo;
+         NSString* errorMsg = userInfo[@"error_msg"];
+         NSAssert([NSThread isMainThread],@"Need to be on the Main Thread");
+         [self showAlert:errorMsg];
+         
+     }];
+    
+    [[NSNotificationCenter defaultCenter]
+        addObserver:self
+        selector:@selector(serverFailedNotification:)
+        name:NFPServerManagerTaskFailedNotification
+        object:nil];
+    
 }
 
+-(void)viewDidDisappear:(BOOL)animated;
+{
+    [super viewDidDisappear:animated];
+    
+    [[NSNotificationCenter defaultCenter]
+     removeObserver:self
+     name:NFPServerManagerTaskFailedNotification
+     object:nil];
 
-//TODO: not sure if this is needed
-- (void)didReceiveMemoryWarning {
-    [super didReceiveMemoryWarning];
-    // Dispose of any resources that can be recreated.
 }
 
+-(void)serverFailedNotification:(NSNotification*)note;
+{
+    NSAssert([NSThread isMainThread],@"Need to be on the Main Thread");
+    
+    NSDictionary* userInfo = note.userInfo;
+    NSString* errorMsg = userInfo[@"error_msg"];
+    [self showAlert:errorMsg];
+    
+}
 
 #pragma mark - UICollectionViewDataSource
 
@@ -217,6 +251,32 @@ minimumLineSpacingForSectionAtIndex:(NSInteger)section
         NSParameterAssert([sender isKindOfClass:[UILongPressGestureRecognizer class]]);
     }
 }
+
+
+#pragma mark - Alert Controller
+// show alert based on the error message
+- (void) showAlert:(NSString*)errMsg
+{
+    //instantiate an empty alertController here. Fill in data depending on errMsg
+    UIAlertController* alertController = [UIAlertController
+                                          alertControllerWithTitle:@"" message:@"" preferredStyle:UIAlertControllerStyleAlert];
+    
+
+    alertController.title = @"No Filter Server Error";
+    alertController.message = errMsg;
+    
+    UIAlertAction* okAction = [UIAlertAction actionWithTitle:@"OK"
+                                                       style:UIAlertActionStyleDefault
+                                                     handler:^(UIAlertAction *action) {
+                                                     }];
+    
+    [alertController addAction:okAction];
+        
+    [alertController setModalPresentationStyle:UIModalPresentationNone];
+    [self presentViewController:alertController animated:YES completion:nil];
+}
+
+
 
 //unwind segue
 -(IBAction) cancelAddImageToCollectionView:(UIStoryboardSegue*)segue;

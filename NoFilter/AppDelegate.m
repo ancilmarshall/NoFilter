@@ -34,10 +34,10 @@ NSString* const kBackgroundSessionIdentifier = @"BackgroundSessionIdentifier";
     
     self.managedObjectContext = [NFPImageManagedObjectContext contextForStoreAtURL:[self SQLiteStoreURL]];
     
-    NSError *error = nil;
-    if (![self.managedObjectContext save:&error]) {
-        NSLog(@"Failed to seed random color data: %@", error);
-    }
+//    NSError *error = nil;
+//    if (![self.managedObjectContext save:&error]) {
+//        NSLog(@"Failed to seed random color data: %@", error);
+//    }
     
     self.shouldPerformBackgroundTask = NO;
     self.backgroundOperationTask = UIBackgroundTaskInvalid;

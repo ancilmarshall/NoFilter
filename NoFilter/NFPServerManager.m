@@ -20,8 +20,11 @@
 #define FOREGROUND_DOWNLOAD_JSON 0
 
 static NSString* const NFPServerScheme = @"http";
-static NSString* const NFPServerPath = @"/api/v1/";
 static NSString* const NFPServerHost = @"nofilter.pneumaticsystem.com";
+static NSString* const NFPServerPath = @"/api/v1/";
+
+NSString* NFPServerManagerTaskFailedNotification = @"NFPServerManagerTaskFailed";
+NSString* NFPServerManagerLoginDidSucceedNotification = @"NFPServerManagerLoginSucceded";
 
 typedef void(^JSONPaserBlockType)(NSDictionary*);
 typedef void(^TaskCompletionHandlerType)(NSData*,NSURLResponse*,NSError*);
@@ -32,7 +35,6 @@ typedef void(^TaskCompletionHandlerType)(NSData*,NSURLResponse*,NSError*);
 @property (nonatomic,strong) NSString* token;
 @property (nonatomic,strong) NSArray* itemList;
 @property (nonatomic,strong) NSArray* imageIDs;
-@property (nonatomic,strong) NSMutableDictionary* taskIDImageIDDict;
 @property (nonatomic,strong) NSURLSession* backgroundDownloadSession;
 @property (nonatomic,strong) NSOperationQueue* backgroundDownloadQueue;
 
@@ -61,14 +63,6 @@ typedef void(^TaskCompletionHandlerType)(NSData*,NSURLResponse*,NSError*);
         self.clientPlistDict = [NSDictionary dictionaryWithContentsOfURL:clientPlistURL];
     }
     return self;
-}
-
--(NSMutableDictionary*)taskIDImageIDDict;
-{
-    if (!_taskIDImageIDDict){
-        _taskIDImageIDDict = [NSMutableDictionary new];
-    }
-    return _taskIDImageIDDict;
 }
 
 #pragma mark - URL based on Query Items and Server Endpoints
@@ -154,7 +148,7 @@ typedef void(^TaskCompletionHandlerType)(NSData*,NSURLResponse*,NSError*);
     return  components;
 }
 
-#pragma mark - NFPServerManager API to perform tasks on remote NoFilter Server
+#pragma mark - NFPServerManager API
 /*
  * Get a token from the server and cache the results
  */
@@ -164,7 +158,8 @@ typedef void(^TaskCompletionHandlerType)(NSData*,NSURLResponse*,NSError*);
         query:@[@"app_key",@"app_secret",@"username",@"password"]];
     
     // Configure the NSURLSession
-    NSURLSessionConfiguration* config = [NSURLSessionConfiguration ephemeralSessionConfiguration];
+    NSURLSessionConfiguration* config = [NSURLSessionConfiguration
+                                         ephemeralSessionConfiguration];
     
     NSMutableURLRequest* request = [NSMutableURLRequest requestWithURL:url];
     request.HTTPMethod = @"POST";
@@ -176,10 +171,12 @@ typedef void(^TaskCompletionHandlerType)(NSData*,NSURLResponse*,NSError*);
         ^(NSData *data, NSURLResponse *response, NSError *error) {
             
             JSONPaserBlockType jsonParserBlock = ^(NSDictionary* jsonResp){
+
                 self.token = jsonResp[@"result"][@"token"];
-                //Update the cached list of items on server during logon
-                [self getItemList];
-                [self didLoginSuccessfully];
+                
+                [self getItemList]; //Cache the list of items on server
+                
+                [self loginDidSucceed];
             };
             
             [self parseData:data response:response error:error handler:jsonParserBlock];
@@ -234,6 +231,8 @@ typedef void(^TaskCompletionHandlerType)(NSData*,NSURLResponse*,NSError*);
 
 -(void)uploadImage:(NFPImageData*)imageData context:(NSManagedObjectContext*)context;
 {
+    //NSLog(@"Uploading Image for id: %tu",imageData.imageID);
+
     // Setup query items needed to upload image
     NSURL* url = [self URLForServerEndpoint:@"item/create"];
 
@@ -260,13 +259,14 @@ typedef void(^TaskCompletionHandlerType)(NSData*,NSURLResponse*,NSError*);
     });
     
     dateformatter.timeStyle = NSDateIntervalFormatterMediumStyle;
-    dateformatter.dateStyle = NSDateIntervalFormatterMediumStyle;
+    dateformatter.dateStyle = NSDateIntervalFormatterLongStyle;
     
     NSString* imageFilename = [NSString stringWithFormat:
         @"NoFilterServerImage_%@", [dateformatter stringFromDate:[NSDate date]]];
     
     NSData* imageDataToUpload = UIImageJPEGRepresentation(imageData.image, 1.0f);
-    imageDataToUpload = [imageDataToUpload multipartFormDataWithBoundaryString:boundaryString
+    imageDataToUpload =
+        [imageDataToUpload multipartFormDataWithBoundaryString:boundaryString
                                              preferredFilename:imageFilename
                                                    contentType:@"image/png"];
     
@@ -288,9 +288,6 @@ typedef void(^TaskCompletionHandlerType)(NSData*,NSURLResponse*,NSError*);
                               [error localizedDescription]);
                     }
                 }];
-                
-                NSLog(@"\nImage After Sync: %@",imageData);
-
             };
             
             [self parseData:data response:response error:error handler:jsonParserBlock];
@@ -303,7 +300,6 @@ typedef void(^TaskCompletionHandlerType)(NSData*,NSURLResponse*,NSError*);
 -(void) downloadItemWithID:(NSUInteger)itemID;
 {
     
-    NSLog(@"Beginning download with id: %tu",itemID);
     NSString* serverEndpoint = @"item/get_raw";
     if (FOREGROUND_DOWNLOAD_JSON && !BACKGROUND_DOWNLOAD){
         serverEndpoint = @"item/get";
@@ -321,8 +317,8 @@ typedef void(^TaskCompletionHandlerType)(NSData*,NSURLResponse*,NSError*);
         NSURLSessionDownloadTask* task = [self.backgroundDownloadSession
                                           downloadTaskWithRequest:request];
         //TODO: use a string, one that can be regenerated after app re-launches in background
-        [self.taskIDImageIDDict setValue:@(itemID)
-            forKey:[NSString stringWithFormat:@"%tu",task.taskIdentifier]];
+        NSString* taskDescription = [NSString stringWithFormat:@"%tu",itemID];
+        task.taskDescription = taskDescription;
 
         [[UIApplication sharedApplication] setNetworkActivityIndicatorVisible:YES];
         [task resume];
@@ -342,7 +338,6 @@ typedef void(^TaskCompletionHandlerType)(NSData*,NSURLResponse*,NSError*);
                     NSString* dataString = result[@"data"];
                     NSData* returnedData=[[ NSData alloc] initWithBase64EncodedString:dataString options:NSDataBase64DecodingIgnoreUnknownCharacters];
                     UIImage* image = [UIImage imageWithData:returnedData];
-                    //Update the cached token value to be used for other server calls
                     [[NFPThumbnailGenerator sharedInstance] addDownloadedImage:image withID:itemID];
                 };
                     
@@ -417,11 +412,38 @@ typedef void(^TaskCompletionHandlerType)(NSData*,NSURLResponse*,NSError*);
     
 }
 
+/*
+ * Here we sync the images between the client app and the web server
+ * There are several ways the images become out of sync
+ *  - New images are added to the client and not uploaded automatically
+ *    (for example if there is not available network, or a network error. ID = 0)
+ *  - New images are added to the server from the web interface
+ *  - Images on the client are deleted (and need to be downloaded)
+ *  - Image(s) on the server are deleted (and need to be uploaded)
+ * 
+ * We assume that these operations are atomic and do not enforce any locking or 
+ * concurrency between the upload and download processes.
+ */
+
 -(void)syncImages;
 {
+    //Find all the imageData that is on the client app, but does not have an id
+    //because it has not yet been uploaded and synced with the server
+    NSArray* clientImageData = [[NFPThumbnailGenerator sharedInstance] allImageData];
+    NSMutableArray* clientImagesWithNonZeroIDs = [NSMutableArray new];
+    NSMutableArray* toUploadImageDataArray = [NSMutableArray new];
+    for (NFPImageData* imageData in clientImageData){
+        if (imageData.imageID == 0){
+            [toUploadImageDataArray addObject:imageData];
+        }
+        else {
+            [clientImagesWithNonZeroIDs addObject:@(imageData.imageID)];
+        }
+    }
+    
     //Ordered Set of NSNumbers (of NSUInteger)
     NSMutableOrderedSet* clientImageIDSet =
-        [NSMutableOrderedSet orderedSetWithArray:[[NFPThumbnailGenerator sharedInstance] allImageIDs]];
+        [NSMutableOrderedSet orderedSetWithArray:clientImagesWithNonZeroIDs];
     
     //Ordered Set of NSNumbers (of NSUInteger)
     NSOrderedSet* serverImageIDSet =
@@ -445,7 +467,7 @@ typedef void(^TaskCompletionHandlerType)(NSData*,NSURLResponse*,NSError*);
         [self downloadItemWithID:imageID];
     }
     
-    NSArray* toUploadImageDataArray = [[NFPThumbnailGenerator sharedInstance] imageDataArrayWithIDs:[toUploadSet array]];
+    [toUploadImageDataArray addObjectsFromArray:[[NFPThumbnailGenerator sharedInstance] imageDataArrayWithIDs:[toUploadSet array]]];
 
     //Note that after this step, the image will be assigned a new id on the
     //sever, and the core data instance's id will be updated to relect this new id
@@ -461,14 +483,23 @@ typedef void(^TaskCompletionHandlerType)(NSData*,NSURLResponse*,NSError*);
 -(void)taskFailedWithErrorMessage:(NSString*)errorMsg;
 {
     dispatch_async(dispatch_get_main_queue(), ^{
-        [self.delegate NFPServerManagerTaskFailedWithErrorMessage:errorMsg];
+    
+        [[NSNotificationCenter defaultCenter]
+            postNotificationName:NFPServerManagerTaskFailedNotification
+            object:nil
+            userInfo:@{@"error_msg":errorMsg}];
+        
     });
 }
 
--(void)didLoginSuccessfully;
+-(void)loginDidSucceed;
 {
     dispatch_async(dispatch_get_main_queue(), ^{
-        [self.delegate NFPServerManagerDidLoginSuccessfully];
+        
+        [[NSNotificationCenter defaultCenter]
+         postNotificationName:NFPServerManagerLoginDidSucceedNotification
+         object:nil];
+        
     });
 }
 
@@ -490,12 +521,11 @@ typedef void(^TaskCompletionHandlerType)(NSData*,NSURLResponse*,NSError*);
             
         } else {
             [self taskFailedWithErrorMessage:[NSString stringWithFormat:
-                @"Error in HTTP Repsonse. Status code: %tu",httpResp.statusCode]];
+                @"Error in HTTP Repsonse\nStatus code: %tu",httpResp.statusCode]];
         }
     } else {
-        NSLog(@"Server responded with error: %@",[error localizedDescription]);
         [self taskFailedWithErrorMessage:[NSString stringWithFormat:
-            @"Error in NSURLSessionTask: %@",[error localizedDescription]]];
+            @"Error in NSURLSessionTask\nError: %@",[error localizedDescription]]];
     }
 }
 
@@ -521,7 +551,7 @@ typedef void(^TaskCompletionHandlerType)(NSData*,NSURLResponse*,NSError*);
         }
     } else {
         [self taskFailedWithErrorMessage:[NSString stringWithFormat:
-            @"Error serializing JSON data: %@",[jsonError localizedDescription]]];
+            @"Error serializing JSON data\nError: %@",[jsonError localizedDescription]]];
     }
 }
 
@@ -535,10 +565,13 @@ typedef void(^TaskCompletionHandlerType)(NSData*,NSURLResponse*,NSError*);
 - (void)URLSession:(NSURLSession *)session downloadTask:(NSURLSessionDownloadTask *)downloadTask didFinishDownloadingToURL:(NSURL *)location;
 {
     
-    NSNumber* imageIDAsNumber = self.taskIDImageIDDict[[NSString stringWithFormat:@"%tu",downloadTask.taskIdentifier]];
-    NSUInteger imageID = [imageIDAsNumber unsignedIntegerValue];
-    //NSURL* downloadURL = [self appDocumentsURLForItemID:imageID];
+    NSString* imageIDString = downloadTask.taskDescription;
+    const char* imageIDCString = [imageIDString cStringUsingEncoding:NSUTF8StringEncoding];
+    int imageIDAsInt = atoi(imageIDCString);
+    NSUInteger imageID = (NSUInteger)imageIDAsInt;
     
+    //NSURL* downloadURL = [self appDocumentsURLForItemID:imageID];
+
     //TODO: error handling
     //[[NSFileManager defaultManager] moveItemAtURL:location toURL:downloadURL error:NULL];
     //dispatch_async(dispatch_get_main_queue(), ^{
@@ -550,7 +583,7 @@ typedef void(^TaskCompletionHandlerType)(NSData*,NSURLResponse*,NSError*);
     //}
 
     //});
-    NSLog(@"Download Complete for id: %tu",imageID);
+    //NSLog(@"Download Complete for id: %tu",imageIDString);
     
     //UIImage* image = [[UIImage alloc] initWithContentsOfFile: [downloadURL path]];
     UIImage* image = [[UIImage alloc] initWithContentsOfFile: [location path]];
@@ -597,7 +630,8 @@ typedef void(^TaskCompletionHandlerType)(NSData*,NSURLResponse*,NSError*);
     self.backgroundDownloadCompletionHandler = nil;
 }
 
-#pragma mark - debugging methods
+
+#pragma mark - Debugging methods
 
 -(void)addMutlipleImagestoNFPThumbnailGenerator;
 {

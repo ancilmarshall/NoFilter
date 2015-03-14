@@ -24,7 +24,7 @@
 -(void) performRegenerationOfAllThumbnails;
 -(void) clearAllThumbnails;
 -(void)deleteAllImagesOnServer;
--(NSArray*)allImageIDs;
+-(NSArray*)allImageData;
 -(NSArray*)imageDataArrayWithIDs:(NSArray*)imageIDs;
 @end
 

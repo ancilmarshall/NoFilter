@@ -62,9 +62,6 @@
         
         self.fetchedResultsController.delegate = self;
         
-//        NSUInteger cnt = [self.managedObjectContext countForFetchRequest:fetchRequest error:nil];
-//        NSLog(@"Count for Fetch Request %tu",cnt);
-        
         //TODO: Perform fetches in the background and in batches
         // Update the main context and call the delegate after updating the context
         // Show an activity wheel stating that photos are updating
@@ -83,9 +80,6 @@
             }
             [self.delegate performBatchUpdatesForManager:self.batchUpdateManager];
             self.batchUpdateManager = nil;
-            
-            // TODO: remove
-            //[self printObjectsInContext:self.managedObjectContext name:@"Main Context"];
             
         });
         
@@ -152,19 +146,9 @@
     return [[self.fetchedResultsController sections][0] numberOfObjects] ;
 }
 
--(NSArray*)allImageIDs;
+-(NSArray*)allImageData;
 {
-    NSArray* allObjects = [self.fetchedResultsController fetchedObjects];
-    NSMutableArray* ids = [NSMutableArray new];
-
-    for (NFPImageData* imageData in allObjects) {
-        //use only id's that are not zero as this function could be called
-        //asynchronously from the upload to the server (when the id is returned)
-        if (imageData.imageID >0){
-            [ids addObject:@(imageData.imageID)];
-        }
-    }
-    return [NSArray arrayWithArray:ids];
+    return [self.fetchedResultsController fetchedObjects];
 }
 
 -(NSArray*)imageDataArrayWithIDs:(NSArray*)imageIDs;
@@ -223,11 +207,11 @@
     if (self.batchUpdateManager != nil){
         [self.delegate performBatchUpdatesForManager:self.batchUpdateManager];
         
-        NSError* error = nil;
-        if (![self.managedObjectContext save:&error]){
-            NSLog(@"Error saving CoreData context, msg: %@",
-                  [error localizedDescription]);
-        }
+//        NSError* error = nil;
+//        if (![self.managedObjectContext save:&error]){
+//            NSLog(@"Error saving CoreData context, msg: %@",
+//                  [error localizedDescription]);
+//        }
 
         // reset the batchUpdateManager after completion
         self.batchUpdateManager = nil;
