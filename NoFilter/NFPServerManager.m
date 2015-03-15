@@ -179,7 +179,7 @@ typedef void(^TaskCompletionHandlerType)(NSData*,NSURLResponse*,NSError*);
             JSONPaserBlockType jsonParserBlock = ^(NSDictionary* jsonResp){
 
                 self.token = jsonResp[@"result"][@"token"];
-                
+                [NFPThumbnailGenerator sharedInstance]; //Instantiate the thumnail generator
                 [self getItemList]; //Cache the list of items on server
                 
                 [self loginDidSucceed];
@@ -438,8 +438,10 @@ typedef void(^TaskCompletionHandlerType)(NSData*,NSURLResponse*,NSError*);
     //because it has not yet been uploaded and synced with the server
     NSArray* clientImageData = [[NFPThumbnailGenerator sharedInstance] allImageData];
     NSAssert(clientImageData != nil, @"Need non-nil clientImageData before syncImages called");
+    
     NSMutableArray* clientImagesWithNonZeroIDs = [NSMutableArray new];
     NSMutableArray* toUploadImageDataArray = [NSMutableArray new];
+    
     for (NFPImageData* imageData in clientImageData){
         if (imageData.imageID == 0){
             [toUploadImageDataArray addObject:imageData];
@@ -475,7 +477,8 @@ typedef void(^TaskCompletionHandlerType)(NSData*,NSURLResponse*,NSError*);
         [self downloadItemWithID:imageID];
     }
     
-    [toUploadImageDataArray addObjectsFromArray:[[NFPThumbnailGenerator sharedInstance] imageDataArrayWithIDs:[toUploadSet array]]];
+    [toUploadImageDataArray addObjectsFromArray:
+        [[NFPThumbnailGenerator sharedInstance] imageDataArrayWithIDs:[toUploadSet array]]];
 
     //Note that after this step, the image will be assigned a new id on the
     //sever, and the core data instance's id will be updated to relect this new id

@@ -17,7 +17,7 @@
 #import "UIImage+NFExtensions.h"
 
 
-#if 1 && defined(DEBUG)
+#if 0 && defined(DEBUG)
 #define THUMBNAIL_GEN_LOG(format, ...) NSLog(@"Thumbnail Generator: " format, ## __VA_ARGS__)
 #else
 #define THUMBNAIL_GEN_LOG(format, ...)
@@ -319,7 +319,7 @@ static NSUInteger ThumbnailGeneratorQueueContext;
     NSArray* arr = [frc fetchedObjects];
     THUMBNAIL_GEN_LOG(@"Contents of Context: %@ with %tu objects",mocName,[arr count]);
     [arr enumerateObjectsUsingBlock:^(NFPImageData* data, NSUInteger idx, BOOL *stop) {
-        NSLog(@"%@",data);
+        THUMBNAIL_GEN_LOG(@"%@",data);
     }];
     
 }

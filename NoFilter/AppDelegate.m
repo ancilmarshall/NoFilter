@@ -9,7 +9,6 @@
 #import "AppDelegate.h"
 #import "NFPImageManagedObjectContext.h"
 #import "NFPServerManager.h"
-#import "NFPThumbnailGenerator.h"
 
 #if 0 && defined(DEBUG)
 #define APP_DELEGATE_LOG(format, ...) NSLog(@"OPERATION: " format, ## __VA_ARGS__)
@@ -60,12 +59,6 @@ NSString* const kBackgroundSessionIdentifier = @"BackgroundSessionIdentifier";
     
     [[UINavigationBar appearance] setBarStyle:UIBarStyleBlackOpaque];
     [[UINavigationBar appearance] setBarTintColor:[UIColor blueColor]];
-    
-    //TODO: remove as this takes lots of time and causes noticeable UI drag
-    
-    //instantiate singleton to peform fetch of core data objects immediately upon launch
-    // as this would be needed by the NFPServerManager to sync images between app and server
-        [NFPThumbnailGenerator sharedInstance];
     
     return YES;
 }
