@@ -9,11 +9,12 @@
 #import "AppDelegate.h"
 #import "NFPImageManagedObjectContext.h"
 #import "NFPServerManager.h"
+#import "NFPThumbnailGenerator.h"
 
 #if 0 && defined(DEBUG)
-#define APP_DELEGATE_DEBUG_LOG(format, ...) NSLog(@"OPERATION: " format, ## __VA_ARGS__)
+#define APP_DELEGATE_LOG(format, ...) NSLog(@"OPERATION: " format, ## __VA_ARGS__)
 #else
-#define APP_DELEGATE_DEBUG_LOG(format, ...)
+#define APP_DELEGATE_LOG(format, ...)
 #endif
 
 extern NSString* const kUserDefaultUsername;
@@ -33,11 +34,6 @@ NSString* const kBackgroundSessionIdentifier = @"BackgroundSessionIdentifier";
     didFinishLaunchingWithOptions:(NSDictionary *)launchOptions {
     
     self.managedObjectContext = [NFPImageManagedObjectContext contextForStoreAtURL:[self SQLiteStoreURL]];
-    
-//    NSError *error = nil;
-//    if (![self.managedObjectContext save:&error]) {
-//        NSLog(@"Failed to seed random color data: %@", error);
-//    }
     
     self.shouldPerformBackgroundTask = NO;
     self.backgroundOperationTask = UIBackgroundTaskInvalid;
@@ -64,6 +60,12 @@ NSString* const kBackgroundSessionIdentifier = @"BackgroundSessionIdentifier";
     
     [[UINavigationBar appearance] setBarStyle:UIBarStyleBlackOpaque];
     [[UINavigationBar appearance] setBarTintColor:[UIColor blueColor]];
+    
+    //TODO: remove as this takes lots of time and causes noticeable UI drag
+    
+    //instantiate singleton to peform fetch of core data objects immediately upon launch
+    // as this would be needed by the NFPServerManager to sync images between app and server
+        [NFPThumbnailGenerator sharedInstance];
     
     return YES;
 }
@@ -132,12 +134,12 @@ NSString* const kBackgroundSessionIdentifier = @"BackgroundSessionIdentifier";
 # pragma mark - Background tasks
 -(void)applicationDidEnterBackground:(UIApplication *)application;
 {
-    APP_DELEGATE_DEBUG_LOG(@"Application did enter background");
+    APP_DELEGATE_LOG(@"Application did enter background");
     
     if (self.shouldPerformBackgroundTask) {
         NSAssert(self.backgroundOperationTask == UIBackgroundTaskInvalid, @"Should never take out two BG tasks for the one queue");
         
-        APP_DELEGATE_DEBUG_LOG(@"Starting background task");
+        APP_DELEGATE_LOG(@"Starting background task");
         self.backgroundOperationTask = [application beginBackgroundTaskWithExpirationHandler:^{
             [self endBackgroundTaskIfNecessary];
         }];
@@ -146,14 +148,14 @@ NSString* const kBackgroundSessionIdentifier = @"BackgroundSessionIdentifier";
 
 -(void)applicationDidBecomeActive:(UIApplication *)application;
 {
-    APP_DELEGATE_DEBUG_LOG(@"Application did become active");
+    APP_DELEGATE_LOG(@"Application did become active");
     [self endBackgroundTaskIfNecessary];
 }
 
 -(void)endBackgroundTaskIfNecessary;
 {
     if (self.backgroundOperationTask != UIBackgroundTaskInvalid) {
-        APP_DELEGATE_DEBUG_LOG(@"Ending background task");
+        APP_DELEGATE_LOG(@"Ending background task");
         [[UIApplication sharedApplication] endBackgroundTask:self.backgroundOperationTask];
         self.backgroundOperationTask = UIBackgroundTaskInvalid;
     }

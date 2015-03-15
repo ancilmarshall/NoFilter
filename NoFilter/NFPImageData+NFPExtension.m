@@ -18,6 +18,12 @@
 #import "NFPImageData+NFPExtension.h"
 #import "NFPServerManager.h"
 
+#if 1 && defined(DEBUG)
+#define IMAGE_DATA_LOG(format, ...) NSLog(@"NFPImageData: " format, ## __VA_ARGS__)
+#else
+#define IMAGE_DATA_LOG(format, ...)
+#endif
+
 @implementation NFPImageData (NFPExtension)
 
 + (NFPImageData*)addImage:(UIImage*)image context:(NSManagedObjectContext*)context;
@@ -30,7 +36,7 @@
 
 + (NFPImageData*)addImage:(UIImage*)image context:(NSManagedObjectContext*)context withID:(NSUInteger)imageID;
 {
-    NSLog(@"Inserting image with ID: %tu",imageID);
+    IMAGE_DATA_LOG(@"Inserting image with ID: %tu",imageID);
     
     NFPImageData* imageData =
     [NSEntityDescription
@@ -43,12 +49,13 @@
     imageData.dateCreated = [NSDate date];
     imageData.imageID = imageID;
     
-    NSError* error;
-    if (![context save:&error]){
-        NSLog(@"\nUnable to insert new entity: %@\nwith error error:%@",imageData,[error localizedDescription]);
-    }
+    [context performBlock:^{
+        NSError* error;
+        if (![context save:&error]){
+            NSLog(@"\nUnable to insert new entity: %@\nwith error error:%@",imageData,[error localizedDescription]);
+        }
+    }];
     
-
     return imageData;
     
 }

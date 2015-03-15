@@ -19,6 +19,12 @@
 #define BACKGROUND_DOWNLOAD 1
 #define FOREGROUND_DOWNLOAD_JSON 0
 
+#if 1 && defined(DEBUG)
+#define SERVER_MANAGER_LOG(format, ...) NSLog(@"Server Manager: " format, ## __VA_ARGS__)
+#else
+#define SERVER_MANAGER_LOG(format, ...)
+#endif
+
 static NSString* const NFPServerScheme = @"http";
 static NSString* const NFPServerHost = @"nofilter.pneumaticsystem.com";
 static NSString* const NFPServerPath = @"/api/v1/";
@@ -231,7 +237,7 @@ typedef void(^TaskCompletionHandlerType)(NSData*,NSURLResponse*,NSError*);
 
 -(void)uploadImage:(NFPImageData*)imageData context:(NSManagedObjectContext*)context;
 {
-    //NSLog(@"Uploading Image for id: %tu",imageData.imageID);
+    SERVER_MANAGER_LOG(@"Uploading Image for id: %tu",imageData.imageID);
 
     // Setup query items needed to upload image
     NSURL* url = [self URLForServerEndpoint:@"item/create"];
@@ -275,13 +281,13 @@ typedef void(^TaskCompletionHandlerType)(NSData*,NSURLResponse*,NSError*);
     NSURLSessionUploadTask* task = [session uploadTaskWithRequest:request
         fromData:imageDataToUpload
         completionHandler:^(NSData *data, NSURLResponse *response, NSError *error) {
-
             JSONPaserBlockType jsonParserBlock = ^(NSDictionary* jsonResp){
                 NSDictionary* result = jsonResp[@"result"];
                 NSUInteger imageID = [result[@"id"] integerValue];
                 imageData.imageID = imageID;
                 
                 [context performBlock:^{
+                    SERVER_MANAGER_LOG(@"Saving Updated ImageData with Id: %tu",imageID);
                     NSError* error;
                     if (![context save:&error]){
                         NSLog(@"Unable to update entity: %@",
@@ -299,6 +305,7 @@ typedef void(^TaskCompletionHandlerType)(NSData*,NSURLResponse*,NSError*);
 
 -(void) downloadItemWithID:(NSUInteger)itemID;
 {
+    SERVER_MANAGER_LOG(@"Downloading image with ID: %tu",itemID);
     
     NSString* serverEndpoint = @"item/get_raw";
     if (FOREGROUND_DOWNLOAD_JSON && !BACKGROUND_DOWNLOAD){
@@ -430,6 +437,7 @@ typedef void(^TaskCompletionHandlerType)(NSData*,NSURLResponse*,NSError*);
     //Find all the imageData that is on the client app, but does not have an id
     //because it has not yet been uploaded and synced with the server
     NSArray* clientImageData = [[NFPThumbnailGenerator sharedInstance] allImageData];
+    NSAssert(clientImageData != nil, @"Need non-nil clientImageData before syncImages called");
     NSMutableArray* clientImagesWithNonZeroIDs = [NSMutableArray new];
     NSMutableArray* toUploadImageDataArray = [NSMutableArray new];
     for (NFPImageData* imageData in clientImageData){
@@ -473,7 +481,7 @@ typedef void(^TaskCompletionHandlerType)(NSData*,NSURLResponse*,NSError*);
     //sever, and the core data instance's id will be updated to relect this new id
     for (NFPImageData* imageData in toUploadImageDataArray)
     {
-        [self uploadImage:imageData context:nil];
+        [self uploadImage:imageData context:imageData.managedObjectContext];
     }
     
 }
@@ -583,7 +591,7 @@ typedef void(^TaskCompletionHandlerType)(NSData*,NSURLResponse*,NSError*);
     //}
 
     //});
-    //NSLog(@"Download Complete for id: %tu",imageIDString);
+    SERVER_MANAGER_LOG(@"Download Complete for id: %tu",imageID);
     
     //UIImage* image = [[UIImage alloc] initWithContentsOfFile: [downloadURL path]];
     UIImage* image = [[UIImage alloc] initWithContentsOfFile: [location path]];

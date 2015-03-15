@@ -14,6 +14,15 @@
 #import "NFPThumbnailOperation.h"
 #import "BatchUpdateManager.h"
 #import "NFPServerManager.h"
+#import "UIImage+NFExtensions.h"
+
+
+#if 1 && defined(DEBUG)
+#define THUMBNAIL_GEN_LOG(format, ...) NSLog(@"Thumbnail Generator: " format, ## __VA_ARGS__)
+#else
+#define THUMBNAIL_GEN_LOG(format, ...)
+#endif
+
 
 @interface NFPThumbnailGenerator()  <NSFetchedResultsControllerDelegate>
 
@@ -82,6 +91,9 @@
             self.batchUpdateManager = nil;
             
         });
+        
+        //prints only for debugging purposes
+        [self printObjectsInContext:self.managedObjectContext name:@"Root Managed Object Context"];
         
         // add KVO observer on the thumbnailGeneratorQueue
         [self addQueueObserver];
@@ -207,11 +219,11 @@
     if (self.batchUpdateManager != nil){
         [self.delegate performBatchUpdatesForManager:self.batchUpdateManager];
         
-//        NSError* error = nil;
-//        if (![self.managedObjectContext save:&error]){
-//            NSLog(@"Error saving CoreData context, msg: %@",
-//                  [error localizedDescription]);
-//        }
+        NSError* error = nil;
+        if (![self.managedObjectContext save:&error]){
+            NSLog(@"Error saving CoreData context, msg: %@",
+                  [error localizedDescription]);
+        }
 
         // reset the batchUpdateManager after completion
         self.batchUpdateManager = nil;
@@ -261,9 +273,27 @@ static NSUInteger ThumbnailGeneratorQueueContext;
 -(void)startThumbnailGeneration:(NFPImageData*)imageData;
 {
     //Initiate and start NSOperation
-    NFPThumbnailOperation* operation =
-        [[NFPThumbnailOperation alloc] initWithNFPImageData:imageData
-            context:[self childContextForParentContext:self.managedObjectContext]];
+//    NFPThumbnailOperation* operation =
+//        [[NFPThumbnailOperation alloc] initWithNFPImageData:imageData
+//            context:[self childContextForParentContext:self.managedObjectContext]];
+    
+    NSBlockOperation* operation = [NSBlockOperation blockOperationWithBlock:^
+    {
+        imageData.thumbnail = [imageData.image
+                               scaledImageConstrainedToSize:CGSizeMake(100.0, 100.0)];
+    }];
+    operation.completionBlock = ^{
+        dispatch_async(dispatch_get_main_queue(), ^{
+            NSLog(@"Thumbnail Updated for ImageID: %tu",imageData.imageID);
+            imageData.hasThumbnail = YES;
+            NSError* error = nil;
+            if (![self.managedObjectContext save:&error]){
+                NSLog(@"Error saving thumbnail to NFPImageData: %@",
+                      [error localizedDescription]);
+            }
+        });
+    };
+
     [self.thumbnailGeneratorQueue addOperation:operation];
 }
 
@@ -287,7 +317,7 @@ static NSUInteger ThumbnailGeneratorQueueContext;
     NSError* fetchError;
     [frc performFetch:&fetchError];
     NSArray* arr = [frc fetchedObjects];
-    NSLog(@"Contents of Context: %@ with %tu objects",mocName,[arr count]);
+    THUMBNAIL_GEN_LOG(@"Contents of Context: %@ with %tu objects",mocName,[arr count]);
     [arr enumerateObjectsUsingBlock:^(NFPImageData* data, NSUInteger idx, BOOL *stop) {
         NSLog(@"%@",data);
     }];
@@ -317,6 +347,12 @@ static NSUInteger ThumbnailGeneratorQueueContext;
     for (NFPImageData* imageData in self.fetchedResultsController.fetchedObjects) {
         [self.managedObjectContext deleteObject:imageData];
     }
+    NSError* error = nil;
+    if (![self.managedObjectContext save:&error]){
+        NSLog(@"Error deleting objects: %@",
+              [error localizedDescription]);
+    }
+    
 }
 
 -(void)deleteAllImagesOnServer;
