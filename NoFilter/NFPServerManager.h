@@ -16,6 +16,7 @@ extern NSString* NFPServerManagerLoginDidSucceedNotification;
 
 @interface NFPServerManager : NSObject
 
+@property (nonatomic,assign) BOOL serverConnectionValid;
 @property (nonatomic,strong) void(^backgroundDownloadCompletionHandler)();
 
 +(instancetype) sharedInstance;

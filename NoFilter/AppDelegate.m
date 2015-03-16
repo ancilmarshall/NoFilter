@@ -56,9 +56,9 @@ NSString* const kBackgroundSessionIdentifier = @"BackgroundSessionIdentifier";
          }
      ];
     
-    
     [[UINavigationBar appearance] setBarStyle:UIBarStyleBlackOpaque];
     [[UINavigationBar appearance] setBarTintColor:[UIColor blueColor]];
+    [[UINavigationBar appearance] setTintColor:[UIColor whiteColor]];
     
     return YES;
 }

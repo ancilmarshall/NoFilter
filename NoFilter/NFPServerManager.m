@@ -67,9 +67,13 @@ typedef void(^TaskCompletionHandlerType)(NSData*,NSURLResponse*,NSError*);
         
         NSURL* clientPlistURL = [[NSBundle mainBundle] URLForResource:@"NoFilterWebApp" withExtension:@"plist"];
         self.clientPlistDict = [NSDictionary dictionaryWithContentsOfURL:clientPlistURL];
+        self.serverConnectionValid = NO;
+        [self performRecurringServerManagerChecks];
     }
     return self;
 }
+
+
 
 #pragma mark - URL based on Query Items and Server Endpoints
 
@@ -177,7 +181,7 @@ typedef void(^TaskCompletionHandlerType)(NSData*,NSURLResponse*,NSError*);
         ^(NSData *data, NSURLResponse *response, NSError *error) {
             
             JSONPaserBlockType jsonParserBlock = ^(NSDictionary* jsonResp){
-
+                self.serverConnectionValid = YES;
                 self.token = jsonResp[@"result"][@"token"];
                 [NFPThumbnailGenerator sharedInstance]; //Instantiate the thumnail generator
                 [self getItemList]; //Cache the list of items on server
@@ -199,6 +203,9 @@ typedef void(^TaskCompletionHandlerType)(NSData*,NSURLResponse*,NSError*);
  */
 -(void) getItemList;
 {
+    if (!self.serverConnectionValid){
+        return;
+    }
     
     // Setup query items needed to get list from server
     NSURL* url = [self URLForServerEndpoint:@"item/list" query:@[@"username"]];
@@ -237,6 +244,9 @@ typedef void(^TaskCompletionHandlerType)(NSData*,NSURLResponse*,NSError*);
 
 -(void)uploadImage:(NFPImageData*)imageData context:(NSManagedObjectContext*)context;
 {
+    if (!self.serverConnectionValid){
+        return;
+    }
     SERVER_MANAGER_LOG(@"Uploading Image for id: %tu",imageData.imageID);
 
     // Setup query items needed to upload image
@@ -305,6 +315,10 @@ typedef void(^TaskCompletionHandlerType)(NSData*,NSURLResponse*,NSError*);
 
 -(void) downloadItemWithID:(NSUInteger)itemID;
 {
+    if (!self.serverConnectionValid){
+        return;
+    }
+    
     SERVER_MANAGER_LOG(@"Downloading image with ID: %tu",itemID);
     
     NSString* serverEndpoint = @"item/get_raw";
@@ -383,6 +397,9 @@ typedef void(^TaskCompletionHandlerType)(NSData*,NSURLResponse*,NSError*);
 
 -(void)deleteImageWithID:(NSUInteger)itemID;
 {
+    if (!self.serverConnectionValid){
+        return;
+    }
     NSLog(@"Beginning deletion of item with id: %tu",itemID);
     
     NSURL* url = [self URLForServerEndpoint:@"item/delete" query:@[]
@@ -412,6 +429,10 @@ typedef void(^TaskCompletionHandlerType)(NSData*,NSURLResponse*,NSError*);
 
 -(void)deleteAllImagesOnServer;
 {
+    if (!self.serverConnectionValid){
+        return;
+    }
+    
     for (id item in self.imageIDs){
         NSUInteger imageID = [(NSNumber*)item unsignedIntegerValue];
         [self deleteImageWithID:imageID];
@@ -434,6 +455,10 @@ typedef void(^TaskCompletionHandlerType)(NSData*,NSURLResponse*,NSError*);
 
 -(void)syncImages;
 {
+    if (!self.serverConnectionValid)
+    {
+        return;
+    }
     //Find all the imageData that is on the client app, but does not have an id
     //because it has not yet been uploaded and synced with the server
     NSArray* clientImageData = [[NFPThumbnailGenerator sharedInstance] allImageData];
@@ -471,6 +496,7 @@ typedef void(^TaskCompletionHandlerType)(NSData*,NSURLResponse*,NSError*);
         [NSMutableOrderedSet orderedSetWithOrderedSet:serverImageIDSet];
     [toDownloadSet minusOrderedSet:intersectionSet];
     
+    // download all needed images from the server
     for (NSNumber* toDownloadImageId in toDownloadSet)
     {
         NSUInteger imageID = [toDownloadImageId unsignedIntegerValue];
@@ -486,6 +512,35 @@ typedef void(^TaskCompletionHandlerType)(NSData*,NSURLResponse*,NSError*);
     {
         [self uploadImage:imageData context:imageData.managedObjectContext];
     }
+    
+}
+
+/*
+ * Performs a background task every 5 seconds to check if there are any current
+ * download tasks and turn off the network activity indicator
+ */
+-(void)performRecurringServerManagerChecks;
+{
+    __weak NFPServerManager* weakSelf = self;
+    dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(5 * NSEC_PER_SEC)), dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_BACKGROUND, 0), ^{
+        
+        SERVER_MANAGER_LOG(@"Performing Recurring Checks...");
+        
+        // Turn off the network activity indicator when 1 download task remains
+        __block NSUInteger downloadSessionTaskCount;
+        [self.backgroundDownloadSession getTasksWithCompletionHandler:
+         ^(NSArray *dataTasks, NSArray *uploadTasks, NSArray *downloadTasks) {
+             downloadSessionTaskCount = [downloadTasks count];
+             SERVER_MANAGER_LOG(@"Background Download Count: %tu", downloadSessionTaskCount);
+             if (downloadSessionTaskCount < 1){
+                 [[UIApplication sharedApplication] setNetworkActivityIndicatorVisible:NO];
+                 self.backgroundDownloadSession = nil;
+             }
+         }];
+        
+        [weakSelf performRecurringServerManagerChecks];
+        
+    });
     
 }
 
@@ -531,10 +586,12 @@ typedef void(^TaskCompletionHandlerType)(NSData*,NSURLResponse*,NSError*);
             [self parseJSONData:data usingBlock:jsonParser];
             
         } else {
+            self.serverConnectionValid = NO;
             [self taskFailedWithErrorMessage:[NSString stringWithFormat:
                 @"Error in HTTP Repsonse\nStatus code: %tu",httpResp.statusCode]];
         }
     } else {
+        self.serverConnectionValid = NO;
         [self taskFailedWithErrorMessage:[NSString stringWithFormat:
             @"Error in NSURLSessionTask\nError: %@",[error localizedDescription]]];
     }
@@ -572,34 +629,21 @@ typedef void(^TaskCompletionHandlerType)(NSData*,NSURLResponse*,NSError*);
  * the data from the temporary url to a permanent location in the app's container
  * This can be called in the background or foreground.
  */
-
-- (void)URLSession:(NSURLSession *)session downloadTask:(NSURLSessionDownloadTask *)downloadTask didFinishDownloadingToURL:(NSURL *)location;
+- (void)URLSession:(NSURLSession *)session downloadTask:(NSURLSessionDownloadTask *)downloadTask
+    didFinishDownloadingToURL:(NSURL *)location;
 {
-    
     NSString* imageIDString = downloadTask.taskDescription;
     const char* imageIDCString = [imageIDString cStringUsingEncoding:NSUTF8StringEncoding];
     int imageIDAsInt = atoi(imageIDCString);
     NSUInteger imageID = (NSUInteger)imageIDAsInt;
     
-    //NSURL* downloadURL = [self appDocumentsURLForItemID:imageID];
 
-    //TODO: error handling
-    //[[NSFileManager defaultManager] moveItemAtURL:location toURL:downloadURL error:NULL];
-    //dispatch_async(dispatch_get_main_queue(), ^{
-    
-    //if ( [self.backgroundDownloadQueue operationCount] == 0 ){
-        //[[UIApplication sharedApplication] setNetworkActivityIndicatorVisible:NO];
-        //self.backgroundDownloadSession = nil;
-        //self.backgroundDownloadQueue = nil;
-    //}
-
-    //});
     SERVER_MANAGER_LOG(@"Download Complete for id: %tu",imageID);
     
-    //UIImage* image = [[UIImage alloc] initWithContentsOfFile: [downloadURL path]];
     UIImage* image = [[UIImage alloc] initWithContentsOfFile: [location path]];
     [[NFPThumbnailGenerator sharedInstance] addDownloadedImage:image withID:imageID];
 }
+
 
 - (NSURL *)appDocumentsURLForItemID:(NSUInteger)itemID;
 {
@@ -635,7 +679,6 @@ typedef void(^TaskCompletionHandlerType)(NSData*,NSURLResponse*,NSError*);
 - (void)URLSessionDidFinishEventsForBackgroundURLSession:(NSURLSession *)session;
 {
     NSParameterAssert(session == self.backgroundDownloadSession);
-    
     NSAssert(self.backgroundDownloadCompletionHandler != nil, @"When finishing background events, expected to have a completion handler");
     self.backgroundDownloadCompletionHandler();
     self.backgroundDownloadCompletionHandler = nil;

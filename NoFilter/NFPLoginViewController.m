@@ -10,6 +10,7 @@
 #import "KeyChainManager.h"
 #import "NFPServerManager.h"
 #import "AppDelegate.h"
+#import "NFPThumbnailGenerator.h"
 
 static NSString* const kMissingInputs = @"Missing Input";
 static NSString* const kIncorrectPassword = @"Incorrect Password";
@@ -25,7 +26,6 @@ NSString* const kUserDefaultRememberLogin = @"Remember Login";
 
 @property (nonatomic,strong) NSString* username;
 @property (nonatomic,strong) KeyChainManager* keyChainManager;
-@property (nonatomic,strong) NFPServerManager* serverManager;
 @property (nonatomic,strong) NSUserDefaults* defaults;
 @property (nonatomic,assign) BOOL rememberLogin;
 
@@ -58,7 +58,6 @@ NSString* const kUserDefaultRememberLogin = @"Remember Login";
     }
     self.logonActivityIndicator.alpha = 0.0f;
 
-    self.serverManager = [NFPServerManager sharedInstance];
     [self registerNotifications];
 
     //simple animation effects
@@ -123,8 +122,7 @@ NSString* const kUserDefaultRememberLogin = @"Remember Login";
     self.logonActivityIndicator.alpha = 1.0f;
     [self.logonActivityIndicator startAnimating];
     
-    [self.serverManager logonToServer];
-
+    [[NFPServerManager sharedInstance] logonToServer];
    
 }
 
@@ -243,13 +241,17 @@ NSString* const kUserDefaultRememberLogin = @"Remember Login";
     }
     else { // Error from Server
         
-        alertController.title = @"No Filter Server Error";
+        alertController.title = @"No server connection";
         alertController.message = errMsg;
         
-        UIAlertAction* okAction = [UIAlertAction actionWithTitle:@"OK"
+        UIAlertAction* okAction = [UIAlertAction actionWithTitle:@"Continue"
                                                            style:UIAlertActionStyleDefault
-                                                         handler:^(UIAlertAction *action) {
-                                                         }];
+                                                         handler:^(UIAlertAction *action)
+        {
+            [[AppDelegate delegate]
+             setRootViewControllerWithIdentifier:@"NFPCollectionViewController"];
+            
+        }];
         
         [alertController addAction:okAction];
     }

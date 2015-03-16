@@ -69,6 +69,7 @@
                                          sectionNameKeyPath:nil
                                          cacheName:nil];
         
+        
         self.fetchedResultsController.delegate = self;
         
         //TODO: Perform fetches in the background and in batches

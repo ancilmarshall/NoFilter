@@ -139,7 +139,6 @@ Please Sign In</string>
                     </collectionView>
                     <navigationItem key="navigationItem" id="kko-5i-ged">
                         <barButtonItem key="rightBarButtonItem" systemItem="add" id="HCE-bc-TNy">
-                            <color key="tintColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
                             <connections>
                                 <action selector="addImageToCollectionView:" destination="M27-FK-AWi" id="dSE-Fn-eya"/>
                                 <segue destination="3yW-xE-aLD" kind="popoverPresentation" identifier="addImageSegue" popoverAnchorBarButtonItem="HCE-bc-TNy" id="9Tw-Ge-HPc">
@@ -185,7 +184,6 @@ Please Sign In</string>
                     </tableView>
                     <navigationItem key="navigationItem" id="j0u-OM-hoc">
                         <barButtonItem key="rightBarButtonItem" systemItem="cancel" id="Vfb-k8-upO">
-                            <color key="tintColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
                             <connections>
                                 <segue destination="pQs-Ue-e9c" kind="unwind" unwindAction="cancelAddImageToCollectionView:" id="lT2-P9-7aN"/>
                             </connections>
