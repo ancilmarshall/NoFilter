@@ -11,7 +11,6 @@
 #import "NFPThumbnailGenerator.h"
 #import "NFPImageData.h"
 #import "NFPImageData+NFPExtension.h"
-#import "NFPThumbnailOperation.h"
 #import "BatchUpdateManager.h"
 #import "NFPServerManager.h"
 #import "UIImage+NFExtensions.h"
@@ -273,10 +272,6 @@ static NSUInteger ThumbnailGeneratorQueueContext;
 
 -(void)startThumbnailGeneration:(NFPImageData*)imageData;
 {
-    //Initiate and start NSOperation
-//    NFPThumbnailOperation* operation =
-//        [[NFPThumbnailOperation alloc] initWithNFPImageData:imageData
-//            context:[self childContextForParentContext:self.managedObjectContext]];
     
     NSBlockOperation* operation = [NSBlockOperation blockOperationWithBlock:^
     {
@@ -285,7 +280,7 @@ static NSUInteger ThumbnailGeneratorQueueContext;
     }];
     operation.completionBlock = ^{
         dispatch_async(dispatch_get_main_queue(), ^{
-            NSLog(@"Thumbnail Updated for ImageID: %tu",imageData.imageID);
+            THUMBNAIL_GEN_LOG(@"Thumbnail Updated for ImageID: %tu",imageData.imageID);
             imageData.hasThumbnail = YES;
             NSError* error = nil;
             if (![self.managedObjectContext save:&error]){

@@ -144,8 +144,6 @@ static NSString * const kDebugSegueIdentifier = @"debugSegue";
                                       initWithFrame:CGRectMake(0, 0, 100,100)];
         thumbnailView.contentMode = UIViewContentModeScaleAspectFit;
         thumbnailView.clipsToBounds = YES;
-//        UIImage* thumbnail = [self.thumbnailgenerator
-//                              thumbnailAtIndex:indexPath.item];
         thumbnailView.image = thumbnail;
         cell.contentView.clipsToBounds = YES;
         [cell.contentView addSubview:thumbnailView];

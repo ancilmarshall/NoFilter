@@ -18,7 +18,7 @@
 #import "NFPImageData+NFPExtension.h"
 #import "NFPServerManager.h"
 
-#if 1 && defined(DEBUG)
+#if 0 && defined(DEBUG)
 #define IMAGE_DATA_LOG(format, ...) NSLog(@"NFPImageData: " format, ## __VA_ARGS__)
 #else
 #define IMAGE_DATA_LOG(format, ...)

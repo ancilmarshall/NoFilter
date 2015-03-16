@@ -19,7 +19,7 @@
 #define BACKGROUND_DOWNLOAD 1
 #define FOREGROUND_DOWNLOAD_JSON 0
 
-#if 1 && defined(DEBUG)
+#if 0 && defined(DEBUG)
 #define SERVER_MANAGER_LOG(format, ...) NSLog(@"Server Manager: " format, ## __VA_ARGS__)
 #else
 #define SERVER_MANAGER_LOG(format, ...)
@@ -73,8 +73,6 @@ typedef void(^TaskCompletionHandlerType)(NSData*,NSURLResponse*,NSError*);
     return self;
 }
 
-
-
 #pragma mark - URL based on Query Items and Server Endpoints
 
 -(NSURL*)URLForServerEndpoint:(NSString*)endpoint query:(NSArray*)queryNames optionalQueryData:(NSDictionary*)optionalData
@@ -88,7 +86,6 @@ typedef void(^TaskCompletionHandlerType)(NSData*,NSURLResponse*,NSError*);
     
     //always add the token query item, except in the case when requesting the token
     //TODO: distinquish between a general token and a user verified token based on flag
-    //TODO: validate token
     if (![queryNames containsObject:@"app_key"] &&
         ![queryNames containsObject:@"app_secret"])
     {
@@ -331,13 +328,13 @@ typedef void(^TaskCompletionHandlerType)(NSData*,NSURLResponse*,NSError*);
     request.HTTPMethod = @"POST";
     
     if(BACKGROUND_DOWNLOAD){
-        //get the raw image from the NoFilter server using API endpoing item/get_raw
-
+        
+        //get the raw image from the NoFilter server using API endpoint item/get_raw
         [self createBackgroundDownloadSessionIfNeeded];
         
         NSURLSessionDownloadTask* task = [self.backgroundDownloadSession
                                           downloadTaskWithRequest:request];
-        //TODO: use a string, one that can be regenerated after app re-launches in background
+
         NSString* taskDescription = [NSString stringWithFormat:@"%tu",itemID];
         task.taskDescription = taskDescription;
 
