@@ -31,6 +31,7 @@
 @property (nonatomic,strong) NSFetchedResultsController* fetchedResultsController;
 @property (nonatomic,strong) BatchUpdateManager* batchUpdateManager;
 @property (nonatomic,strong) NFPImageManagedObjectContext* managedObjectContext;
+@property (nonatomic,strong) NSUserDefaults* appGroupUserDefaults;
 @end
 
 @implementation NFPThumbnailGenerator
@@ -97,6 +98,13 @@
         
         // add KVO observer on the thumbnailGeneratorQueue
         [self addQueueObserver];
+        
+        self.appGroupUserDefaults = [[NSUserDefaults alloc] initWithSuiteName:
+                                     @"group.Ancil-Marshall.NoFilter"];
+        NFPImageData* latestNFPImageData = [self imageDataWithHighestID];
+        UIImage* latestImage = latestNFPImageData.image;
+        NSData* latestImageData = UIImageJPEGRepresentation(latestImage, 1.0);
+        [self.appGroupUserDefaults setObject:latestImageData forKey:@"sharedKey"];
         
     }
     return self;

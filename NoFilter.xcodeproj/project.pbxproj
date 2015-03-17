@@ -94,6 +94,7 @@
 		1D866A4E1AB811D5007C9797 /* TodayViewController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = TodayViewController.m; sourceTree = "<group>"; };
 		1D866A501AB811D5007C9797 /* MainInterface.storyboard */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; path = MainInterface.storyboard; sourceTree = "<group>"; };
 		1D866A591AB814C0007C9797 /* NoFilter.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = NoFilter.entitlements; sourceTree = "<group>"; };
+		1D866A5A1AB819FA007C9797 /* NoFilterTodayExtension.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = NoFilterTodayExtension.entitlements; sourceTree = "<group>"; };
 		1DB274EB1A991E45005AD0A6 /* NSData+NFExtensions.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "NSData+NFExtensions.h"; sourceTree = "<group>"; };
 		1DB274EC1A991E45005AD0A6 /* NSData+NFExtensions.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "NSData+NFExtensions.m"; sourceTree = "<group>"; };
 		1DB274EE1A9920C7005AD0A6 /* NoFilterWebApp.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = NoFilterWebApp.plist; sourceTree = "<group>"; };
@@ -231,6 +232,7 @@
 		1D866A4A1AB811D5007C9797 /* NoFilterTodayExtension */ = {
 			isa = PBXGroup;
 			children = (
+				1D866A5A1AB819FA007C9797 /* NoFilterTodayExtension.entitlements */,
 				1D866A4D1AB811D5007C9797 /* TodayViewController.h */,
 				1D866A4E1AB811D5007C9797 /* TodayViewController.m */,
 				1D866A501AB811D5007C9797 /* MainInterface.storyboard */,
@@ -370,7 +372,7 @@
 						DevelopmentTeam = 59MH8M4E5Z;
 						SystemCapabilities = {
 							com.apple.ApplicationGroups.iOS = {
-								enabled = 0;
+								enabled = 1;
 							};
 						};
 					};
@@ -381,6 +383,11 @@
 					1D866A451AB811D5007C9797 = {
 						CreatedOnToolsVersion = 6.1.1;
 						DevelopmentTeam = 59MH8M4E5Z;
+						SystemCapabilities = {
+							com.apple.ApplicationGroups.iOS = {
+								enabled = 1;
+							};
+						};
 					};
 				};
 			};
@@ -656,7 +663,9 @@
 		1D866A551AB811D5007C9797 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				CODE_SIGN_ENTITLEMENTS = NoFilterTodayExtension/NoFilterTodayExtension.entitlements;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
 				GCC_PREPROCESSOR_DEFINITIONS = (
 					"DEBUG=1",
 					"$(inherited)",
@@ -664,6 +673,7 @@
 				INFOPLIST_FILE = NoFilterTodayExtension/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @executable_path/../../Frameworks";
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				PROVISIONING_PROFILE = "";
 				SKIP_INSTALL = YES;
 			};
 			name = Debug;
@@ -671,10 +681,13 @@
 		1D866A561AB811D5007C9797 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				CODE_SIGN_ENTITLEMENTS = NoFilterTodayExtension/NoFilterTodayExtension.entitlements;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
 				INFOPLIST_FILE = NoFilterTodayExtension/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @executable_path/../../Frameworks";
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				PROVISIONING_PROFILE = "";
 				SKIP_INSTALL = YES;
 			};
 			name = Release;
@@ -716,6 +729,7 @@
 				1D866A561AB811D5007C9797 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
 
