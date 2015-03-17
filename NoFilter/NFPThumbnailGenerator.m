@@ -163,6 +163,19 @@
     return [self.fetchedResultsController fetchedObjects];
 }
 
+-(NFPImageData*)imageDataWithHighestID;
+{
+    NSArray* imageDataArray = [self.fetchedResultsController fetchedObjects];
+    NFPImageData* maxImageData = [imageDataArray firstObject];
+    for (NFPImageData* imageData in imageDataArray) {
+        
+        if (imageData.imageID > maxImageData.imageID){
+            maxImageData = imageData;
+        }
+    }
+    return maxImageData;
+}
+
 -(NSArray*)imageDataArrayWithIDs:(NSArray*)imageIDs;
 {
     NSArray* allObjects = [self.fetchedResultsController fetchedObjects];
