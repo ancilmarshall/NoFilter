@@ -8,7 +8,6 @@
 
 #import "TodayViewController.h"
 #import <NotificationCenter/NotificationCenter.h>
-//#import <MobileCoreServices/MobileCoreServices.h>
 
 @interface TodayViewController () <NCWidgetProviding>
 @property (nonatomic,strong) NSUserDefaults* appGroupUserDefaults;
@@ -24,10 +23,6 @@
     self.appGroupUserDefaults = [[NSUserDefaults alloc] initWithSuiteName:
                                  @"group.Ancil-Marshall.NoFilter"];
     
-    NSData* imageData = (NSData*)[self.appGroupUserDefaults objectForKey:@"sharedKey"];
-    UIImage* image = [UIImage imageWithData:imageData];
-    self.imageView.image = image;
-    
 }
 
 -(IBAction)imageTapped:(id)gesture{
@@ -42,6 +37,9 @@
     // If there's no update required, use NCUpdateResultNoData
     // If there's an update, use NCUpdateResultNewData
     
+    NSData* imageData = (NSData*)[self.appGroupUserDefaults objectForKey:@"sharedKey"];
+    UIImage* image = [UIImage imageWithData:imageData];
+    self.imageView.image = image;
     
     completionHandler(NCUpdateResultNewData);
 }
