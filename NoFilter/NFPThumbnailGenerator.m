@@ -32,6 +32,7 @@
 @property (nonatomic,strong) BatchUpdateManager* batchUpdateManager;
 @property (nonatomic,strong) NFPImageManagedObjectContext* managedObjectContext;
 @property (nonatomic,strong) NSUserDefaults* appGroupUserDefaults;
+@property (nonatomic,strong) UIImage* todayExtensionImage;
 @end
 
 @implementation NFPThumbnailGenerator
@@ -101,15 +102,23 @@
         
         self.appGroupUserDefaults = [[NSUserDefaults alloc] initWithSuiteName:
                                      @"group.Ancil-Marshall.NoFilter"];
-        NFPImageData* latestNFPImageData = [self imageDataWithHighestID];
-        UIImage* latestImage = latestNFPImageData.image;
-        NSData* latestImageData = UIImageJPEGRepresentation(latestImage, 1.0);
-        [self.appGroupUserDefaults setObject:latestImageData forKey:@"sharedKey"];
         
+        [self updateTodayExtensionImage];
     }
     return self;
 }
 
+-(void)updateTodayExtensionImage;
+{
+    self.todayExtensionImage = [self imageDataWithHighestID].image;
+}
+
+-(void)setTodayExtensionImage:(UIImage *)todayExtensionImage;
+{
+    NSData* latestImageData = UIImageJPEGRepresentation(todayExtensionImage, 1.0);
+    [self.appGroupUserDefaults setObject:latestImageData forKey:@"sharedKey"];
+  
+}
 
 -(NSOperationQueue*)thumbnailGeneratorQueue;
 {
@@ -248,6 +257,8 @@
 
         // reset the batchUpdateManager after completion
         self.batchUpdateManager = nil;
+        
+        [self updateTodayExtensionImage];
     }
 }
 
